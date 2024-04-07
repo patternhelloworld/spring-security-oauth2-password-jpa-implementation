@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.patternknife.securityhelper.oauth2.mapper.CustomerMapper">
+    <select id="findByPageFilter"
+            parameterType="com.patternknife.securityhelper.oauth2.domain.customer.dto.CombinedCustomerConditionFilter"
+            resultType="com.patternknife.securityhelper.oauth2.domain.customer.dto.CustomerResDTO$OneWithCountsWithAdmin">
+        SELECT
+        customer.id as id,
+        customer.email as email,
+        customer.name as name,
+        customer.id_name as idName,
+        customer.hp as hp,
+        customer.birthday as birthday,
+        customer.sex as sex,
+        point_detail_sub.point AS currentPoint,
+        COUNT(DISTINCT treatment.id) AS treatmentCounts,
+        COUNT(DISTINCT customer_gift_sub.id) AS giftCounts,
+        COUNT(DISTINCT interested_treatment_part.id) AS interestedTreatmentPartCounts,
+        customer.kakao_id_name as kakaoIdName,
+        customer.naver_id_name as naverIdName,
+        customer.google_id_name as googleIdName,
+        customer.apple_id_name as appleIdName,
+        customer.password_changed_at as passwordChangedAt,
+        customer.created_at as createdAt,
+        customer.updated_at as updatedAt,
+        customer.deleted_at as deletedAt,
+        customer.delete_admin_id as deleteAdminId
+
+        FROM
+            customer
+
+                LEFT JOIN
+            treatment ON customer.id = treatment.customer_id
+
+
+                LEFT JOIN
+            (SELECT id, customer_id
+            FROM customer_gift
+            WHERE 1=1
+            <if test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'customerGiftCreatedAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND request_date &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND request_date &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </if>) customer_gift_sub
+            ON customer.id = customer_gift_sub.customer_id
+
+                LEFT JOIN
+            interested_treatment_part ON customer.id = interested_treatment_part.customer_id
+
+                LEFT JOIN
+            (SELECT customer_id, SUM(point) AS point
+            FROM point_detail
+            WHERE 1=1
+            <if test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'pointDetailCreatedAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND created_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND created_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </if>
+            GROUP BY customer_id) point_detail_sub
+            ON customer.id = point_detail_sub.customer_id
+
+        WHERE
+            1=1
+            <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.id != null">
+                AND customer.id = #{filter.customerSearchFilter.id}
+            </if>
+            <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.idName != null">
+                AND customer.id_name LIKE CONCAT('%', #{filter.customerSearchFilter.idName}, '%')
+            </if>
+            <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.email != null">
+                AND customer.email LIKE CONCAT('%', #{filter.customerSearchFilter.email}, '%')
+            </if>
+            <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.name != null">
+                AND customer.name LIKE CONCAT('%', #{filter.customerSearchFilter.name}, '%')
+            </if>
+            <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.maxId != null">
+                AND customer.id &lt;= #{filter.customerSearchFilter.maxId}
+            </if>
+        <choose>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'createdAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND customer.created_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND customer.created_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'updatedAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND customer.updated_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND customer.updated_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'deletedAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND customer.deleted_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND customer.deleted_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <otherwise>
+                <!-- 기타 필터 없는 경우 처리 -->
+            </otherwise>
+        </choose>
+        GROUP BY
+        customer.id, customer.email, customer.name, customer.id_name, customer.hp, customer.birthday, customer.sex, point_detail_sub.point, customer.kakao_id_name, customer.naver_id_name, customer.google_id_name, customer.apple_id_name, customer.password_changed_at, customer.created_at, customer.updated_at, customer.deleted_at, customer.delete_admin_id
+        <choose>
+            <when test="filter.sorterValueFilter == null">
+                ORDER BY customer.id DESC
+            </when>
+            <when test="filter.sorterValueFilter !=null and filter.sorterValueFilter.column == 'id'">
+                ORDER BY customer.id
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'idName'">
+                ORDER BY customer.id_name
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'name'">
+                ORDER BY customer.name
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'email'">
+                ORDER BY customer.email
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'currentPoint'">
+                ORDER BY currentPoint
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'createdAt'">
+                ORDER BY createdAt
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'updatedAt'">
+                ORDER BY updatedAt
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'deletedAt'">
+                ORDER BY deletedAt
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'treatmentCounts'">
+                ORDER BY treatmentCounts
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'giftCounts'">
+                ORDER BY giftCounts
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <when test="filter.sorterValueFilter.column == 'interestedTreatmentPartCounts'">
+                ORDER BY interestedTreatmentPartCounts
+                <if test="filter.sorterValueFilter.asc">
+                    ASC
+                </if>
+                <if test="!filter.sorterValueFilter.asc">
+                    DESC
+                </if>
+            </when>
+            <otherwise>
+                ORDER BY customer.id DESC <!-- 기본 정렬 -->
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="isMysql">
+                LIMIT #{limit} OFFSET #{offset}
+            </when>
+            <otherwise>
+                OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+            </otherwise>
+        </choose>
+
+    </select>
+    <select id="countByPageFilter" parameterType="com.patternknife.securityhelper.oauth2.domain.customer.dto.CombinedCustomerConditionFilter" resultType="int">
+        SELECT COUNT(distinct customer.id)
+        FROM
+        customer
+        LEFT JOIN
+        treatment ON customer.id = treatment.customer_id
+
+        LEFT JOIN
+        customer_gift ON customer.id = customer_gift.customer_id
+
+        LEFT JOIN
+        interested_treatment_part ON customer.id = interested_treatment_part.customer_id
+
+        LEFT JOIN
+        (SELECT customer_id, SUM(point) AS point
+        FROM point_detail
+        WHERE 1=1
+        <if test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'pointDetailCreatedAt'">
+            <if test="filter.dateRangeFilter.startDate != null">
+                AND created_at &gt;= #{filter.dateRangeFilter.startDate}
+            </if>
+            <if test="filter.dateRangeFilter.endDate != null">
+                AND created_at &lt;= #{filter.dateRangeFilter.endDate}
+            </if>
+        </if>
+        GROUP BY customer_id) point_detail_sub
+        ON customer.id = point_detail_sub.customer_id
+
+        WHERE
+        1=1
+        <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.id != null">
+            AND customer.id = #{filter.customerSearchFilter.id}
+        </if>
+        <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.idName != null">
+            AND customer.id_name LIKE CONCAT('%', #{filter.customerSearchFilter.idName}, '%')
+        </if>
+        <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.email != null">
+            AND customer.email LIKE CONCAT('%', #{filter.customerSearchFilter.email}, '%')
+        </if>
+        <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.name != null">
+            AND customer.name LIKE CONCAT('%', #{filter.customerSearchFilter.name}, '%')
+        </if>
+        <if test="filter.customerSearchFilter != null and filter.customerSearchFilter.maxId != null">
+            AND customer.id &lt;= #{filter.customerSearchFilter.maxId}
+        </if>
+        <choose>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'createdAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND customer.created_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND customer.created_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'updatedAt'">
+                <if test="startDate != null">
+                    AND customer.updated_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="endDate != null">
+                    AND customer.updated_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <when test="filter.dateRangeFilter != null and filter.dateRangeFilter.column == 'deletedAt'">
+                <if test="filter.dateRangeFilter.startDate != null">
+                    AND customer.deleted_at &gt;= #{filter.dateRangeFilter.startDate}
+                </if>
+                <if test="filter.dateRangeFilter.endDate != null">
+                    AND customer.deleted_at &lt;= #{filter.dateRangeFilter.endDate}
+                </if>
+            </when>
+            <otherwise>
+                <!-- 기타 필터 없는 경우 처리 -->
+            </otherwise>
+        </choose>
+    </select>
+</mapper>
