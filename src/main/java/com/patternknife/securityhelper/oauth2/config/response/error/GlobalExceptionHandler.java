@@ -6,7 +6,6 @@ import com.patternknife.securityhelper.oauth2.config.response.error.exception.Er
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.file.FileNotFoundException;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.payload.DaouHandledException;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.payload.SearchFilterException;
 import com.patternknife.securityhelper.oauth2.config.response.error.message.GeneralErrorMessage;
 import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
@@ -296,14 +295,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-
-    @ExceptionHandler(DaouHandledException.class)
-    public ResponseEntity<?> daouRequestException(DaouHandledException ex, WebRequest request) {
-
-        ErrorDetails errorDetails = new ErrorDetails(ex.getMessage(), request.getDescription(false),
-                ex.getMessage(), CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
 
     // config/resttemplate
     @ExceptionHandler(ResourceAccessException.class)

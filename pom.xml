@@ -8,7 +8,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <groupId>com.patternknife.securityhelper.oauth2</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>d
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
