@@ -1,4 +1,4 @@
-# Spring Security Oauth2 Password JPA Implementation
+# POC : Spring Security Oauth2 Password JPA Implementation
 ## Overview
 
 * In the Spring Security 6 ecosystem, compared to 5, there is a preference for Jwt or Keycloak over traditional OAuth2, and for the Authorization Code flow over the Password Grant method. In this context, the OAuth2 Password Grant method has been implemented with the following advantages:
