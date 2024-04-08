@@ -17,10 +17,10 @@ public class AdminDTO {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CreateReq {
 
-        @NotBlank(message = "ID는 비어있으면 안됩니다.")
+        @NotBlank(message = "ID cannot be empty.")
         private String idName;
 
-        @NotBlank(message = "비밀번호는 비어있으면 안됩니다.")
+        @NotBlank(message = "Password cannot be empty.")
         public String password;
         public Boolean otpIssue;
 
@@ -32,15 +32,6 @@ public class AdminDTO {
             this.password = password;
         }
 
-
-        public Admin toEntity(String otpSecretKey, String otpSecretQrUrl) {
-            return Admin.builder()
-                    .idName(this.idName)
-                    .password(Password.builder().value(this.password).build())
-                    .otpSecretKey(otpSecretKey)
-                    .otpSecretQrUrl(otpSecretQrUrl)
-                    .build();
-        }
 
         public Admin toEntity() {
             return Admin.builder()
@@ -56,10 +47,10 @@ public class AdminDTO {
     @AllArgsConstructor
     public static class UpdateReq {
 
-        @NotNull(message = "고유 ID 값을 확인할 수 없습니다. 문제가 지속되면 관리자에게 문의 하십시오.")
+        @NotNull(message = "ID cannot be empty.")
         private Long id;
 
-        @NotBlank(message = "ID는 비어있으면 안됩니다.")
+        @NotBlank(message = "ID cannot be empty.")
         private String idName;
 
         private List<Integer> commaSplitRoleIds;
@@ -85,14 +76,9 @@ public class AdminDTO {
         private Long id;
         private String idName;
 
-        private String otpSecretKey;
-        private String otpSecretQrUrl;
-
         public UpdateRes(Admin admin) {
             this.id = admin.getId();
             this.idName = admin.getIdName();
-            this.otpSecretKey = admin.getOtpSecretKey();
-            this.otpSecretQrUrl = admin.getOtpSecretQrUrl();
         }
     }
 
@@ -101,8 +87,6 @@ public class AdminDTO {
 
         private Long id;
         private String idName;
-        private String otpSecretKey;
-        private String otpSecretQrUrl;
         private String description;
         private String commaSplitRoleIds;
 
@@ -112,11 +96,9 @@ public class AdminDTO {
         private Timestamp updatedAt;
 
         @QueryProjection
-        public OneWithRoleIdsRes(Long id, String idName, String otpSecretKey, String otpSecretQrUrl, String description, String commaSplitRoleIds, Timestamp createdAt, Timestamp updatedAt) {
+        public OneWithRoleIdsRes(Long id, String idName, String description, String commaSplitRoleIds, Timestamp createdAt, Timestamp updatedAt) {
             this.id = id;
             this.idName = idName;
-            this.otpSecretKey = otpSecretKey;
-            this.otpSecretQrUrl = otpSecretQrUrl;
             this.description = description;
             this.commaSplitRoleIds = commaSplitRoleIds;
             this.createdAt = createdAt;

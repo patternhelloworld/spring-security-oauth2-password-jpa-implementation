@@ -3,6 +3,8 @@ package com.patternknife.securityhelper.oauth2.config.security.serivce;
 import com.patternknife.securityhelper.oauth2.config.CustomHttpHeaders;
 import com.patternknife.securityhelper.oauth2.config.logger.module.NonStopErrorLogConfig;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.authentication.OAuth2AuthorizationBuildingService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

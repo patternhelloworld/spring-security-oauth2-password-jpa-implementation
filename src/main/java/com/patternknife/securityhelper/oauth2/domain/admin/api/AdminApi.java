@@ -2,7 +2,7 @@ package com.patternknife.securityhelper.oauth2.domain.admin.api;
 
 import com.patternknife.securityhelper.oauth2.config.response.GlobalSuccessPayload;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.ResourceNotFoundException;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.domain.admin.dto.AdminDTO;
 import com.patternknife.securityhelper.oauth2.domain.admin.entity.Admin;
@@ -28,9 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/*
-*   Admin 이 Admin 을 제어하는 API 들에 한해 SUPER_ADMIN 들만 가능하다.
-* */
+
 @RestController
 @RequestMapping("/api/v1")
 @AllArgsConstructor
@@ -39,9 +37,9 @@ public class AdminApi {
     private final AdminService adminService;
     private final OAuth2AuthorizationServiceImpl authorizationService;
 
-    /* Admin 자기 자신 */
 
-    @PreAuthorize("@authorityService.hasAnyAdminRole()")
+
+    @PreAuthorize("@resourceServerAuthorityChecker.hasAnyAdminRole()")
     @GetMapping("/admins/me")
     public GlobalSuccessPayload<?> getAdminSelf(@AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo,
                                                 @RequestHeader("Authorization") String authorizationHeader) throws ResourceNotFoundException {
@@ -70,10 +68,9 @@ public class AdminApi {
 
     }
 
-    @PreAuthorize("@authorityService.hasAnyAdminRole()")
+    @PreAuthorize("@resourceServerAuthorityChecker.hasAnyAdminRole()")
     @GetMapping("/admin/me/logout")
-    public GlobalSuccessPayload<?> logoutAdmin(HttpServletRequest request,
-                                               @AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public GlobalSuccessPayload<?> logoutAdmin(HttpServletRequest request) {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
         String token = resolver.resolve(request);
@@ -91,13 +88,12 @@ public class AdminApi {
 
         } catch (Exception e) {
             response.put("logout", Boolean.FALSE);
-            CustomUtils.createNonStoppableErrorMessage("로그 아웃 도중 오류 발생", e);
+            CustomUtils.createNonStoppableErrorMessage("Error during logout", e);
         }
         return new GlobalSuccessPayload<>(response);
     }
 
 
-    /* Admin 이 다른 Admin의 권한을 제어 */
 
     @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @GetMapping("/admins")
@@ -114,9 +110,7 @@ public class AdminApi {
     }
 
 
-    /*
-    *   TO DO. 엔터티 리턴 금지
-    * */
+
     @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @GetMapping("/admins/{id}")
     public GlobalSuccessPayload<ResponseEntity<Admin>> getAdminById(@PathVariable(value = "id") Long adminId, @AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo)

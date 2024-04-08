@@ -9,12 +9,6 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-/*
-*
-*   QueryDsl 을 써야하는 경우 = 다른 엔터티들 Join, Group by, having... + 동적 where
-*
-*   Repository 에는 Repository 가 다른 엔터티 종류는 못옴
-* */
 @Repository
 public class AdminRepositorySupport extends CommonQuerydslRepositorySupport {
 

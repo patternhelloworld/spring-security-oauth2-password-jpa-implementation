@@ -1,13 +1,13 @@
 package com.patternknife.securityhelper.oauth2.domain.traditionaloauth.service;
 
 import com.patternknife.securityhelper.oauth2.config.logger.module.NonStopErrorLogConfig;
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthorizedException;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCachedInfo;
-import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.OAuth2AuthorizationServiceImpl;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationHashCheckService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
 import com.patternknife.securityhelper.oauth2.config.security.util.SecurityUtil;
 import com.patternknife.securityhelper.oauth2.domain.traditionaloauth.bo.BasicTokenResolver;
@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -45,21 +44,21 @@ public class TraditionalOauthService {
     private final ConditionalDetailsService conditionalDetailsService;
 
     private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
-    private final Oauth2AuthenticationService oauth2AuthenticationService;
+    private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
     public TraditionalOauthService(RegisteredClientRepository registeredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
                                    CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
-                                   Oauth2AuthenticationService oauth2AuthenticationService) {
+                                   Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService) {
 
         this.registeredClientRepository = registeredClientRepository;
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
 
         this.commonOAuth2AuthorizationCycle = commonOAuth2AuthorizationCycle;
-        this.oauth2AuthenticationService = oauth2AuthenticationService;
+        this.oauth2AuthenticationHashCheckService = oauth2AuthenticationHashCheckService;
 
     }
 
@@ -71,11 +70,7 @@ public class TraditionalOauthService {
 
         UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
 
-        if(basicCredentials.getClientId().equals(OAuth2ClientCachedInfo.ADMIN_CLIENT_ID.getValue())){
-            oauth2AuthenticationService.validateOtpValue(accessTokenRequest.getOtp_value(),((AccessTokenUserInfo) userDetails).getAdditionalAccessTokenUserInfo().getOtpSecretKey());
-        }
-
-        oauth2AuthenticationService.validatePassword(accessTokenRequest.getPassword(), userDetails);
+        oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
 
         HttpServletRequest request =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -96,25 +91,29 @@ public class TraditionalOauthService {
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
                                                                               String authorizationHeader) throws IOException {
 
-        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(()-> new UnauthorizedException("Header Token 의 파싱에 실패 하였습니다."));
+        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(()-> new UnauthorizedException(SecurityExceptionMessage.AUTHORIZATION_ERROR.getMessage()));
 
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
         assert registeredClient != null;
 
         if(!(basicCredentials.getClientId().equals(registeredClient.getClientId())
-                && oauth2AuthenticationService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
+                && oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
             throw new UnauthorizedException(SecurityExceptionMessage.AUTHORIZATION_ERROR.getMessage());
         }
 
         OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
-        // 리프레시 토큰 검증
+
+        UserDetails userDetails;
         if (oAuth2Authorization == null || oAuth2Authorization.getRefreshToken() == null) {
-            throw new InvalidBearerTokenException("유효하지 않은 Refresh Token 입니다. 문제가 지속된다면 관리자에게 문의 하십시오.");
+            throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_ERROR.getMessage());
+        }else{
+            userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
         }
 
-        // Overwrite Access + Refresh Tokens
-        authorizationService.save(oAuth2Authorization);
+
+        oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, new AuthorizationGrantType(refreshTokenRequest.getGrant_type()), basicCredentials.getClientId(), oAuth2Authorization.getAttributes());
+
 
         Instant now = Instant.now();
         Instant expiresAt = oAuth2Authorization.getRefreshToken().getToken().getExpiresAt();

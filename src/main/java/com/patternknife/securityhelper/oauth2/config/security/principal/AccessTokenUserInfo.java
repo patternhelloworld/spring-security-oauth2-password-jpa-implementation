@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 
 /*
-* 	해당 클래스는 다른 프로젝트들이 있을 경우, 동일 하게  com.patternknife.securityhelper.oauth2.interestedtreatmentpart.dto.security 에 위치해야 한다.
+* 	If there are other modules, this class must also be located in com.patternknife.securityhelper.oauth2.interestedtreatmentpart.dto.security.
 * */
 public class AccessTokenUserInfo extends User implements OAuth2AuthenticatedPrincipal
 {
@@ -41,20 +41,11 @@ public class AccessTokenUserInfo extends User implements OAuth2AuthenticatedPrin
 
 	@Override
 	public Map<String, Object> getAttributes() {
-		// 권한 목록을 추출하여 Map에 추가
 		Map<String, Object> attributes = new HashMap<>();
 		List<String> authorities = this.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
 		attributes.put("authorities", authorities);
-
-		// 추가적으로 필요한 사용자 정보를 attributes Map에 추가할 수 있습니다.
-		// 예를 들어, 추가 정보가 AdditionalAccessTokenUserInfo 객체에 있다면,
-		// 이 정보를 Map에 추가할 수 있습니다.
-		if (this.additionalAccessTokenUserInfo != null) {
-			// additionalAccessTokenUserInfo의 내용을 Map에 추가하는 로직
-			// 예: attributes.put("email", this.additionalAccessTokenUserInfo.getEmail());
-		}
 
 		return attributes;
 	}

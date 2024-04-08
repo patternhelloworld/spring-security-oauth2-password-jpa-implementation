@@ -31,8 +31,8 @@ public class ResponseErrorLogConfig {
 
                 ErrorDetails errorDetails = (ErrorDetails) ((ResponseEntity) returnValue).getBody();
                 loggedText += String.format("[After - Error Response]\n message : %s || \n userMessage : %s || \n cause : %s || \n stackTrace : %s",
-                        errorDetails != null ? errorDetails.getMessage() : "No error detail message",
-                        errorDetails != null ? errorDetails.getUserMessage() : "No error detail auth message",
+                        errorDetails != null ? errorDetails.getMessage() : "No error message",
+                        errorDetails != null ? errorDetails.getUserMessage() : "No error userMessage",
                         errorDetails != null ? errorDetails.getCause() : "No error detail cause",
                         errorDetails != null ? errorDetails.getStackTrace() : "No error detail stack trace");
             }
@@ -41,7 +41,6 @@ public class ResponseErrorLogConfig {
             loggedText += "\n[Error during the errorLogging] : " + ex4.getMessage();
         }
 
-        // 5. 발생한 객체
         try {
             loggedText += "\n[Location] : " + p.getTarget().getClass().getSimpleName() + " " + p.getSignature().getName();
         } catch (Exception ex5) {

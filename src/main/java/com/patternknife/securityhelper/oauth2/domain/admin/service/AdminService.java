@@ -1,11 +1,12 @@
 package com.patternknife.securityhelper.oauth2.domain.admin.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patternknife.securityhelper.oauth2.config.database.CommonQuerydslRepositorySupport;
 import com.patternknife.securityhelper.oauth2.config.database.SelectablePersistenceConst;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.ResourceNotFoundException;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.domain.admin.bo.GoogleOtpResolver;
 import com.patternknife.securityhelper.oauth2.domain.admin.dao.AdminRepository;
 import com.patternknife.securityhelper.oauth2.domain.admin.dao.AdminRoleRepository;
 import com.patternknife.securityhelper.oauth2.domain.admin.dto.AdminDTO;
@@ -20,16 +21,10 @@ import com.patternknife.securityhelper.oauth2.domain.role.entity.Role;
 import com.patternknife.securityhelper.oauth2.util.CommonConstant;
 import com.patternknife.securityhelper.oauth2.util.CustomUtils;
 import com.patternknife.securityhelper.oauth2.util.PaginationUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.patternknife.securityhelper.oauth2.domain.admin.entity.Admin;
-import com.patternknife.securityhelper.oauth2.domain.admin.entity.AdminRole;
-import com.patternknife.securityhelper.oauth2.domain.admin.entity.Password;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,11 +70,6 @@ public class AdminService extends CommonQuerydslRepositorySupport {
         this.entityManager = entityManager;
     }
 
-    /*
-    *
-    *   1. 사용자 조회
-    *
-    * */
 
     public Admin findById(Long id) throws ResourceNotFoundException {
         return adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("findById - Admin not found for this id :: " + id));
@@ -131,10 +121,9 @@ public class AdminService extends CommonQuerydslRepositorySupport {
         final QAdminRole qAdminRole = QAdminRole.adminRole;
         final QRole qRole = QRole.role;
 
-        // alias 는 sorting 할 컬럼만 지정하면 됨
+
         JPQLQuery<AdminDTO.OneWithRoleIdsRes> query = jpaQueryFactory
-                .select(new QAdminDTO_OneWithRoleIdsRes(qAdmin.id, qAdmin.idName, qAdmin.otpSecretKey,
-                        qAdmin.otpSecretQrUrl, qAdmin.description,
+                .select(new QAdminDTO_OneWithRoleIdsRes(qAdmin.id, qAdmin.idName, qAdmin.description,
                         dbDialect.equals(SelectablePersistenceConst.MYSQL_8.getValue()) ?
                                 Expressions.stringTemplate("group_concat({0})", qRole.id).as("commaSplitRoleIds") :
                                 dbDialect.equals(SelectablePersistenceConst.MSSQL.getValue()) ?
@@ -143,7 +132,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                 .from(qAdmin)
                 .leftJoin(qAdmin.adminRoles, qAdminRole)
                 .leftJoin(qAdminRole.role, qRole)
-                .groupBy(qAdmin.id, qAdmin.idName, qAdmin.otpSecretKey, qAdmin.otpSecretQrUrl, qAdmin.description, qAdmin.createdAt, qAdmin.updatedAt)
+                .groupBy(qAdmin.id, qAdmin.idName, qAdmin.description, qAdmin.createdAt, qAdmin.updatedAt)
                 .where(qAdmin.id.eq(adminId));
 
         return query.fetchOne();
@@ -175,10 +164,9 @@ public class AdminService extends CommonQuerydslRepositorySupport {
         final QAdminRole qAdminRole = QAdminRole.adminRole;
         final QRole qRole = QRole.role;
 
-        // alias 는 sorting 할 컬럼만 지정하면 됨
+
         JPQLQuery<AdminDTO.OneWithRoleIdsRes> query = jpaQueryFactory
-                .select(new QAdminDTO_OneWithRoleIdsRes(qAdmin.id, qAdmin.idName, qAdmin.otpSecretKey,
-                        qAdmin.otpSecretQrUrl, qAdmin.description,
+                .select(new QAdminDTO_OneWithRoleIdsRes(qAdmin.id, qAdmin.idName, qAdmin.description,
                         dbDialect.equals(SelectablePersistenceConst.MYSQL_8.getValue()) ?
                                 Expressions.stringTemplate("group_concat({0})", qRole.id).as("commaSplitRoleIds") :
                        dbDialect.equals(SelectablePersistenceConst.MSSQL.getValue()) ?
@@ -197,7 +185,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                 .leftJoin(qAdminRole.role, qRole);
 
 
-        query.groupBy(qAdmin.id, qAdmin.idName, qAdmin.otpSecretKey, qAdmin.otpSecretQrUrl, qAdmin.description, qAdmin.createdAt, qAdmin.updatedAt);
+        query.groupBy(qAdmin.id, qAdmin.idName, qAdmin.description, qAdmin.createdAt, qAdmin.updatedAt);
         countQuery.groupBy(qAdmin.id);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -248,7 +236,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                     countQuery.where(booleanBuilder);
 
                 }  else {
-                    throw new IllegalStateException("유효하지 않은 Date range 검색 대상입니다.");
+                    throw new IllegalStateException("NOT a valid date range");
                 }
             }
 
@@ -277,7 +265,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                     query.orderBy(deserializedSorterValueFilter.getAsc() ? qAdmin.updatedAt.asc() : qAdmin.updatedAt.desc());
                     break;
                 default:
-                    throw new IllegalArgumentException("다음은 유효한 정렬 컬럼이 아닙니다 : " + sortedColumn);
+                    throw new IllegalArgumentException("Not a valid sort column : " + sortedColumn);
             }
         }
 
@@ -288,62 +276,27 @@ public class AdminService extends CommonQuerydslRepositorySupport {
 
     }
 
-    /*
-        2. 사용자 생성
-    * */
+
     public Admin create(AdminDTO.CreateReq dto){
-
-        // OTP 는 선택적 업데이트
-        if(dto.getOtpIssue() != null && dto.getOtpIssue()) {
-
-            GoogleOtpResolver googleOtpResolver = new GoogleOtpResolver();
-
-            GoogleAuthenticatorKey secretKey = googleOtpResolver.generateOtpSecretKey();
-            String secretKeyQrUrl = googleOtpResolver.generateOtpSecretQrCodeUrl(dto.getIdName(), secretKey);
-
-            return adminRepository.save(dto.toEntity(secretKey.getKey(), secretKeyQrUrl));
-
-        }else{
-            return adminRepository.save(dto.toEntity());
-        }
-
+        return adminRepository.save(dto.toEntity());
     }
 
     @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
     public AdminDTO.UpdateRes update(Long id, AdminDTO.UpdateReq dto) {
 
-        // 아래 두 가지 방법 중 한가지로 영속성 컨텍스트에 진입
-       Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("해당 관리자를 찾을 수 없습니다. (ID : '" + id + "')"));
+
+       Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Couldn't find the Admin (ID : '" + id + "')"));
        admin.setIdName(dto.getIdName());
 
         if(dto.getPassword() != null){
             admin.setPassword(Password.builder().value(dto.getPassword()).build());
         }
-        // OTP 도 선택적 업데이트
-        if(dto.getOtpIssue() != null && dto.getOtpIssue()) {
-
-            GoogleOtpResolver googleOtpResolver = new GoogleOtpResolver();
-
-            GoogleAuthenticatorKey secretKey = googleOtpResolver.generateOtpSecretKey();
-            String secretKeyQrUrl = googleOtpResolver.generateOtpSecretQrCodeUrl(admin.getIdName(), secretKey);
-
-            admin.setOtpSecretKey(secretKey.getKey());
-            admin.setOtpSecretQrUrl(secretKeyQrUrl);
-
-        }
-
-/*        List<AdminRole> adminRoles = adminRoleRepository.findByAdmin(admin).orElse(null);
-        if(adminRoles != null){
-            for (AdminRole adminRole : adminRoles) {
-                entityManager.remove(adminRole);
-            }
-        }*/
 
        adminRoleRepository.deleteByAdmin(admin);
 
         for (Integer roleId : dto.getCommaSplitRoleIds()) {
             Role role = roleRepository.findById(roleId.longValue())
-                    .orElseThrow(() -> new ResourceNotFoundException("권한이 확인 되지 않았습니다. (ID " + roleId + ")"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Authority is NOT confirmed (ID " + roleId + ")"));
             AdminRole adminRole = new AdminRole();
             adminRole.setAdmin(admin);
             adminRole.setRole(role);

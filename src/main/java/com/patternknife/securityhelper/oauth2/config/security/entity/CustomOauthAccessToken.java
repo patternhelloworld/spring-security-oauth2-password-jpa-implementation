@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @DynamicUpdate
 public class CustomOauthAccessToken {
 
-    // MD5(accessToken 값)
+    // MD5(accessToken string)
     @Column(name = "token_id")
     private String tokenId;
 
@@ -27,7 +27,7 @@ public class CustomOauthAccessToken {
     @Column(name = "authentication_id")
     private String authenticationId;
 
-    // Base64(Serialize(Oauth2AccessToken 객체))
+    // Base64(Serialize(Oauth2AccessToken))
     @Lob
     @Column(name = "token", columnDefinition = "NVARCHAR(MAX)")
     private String token;
@@ -38,7 +38,7 @@ public class CustomOauthAccessToken {
     @Column(name = "client_id")
     private String clientId;
 
-    // Base64(Serialize(Oauth2Authorization 객체))
+    // Base64(Serialize(Oauth2Authorization))
     @Lob
     @Column(name = "authentication", columnDefinition = "NVARCHAR(MAX)")
     private String authentication;

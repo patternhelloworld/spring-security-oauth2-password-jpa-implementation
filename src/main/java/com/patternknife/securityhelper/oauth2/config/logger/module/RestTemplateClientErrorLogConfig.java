@@ -21,7 +21,6 @@ public class RestTemplateClientErrorLogConfig implements ResponseErrorHandler {
   @Override
   public boolean hasError(@NonNull final ClientHttpResponse response) throws IOException {
     final HttpStatusCode statusCode = response.getStatusCode();
-//    response.getBody() 넘겨 받은 body 값으로 적절한 예외 상태 확인 이후 boolean return
     return !statusCode.is2xxSuccessful();
   }
 

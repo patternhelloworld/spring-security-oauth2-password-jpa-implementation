@@ -54,9 +54,9 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     @Override
     public UserDetails loadUserByUsername(String username){
 
-        Admin admin = adminRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("관리자 (ID : \"" + username + "\") 을 찾을 수 없습니다."));
+        Admin admin = adminRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("Admin (ID : \"" + username + "\") NOT found."));
         if(admin.getDeletedAt() != null){
-            throw new DisabledException(admin.getIdName() + " 님의 계정은 현재 비활성화 되어 있습니다.");
+            throw new DisabledException(admin.getIdName() + "'s account is currently disabled.");
         }
 /*        GoogleOtpResolver adminBO = new GoogleOtpResolver();
         GoogleAuthenticatorKey secretKey = adminBO.generateOtpSecretKey();
@@ -92,7 +92,6 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
         AccessTokenUserInfo authUser = new AccessTokenUserInfo(username, password, enabled, accountNonExpired, credentialsNonExpired,
                 accountNonLocked, authorities);
 
-        // Spring Security 로그인 사용자 정보에 DB의 추가적인 컬럼들도 저장하기 위함.
         authUser.setAdditionalAccessTokenUserInfo(new AdditionalAccessTokenUserInfo(admin));
 
         return authUser;

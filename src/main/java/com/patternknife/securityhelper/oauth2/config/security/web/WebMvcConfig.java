@@ -1,9 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.security.web;
 
-import com.patternknife.securityhelper.oauth2.domain.point.enums.PointDetailStatusTypeConverter;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -29,14 +28,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         HttpMethod.DELETE.name());
     }
 
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new PointDetailStatusTypeConverter());
-    }
-/*    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(verifyAccessInterceptor).addPathPatterns("/**");
-    }*/
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

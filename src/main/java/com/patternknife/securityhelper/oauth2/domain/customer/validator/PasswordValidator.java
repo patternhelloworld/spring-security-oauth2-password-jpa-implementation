@@ -27,7 +27,7 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
         if (!isValidPassword) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    MessageFormat.format("{0}자 이상의 {1}자 이하의 숫자, 영문자, 특수문자를 포함하고, 연속된 숫자가 아닌 비밀번호를 입력하십시오.", MIN_SIZE, MAX_SIZE))
+                    MessageFormat.format("Please enter a password that includes numbers, letters, and special characters of at least {0} characters and no more than {1} characters, and is not a sequence of consecutive numbers.", MIN_SIZE, MAX_SIZE))
                     .addConstraintViolation();
         }
         return isValidPassword;

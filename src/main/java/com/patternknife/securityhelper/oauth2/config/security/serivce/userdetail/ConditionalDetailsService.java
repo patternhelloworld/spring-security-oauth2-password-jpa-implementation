@@ -22,7 +22,7 @@ public class ConditionalDetailsService {
             return adminDetailsService.loadUserByUsername(username);
         }else {
             throw new UnauthenticatedException(ErrorMessages.builder()
-                    .message("해당 사용자가 Admin 인지 Customer 인지 구분 불가. (client_id : " + clientId + ")")
+                    .message("Unable to distinguish whether the user is an Admin or a Customer. (client_id: " + clientId + ")")
                     .userMessage(SecurityExceptionMessage.AUTHENTICATION_ERROR.getMessage())
                     .build());
         }

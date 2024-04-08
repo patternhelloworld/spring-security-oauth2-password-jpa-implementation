@@ -20,7 +20,6 @@ public class ResponseSuccessLogConfig {
     private static final Logger logger = LoggerFactory.getLogger(ResponseSuccessLogConfig.class);
 
 
-    // 표현식 설명 : com.patternknife.securityhelper.oauth2.controller 패키지 및 하위 패키지(..)의 모든 메서드(*)
     @AfterReturning(pointcut = ("within(com.patternknife.securityhelper.oauth2.domain..api..*)"),
             returning = "returnValue")
     public void endpointAfterReturning(JoinPoint p, Object returnValue) {
@@ -28,7 +27,7 @@ public class ResponseSuccessLogConfig {
         boolean isErrored = false;
         String loggedText = "\n[After - Returning Thread] : " + Thread.currentThread().getId() + "\n";
 
-        // 3. Response logging
+        // Response logging
         try {
             ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -49,7 +48,7 @@ public class ResponseSuccessLogConfig {
             loggedText += "[After - Error during the responseLogging] : " + ex3.getMessage();
         }
 
-        // 5. 발생한 객체
+
         try {
             loggedText += "\n[After - Location] : " + p.getTarget().getClass().getSimpleName() + " " + p.getSignature().getName();
         } catch (Exception ex5) {

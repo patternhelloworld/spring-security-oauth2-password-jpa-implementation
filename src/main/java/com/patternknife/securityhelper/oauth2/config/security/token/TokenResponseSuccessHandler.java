@@ -64,7 +64,7 @@ public class TokenResponseSuccessHandler  implements AuthenticationSuccessHandle
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
         }else{
-            throw new IllegalStateException("잘못된 Grant Type 입니다.");
+            throw new IllegalStateException("Wrong Grant Type");
         }
 
 

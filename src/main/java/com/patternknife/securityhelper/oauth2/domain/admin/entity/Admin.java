@@ -26,12 +26,6 @@ public class Admin
 	@Column(name="id_name")
 	private String idName;
 
-	@Column(name="otp_secret_key")
-	private String otpSecretKey;
-
-	@Column(name="otp_secret_qr_url")
-	private String otpSecretQrUrl;
-
 	@Column(name="description")
 	private String description;
 

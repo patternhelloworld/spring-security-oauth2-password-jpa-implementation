@@ -2,6 +2,7 @@ package com.patternknife.securityhelper.oauth2.domain.traditionaloauth.api.v1;
 
 
 import com.patternknife.securityhelper.oauth2.config.response.GlobalSuccessPayload;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
 import com.patternknife.securityhelper.oauth2.domain.traditionaloauth.dto.SpringSecurityTraditionalOauthDTO;
 import com.patternknife.securityhelper.oauth2.domain.traditionaloauth.service.TraditionalOauthService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class TraditionalOauthApi {
             case "refresh_token":
                 return new GlobalSuccessPayload<>(traditionalOauthService.refreshAccessToken(tokenRequest, authorizationHeader));
             default:
-                throw new IllegalStateException("유효한 grant_type 이 아닙니다.");
+                throw new IllegalStateException(SecurityExceptionMessage.WRONG_GRANT_TYPE.getMessage());
         }
     }
 

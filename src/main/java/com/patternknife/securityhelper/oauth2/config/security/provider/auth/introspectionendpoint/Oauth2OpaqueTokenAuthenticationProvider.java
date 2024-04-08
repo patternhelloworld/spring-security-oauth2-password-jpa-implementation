@@ -1,7 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.security.provider.auth.introspectionendpoint;
 
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AdditionalAccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.AdminDetailsService;
@@ -126,7 +127,7 @@ public final class Oauth2OpaqueTokenAuthenticationProvider implements Authentica
         }
 
         if(oAuth2AuthenticatedPrincipal == null){
-            throw new UnauthenticatedException("로그인을 진행해 주세요.");
+            throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_FAILURE.getMessage());
         }
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, token, oAuth2Authorization.getAccessToken().getToken().getIssuedAt(), oAuth2Authorization.getAccessToken().getToken().getExpiresAt());

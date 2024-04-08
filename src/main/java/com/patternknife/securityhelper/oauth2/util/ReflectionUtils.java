@@ -3,7 +3,7 @@ package com.patternknife.securityhelper.oauth2.util;
 import java.lang.reflect.Field;
 
 public class ReflectionUtils {
-    // updateClinicField 에서 호출하여 Java Reflection 방법으로 Get Set
+
     public static String getFieldValue(Object object, String fieldName) {
         try {
             Field field = object.getClass().getDeclaredField(fieldName);

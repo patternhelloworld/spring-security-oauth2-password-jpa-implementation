@@ -12,8 +12,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 
 /*
-*   Response Payload 를 임의로 변경하고자 할 때 사용
-*   다른 방법을 찾아보고 안 될 때 사용
+    Use when wanting to arbitrarily change the Response Payload.
+    Use when other methods have been explored and do not work.
 * */
 @ControllerAdvice
 public class SpecificResponseHandler implements ResponseBodyAdvice<Object> {
@@ -30,7 +30,7 @@ public class SpecificResponseHandler implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                   Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 
-        // /oauth/token API 에서 성공 시 response payload 를 변경
+        // /oauth2/token
         if(body instanceof OAuth2AccessToken && ((ServletServerHttpResponse) response).getServletResponse().getStatus() == HttpStatus.OK.value()) {
             return new GlobalSuccessPayload<>(body);
         }else{

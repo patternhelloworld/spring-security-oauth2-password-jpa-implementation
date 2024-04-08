@@ -3,7 +3,7 @@ package com.patternknife.securityhelper.oauth2.config.security.provider.resource
 
 import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AdditionalAccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.AdminDetailsService;

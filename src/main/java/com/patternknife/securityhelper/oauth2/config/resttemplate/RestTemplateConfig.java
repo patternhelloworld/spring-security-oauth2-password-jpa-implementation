@@ -27,7 +27,7 @@ public class RestTemplateConfig {
                 .setConnectTimeout(Duration.ofSeconds(6))
                 .build();
     }
-    // 미사용
+
     @Bean
     public RestTemplate kaKaoAccessTokenInfoTemplate() {
         return createRestTemplate("https://kapi.kakao.com/v1/user/access_token_info");

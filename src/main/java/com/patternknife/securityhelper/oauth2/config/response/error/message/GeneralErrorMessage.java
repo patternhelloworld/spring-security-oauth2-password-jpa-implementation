@@ -4,17 +4,17 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum GeneralErrorMessage {
+public enum GeneralErrorMessage implements ExceptionMessageInterface {
 
-    UNHANDLED_ERROR("G_000", "처리되지 않은 오류 입니다.","불편을 끼쳐드려 송구합니다. 재시도 해도 문제가 지속될 경우 관리자에게 문의 하십시오. 로그 확인이 필요합니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNHANDLED_ERROR("G_000", "An unhandled error has occurred.", "We apologize for the inconvenience. If the problem persists upon retry, please contact the administrator. Log checking is required.", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    NULL_VALUE_FOUND("G_001", "빈 값이 확인되었습니다.", "불편을 끼쳐드려 송구합니다. 재시도 해도 문제가 지속될 경우 관리자에게 문의 하십시오. 로그 확인이 필요합니다.", HttpStatus.BAD_REQUEST),
-    DUPLICATE_VALUE_FOUND("G_002", "중복된 값이 확인 되었습니다.","중복된 값이 확인 되었습니다.",  HttpStatus.CONFLICT),
-    INPUT_VALUE_INVALID("G_003", "입력값이 올바르지 않습니다.","입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    NULL_VALUE_FOUND("G_001", "A null value was detected.", "We apologize for the inconvenience. If the problem persists upon retry, please contact the administrator. Log checking is required.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_VALUE_FOUND("G_002", "A duplicate value was detected.", "A duplicate value was detected.", HttpStatus.CONFLICT),
+    INPUT_VALUE_INVALID("G_003", "The input value is invalid.", "The input value is invalid.", HttpStatus.BAD_REQUEST),
 
-    ACCOUNT_NOT_FOUND("S_000", "해당 회원을 찾을 수 없습니다.","해당 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    EMAIL_DUPLICATION("S_001", "이메일이 중복되었습니다.","이메일이 중복되었습니다.", HttpStatus.CONFLICT),
-    PASSWORD_FAILED_EXCEEDED("S_002", "비밀번호 실패 횟수가 초과했습니다.","비밀번호 실패 횟수가 초과했습니다.", HttpStatus.BAD_REQUEST);
+    ACCOUNT_NOT_FOUND("S_000", "The member could not be found.", "The member could not be found.", HttpStatus.NOT_FOUND),
+    EMAIL_DUPLICATION("S_001", "The email is duplicated.", "The email is duplicated.", HttpStatus.CONFLICT),
+    PASSWORD_FAILED_EXCEEDED("S_002", "Password failure attempts have been exceeded.", "Password failure attempts have been exceeded.", HttpStatus.BAD_REQUEST);
 
 
     private final String code;

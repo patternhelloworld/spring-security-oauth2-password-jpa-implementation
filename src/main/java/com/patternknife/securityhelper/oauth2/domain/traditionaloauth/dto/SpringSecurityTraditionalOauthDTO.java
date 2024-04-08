@@ -18,7 +18,7 @@ public class SpringSecurityTraditionalOauthDTO {
 
         private String refresh_token;
 
-        @NotBlank(message = "grant_type 필드는 비어있으면 안됩니다.")
+        @NotBlank
         private String grant_type;
 
         private String otp_value;

@@ -2,11 +2,10 @@ package com.patternknife.securityhelper.oauth2.config.security.provider.auth.end
 
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.OtpValueUnauthorizedException;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
-import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCachedInfo;
-import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.OAuth2AuthorizationServiceImpl;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationHashCheckService;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
 import com.patternknife.securityhelper.oauth2.config.security.token.CustomGrantAuthenticationToken;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,10 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.*;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
@@ -30,7 +32,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider, Ser
 
     private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
     private final ConditionalDetailsService conditionalDetailsService;
-    private final Oauth2AuthenticationService oauth2AuthenticationService;
+    private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
     @Override
@@ -45,23 +47,20 @@ public class CustomAuthenticationProvider implements AuthenticationProvider, Ser
 
             UserDetails userDetails;
             if(((String)customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())){
+
                 userDetails = conditionalDetailsService.loadUserByUsername((String)customGrantAuthenticationToken.getAdditionalParameters().get("username"), clientId);
 
-                if(clientId.equals(OAuth2ClientCachedInfo.ADMIN_CLIENT_ID.getValue())){
-                    oauth2AuthenticationService.validateOtpValue((String)customGrantAuthenticationToken.getAdditionalParameters().get("otp_value"),((AccessTokenUserInfo) userDetails).getAdditionalAccessTokenUserInfo().getOtpSecretKey());
-                }
-
-                oauth2AuthenticationService.validatePassword((String)customGrantAuthenticationToken.getAdditionalParameters().get("password"), userDetails);
+                oauth2AuthenticationHashCheckService.validateUsernamePassword((String)customGrantAuthenticationToken.getAdditionalParameters().get("password"), userDetails);
 
             }else if(((String)customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())){
                 OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken((String)customGrantAuthenticationToken.getAdditionalParameters().get("refresh_token"), OAuth2TokenType.REFRESH_TOKEN);
                 if(oAuth2Authorization != null) {
                     userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
                 }else{
-                    throw new UnauthenticatedException("해당 토큰으로 부터 인증 정보를 찾을 수 없습니다.");
+                    throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_ERROR.getMessage());
                 }
             }else{
-                throw new IllegalStateException("잘못된 Grant Type 입니다.");
+                throw new IllegalStateException(SecurityExceptionMessage.WRONG_GRANT_TYPE.getMessage());
             }
 
             OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters());

@@ -22,7 +22,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <dependencies>
 
-        <!-- Spring Boot WebFlux 의존성 추가 -->
+        <!-- Spring Boot WebFlux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -106,7 +106,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>1.9.13</version>
         </dependency>
 
-        <!-- 인증 -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -181,23 +181,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
         </dependency>
-        <!--        <dependency>
-                    <groupId>com.jayway.jsonpath</groupId>
-                    <artifactId>json-path</artifactId>
-                    <version>2.2.0</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>net.minidev</groupId>
-                    <artifactId>json-smart</artifactId>
-                    <version>2.4.7</version> &lt;!&ndash; Use the latest version available &ndash;&gt;
-                </dependency>-->
 
-        <!--      <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
-                <version>0.9.1</version>
-            </dependency>-->
 
 
         <dependency>
@@ -232,18 +216,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId> <!-- 엑셀 2007 이상 버전에서 사용 -->
-            <version>4.1.2</version>
-        </dependency>
-
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
@@ -256,23 +228,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         </dependency>
 
 
-        <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter-test</artifactId>
-            <version>3.0.2</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
-            <groupId>com.google.firebase</groupId>
-            <artifactId>firebase-admin</artifactId>
-            <version>9.2.0</version>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -295,29 +258,9 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <executable>true</executable> <!-- 여기를 활성화 후 패키징 -->
+                    <executable>true</executable>
                 </configuration>
             </plugin>
-            <!--            <plugin>
-                            <groupId>org.jvnet.jaxb2.maven2</groupId>
-                            <artifactId>maven-jaxb2-plugin</artifactId>
-                            <version>0.13.2</version>
-                            <executions>
-                                <execution>
-                                    <goals>
-                                        <goal>generate</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <generatePackage>com.patternknife.securityhelper.oauth2.microservice.common.wsdl</generatePackage>
-                                <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
-                                <schemaDirectory>${project.basedir}/src/main/resources/wsdl</schemaDirectory>
-                                <schemaIncludes>
-                                    <include>*.xsd</include>
-                                </schemaIncludes>
-                            </configuration>
-                        </plugin>-->
             <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
@@ -402,12 +345,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version> <!-- 사용하는 surefire 플러그인의 버전을 확인하고 필요에 따라 변경하세요 -->
+                <version>2.22.2</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/SecretCustomerIntegrationTest.java</exclude> <!-- 제외하고 싶은 테스트 클래스 -->
+                        <exclude>**/SecretCustomerIntegrationTest.java</exclude>
                         <exclude>**/SecretCustomerFactoryTest.java</exclude>
-                        <!-- 다른 클래스를 추가하고 싶으면 <exclude> 태그를 더 추가하세요 -->
                     </excludes>
                 </configuration>
             </plugin>

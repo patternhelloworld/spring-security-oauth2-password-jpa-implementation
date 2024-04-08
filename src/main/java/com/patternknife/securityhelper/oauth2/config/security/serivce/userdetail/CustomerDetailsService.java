@@ -54,16 +54,16 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     @Override
     public UserDetails loadUserByUsername(String username)  {
 
-        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("사용자 (ID : \"" + username + "\") 을 찾을 수 없습니다."));
+        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("Customer (ID : \"" + username + "\") NOT foUND"));
         if(customer.getDeletedAt() != null){
             if(customer.getDeleteAdminId() == null) {
                 if (customer.getOneWeekAfterDeletedAsString() != null) {
-                    throw new UserDeletedException("탈퇴한 계정으로써, " + customer.getOneWeekAfterDeletedAsString() + " 까지 재가입이 불가합니다.");
+                    throw new UserDeletedException("As a deleted account, re-registration is not possible until " + customer.getOneWeekAfterDeletedAsString() + ".");
                 } else {
-                    throw new UserDeletedException("탈퇴한 계정입니다.");
+                    throw new UserDeletedException("This is a deleted account.");
                 }
             }else{
-                throw new UserDeletedException("관리자에 의해 정지 된 계정입니다.");
+                throw new UserDeletedException("Suspended by Admin.");
             }
         }
 

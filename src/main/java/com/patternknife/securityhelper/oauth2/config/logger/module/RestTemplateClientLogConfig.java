@@ -30,7 +30,6 @@ public class RestTemplateClientLogConfig implements ClientHttpRequestInterceptor
     ClientHttpResponse response = execution.execute(request, body);
 
     try {
-      // 이 구간에서 오류가 발생하면 서버로 부터 response 200 을 받고도 오류가 발생 함.
       loggingResponse(response);
     }catch (Exception e){
         logger.error(e.getMessage());
@@ -50,7 +49,7 @@ public class RestTemplateClientLogConfig implements ClientHttpRequestInterceptor
     loggedText += "Request Method: " + request.getMethod() + "\n";
     loggedText += "Request URI: " + request.getURI() + "\n";
     loggedText += "Request body: " +
-            (body.length == 0 ? "값이 없습니다." : new String(body, StandardCharsets.UTF_8)) + "\n";
+            (body.length == 0 ? "No body value" : new String(body, StandardCharsets.UTF_8)) + "\n";
     loggedText += "======Request to Server======\n";
 
     logger.trace(loggedText);

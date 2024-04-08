@@ -33,8 +33,6 @@ public class AdditionalAccessTokenUserInfo implements Serializable {
     private String username;
     private String name;
 
-    private String otpSecretKey;
-
     private LocalDateTime deletedAt;
 
     public AdditionalAccessTokenUserInfo(Customer customer) {
@@ -55,8 +53,6 @@ public class AdditionalAccessTokenUserInfo implements Serializable {
 
         this.id = admin.getId();
         this.username = admin.getIdName();
-
-        this.otpSecretKey = admin.getOtpSecretKey();
 
         this.deletedAt = admin.getDeletedAt();
     }

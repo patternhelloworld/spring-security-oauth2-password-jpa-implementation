@@ -83,10 +83,10 @@ public class CustomerIntegrationTest {
     }
 
     @Test
-    public void test_같은_앱토큰_끼리는_같은_액세스_토큰을_사용_EXPOSED() throws Exception {
+    public void test_SameAppTokensUseSameAccessToken_EXPOSED() throws Exception {
 
         /*
-        *    Access Token (앱토큰 : APPTOKENAAA)
+        *    Access Token (APP-TOKEN : APPTOKENAAA)
         * */
 
         MvcResult result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
@@ -101,17 +101,17 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         String responseString = result.getResponse().getContentAsString();
         JSONObject jsonResponse = new JSONObject(responseString);
         String refreshToken = jsonResponse.getJSONObject("data").getString("refresh_token");
@@ -119,7 +119,7 @@ public class CustomerIntegrationTest {
 
 
         /*
-         *    Access Token (앱토큰 : 없음)
+         *    Access Token (APP-TOKEN : X)
          * */
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
@@ -133,24 +133,24 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getJSONObject("data").getString("refresh_token");
         String accessToken = jsonResponse.getJSONObject("data").getString("access_token");
 
         /*
-         *    Access Token (앱토큰 : APPTOKENAAA2)
+         *    Access Token (APP-TOKEN : APPTOKENAAA)
          * */
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
@@ -159,9 +159,9 @@ public class CustomerIntegrationTest {
                         .param("grant_type", "password")
                         .param("username", testUserName)
                         .param("password", testUserPassword))
-                .andExpect(status().isOk()).andReturn(); // 응답을 MvcResult 객체에 저장
+                .andExpect(status().isOk()).andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getJSONObject("data").getString("refresh_token");
@@ -170,7 +170,7 @@ public class CustomerIntegrationTest {
 
 
         /*
-         *    Refresh Token (앱토큰 : APPTOKENAAA2)
+         *    Refresh Token (APP-TOKEN : APPTOKENAAA2)
          * */
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
@@ -183,22 +183,23 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new RefreshTokenMaskingPreprocessor()),
                         preprocessResponse(new RefreshTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 refresh_token 방식을 사용합니다. refresh_token 이라고 기입해주세요."),
+                                parameterWithName("grant_type").description("Uses the refresh_token method among Oauth2 grant_types. Please write refresh_token."),
                                 parameterWithName("refresh_token").description("XXX")
-                        ))).andReturn();
+                        )))
+                .andReturn();
 
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         String accessToken2 = jsonResponse.getJSONObject("data").getString("access_token");
 
         /*
-         *      로그 아웃
+         *      LOGOUT
          *
-         *      : 결과적으로 APPTOKENAAA2 만 로그아웃되어야 한다.
+         *      : ONLY APPTOKENAAA2 SHOULD BE LOGGED OUT
          * */
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/me/logout")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -208,12 +209,13 @@ public class CustomerIntegrationTest {
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer XXX")
                         ),relaxedResponseFields(
-                                fieldWithPath("data.logout").description("true 이면 백앤드에서 logout 성공, false 이면 실패. 이나 이 메시지 무시하고, UX 를 고려하여, 클라이언트에서 토큰 지우고, 로그인 화면으로 이동.")
+                                fieldWithPath("data.logout").description("If true, logout is successful on the backend, if false, it fails. However, ignore this message and, considering UX, delete the token on the client side and move to the login screen.")
+
                         )));
 
 
         /*
-         *    Access Token (앱토큰 : APPTOKENAAA)
+         *    Access Token (APP-TOKEN : APPTOKENAAA)
          * */
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
@@ -228,17 +230,17 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getJSONObject("data").getString("refresh_token");
@@ -246,20 +248,15 @@ public class CustomerIntegrationTest {
 
 
 
-
         if(!accessTokenForAppToken1.equals(finalAccessTokenForAppToken1)){
-            assertEquals("최초 앱토큰에 해당하는 Access Token 이 다르게 나왔습니다.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
+            assertEquals("The Access Token corresponding to the initial app token was different.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
         }else{
-            assertTrue(true, "성공");
+            assertTrue(true, "Success");
         }
     }
 
     @Test
-    public void test_같은_앱토큰_끼리는_같은_액세스_토큰을_사용_ORIGINAL() throws Exception {
-
-        /*
-         *    Access Token (앱토큰 : APPTOKENAAA)
-         * */
+    public void test_SameAppTokensUseSameAccessToken_ORIGINAL() throws Exception {
 
         MvcResult result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
@@ -273,26 +270,22 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         String responseString = result.getResponse().getContentAsString();
         JSONObject jsonResponse = new JSONObject(responseString);
         String refreshToken = jsonResponse.getString("refresh_token");
         String accessTokenForAppToken1 = jsonResponse.getString("access_token");
 
-
-        /*
-         *    Access Token (앱토큰 : 없음)
-         * */
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
@@ -305,25 +298,23 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         String accessToken = jsonResponse.getString("access_token");
 
-        /*
-         *    Access Token (앱토큰 : APPTOKENAAA2)
-         * */
+
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
                         .header(CustomHttpHeaders.APP_TOKEN, "APPTOKENAAA2")
@@ -331,9 +322,9 @@ public class CustomerIntegrationTest {
                         .param("grant_type", "password")
                         .param("username", testUserName)
                         .param("password", testUserPassword))
-                .andExpect(status().isOk()).andReturn(); // 응답을 MvcResult 객체에 저장
+                .andExpect(status().isOk()).andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
@@ -341,9 +332,6 @@ public class CustomerIntegrationTest {
 
 
 
-        /*
-         *    Refresh Token (앱토큰 : APPTOKENAAA2)
-         * */
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
                         .header(CustomHttpHeaders.APP_TOKEN, "APPTOKENAAA2")
@@ -355,23 +343,20 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new RefreshTokenMaskingPreprocessor()),
                         preprocessResponse(new RefreshTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 refresh_token 방식을 사용합니다. refresh_token 이라고 기입해주세요."),
+                                parameterWithName("grant_type").description("Uses the refresh_token method among Oauth2 grant_types. Please write refresh_token."),
                                 parameterWithName("refresh_token").description("XXX")
-                        ))).andReturn();
+                        )))
+                .andReturn();
 
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         String accessToken2 = jsonResponse.getString("access_token");
 
-        /*
-         *      로그 아웃
-         *
-         *      : 결과적으로 APPTOKENAAA2 만 로그아웃되어야 한다.
-         * */
+
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/me/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken2))
@@ -380,13 +365,10 @@ public class CustomerIntegrationTest {
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer XXX")
                         ),relaxedResponseFields(
-                                fieldWithPath("data.logout").description("true 이면 백앤드에서 logout 성공, false 이면 실패. 이나 이 메시지 무시하고, UX 를 고려하여, 클라이언트에서 토큰 지우고, 로그인 화면으로 이동.")
+                                fieldWithPath("data.logout").description("If true, logout is successful on the backend, if false, it fails. However, ignore this message and, considering UX, delete the token on the client side and move to the login screen.")
                         )));
 
 
-        /*
-         *    Access Token (앱토큰 : APPTOKENAAA)
-         * */
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, basicHeader)
@@ -400,17 +382,17 @@ public class CustomerIntegrationTest {
                         preprocessRequest(new AccessTokenMaskingPreprocessor()),
                         preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
                         requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("전달 받으 신 client_id 와  client_secret 를 ':' 로 연결하여 base64 함수를 사용하고 맨 앞에 Basic 이라고 기입하십시오. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("값이 없다고 로그인이 되지는 않지만, App-Token 값이 없는 경우들은 모든 같은 access_token 을 공유합니다. 기기별 세션 정책에 따라 필수 값으로 넣어주세요.")
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(CustomHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
                         ),
                         formParameters(
-                                parameterWithName("grant_type").description("Oauth2 grant_type 중 password 방식을 사용합니다. password 라고 기입해주세요."),
-                                parameterWithName("username").description("사용자의 이메일 주소 입니다."),
-                                parameterWithName("password").description("사용자의 비밀번호 입니다.")
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
                         )))
-                .andReturn(); // 응답을 MvcResult 객체에 저장
+                .andReturn();
 
-        // 응답에서 refresh_token 추출
+
         responseString = result.getResponse().getContentAsString();
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
@@ -420,9 +402,9 @@ public class CustomerIntegrationTest {
 
 
         if(!accessTokenForAppToken1.equals(finalAccessTokenForAppToken1)){
-            assertEquals("최초 앱토큰에 해당하는 Access Token 이 다르게 나왔습니다.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
+            assertEquals("The Access Token corresponding to the initial app token was different.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
         }else{
-            assertTrue(true, "성공");
+            assertTrue(true, "Success");
         }
     }
 
@@ -453,7 +435,7 @@ public class CustomerIntegrationTest {
         @SneakyThrows
         @Override
         public OperationResponse preprocess(OperationResponse response) {
-            // 1. 응답 본문 마스킹
+
             byte[] modifiedContent = response.getContent();
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -473,7 +455,7 @@ public class CustomerIntegrationTest {
                 modifiedContent = objectMapper.writeValueAsBytes(contentMap);
             }
 
-            // 2. 응답 헤더 마스킹
+
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.putAll(response.getHeaders());
 
@@ -508,7 +490,7 @@ public class CustomerIntegrationTest {
         @SneakyThrows
         @Override
         public OperationResponse preprocess(OperationResponse response) {
-            // 1. 응답 본문 마스킹
+
             byte[] modifiedContent = response.getContent();
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -529,7 +511,7 @@ public class CustomerIntegrationTest {
             }
 
 
-            // 2. 응답 헤더 마스킹
+
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.putAll(response.getHeaders());
 

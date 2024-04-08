@@ -142,15 +142,12 @@ public class CustomUtils {
 
     public static Integer[] commaSplitStrToIntegerArr(String input){
 
-        // 콤마(,)를 기준으로 문자열 분리
         String[] parts = input.split(",");
 
-        // 변환된 Integer 배열을 담기 위한 배열 생성
         Integer[] integers = new Integer[parts.length];
 
-        // 문자열을 Integer로 변환하여 배열에 저장
         for (int i = 0; i < parts.length; i++) {
-            integers[i] = Integer.parseInt(parts[i].trim()); // trim()을 사용해 공백 제거
+            integers[i] = Integer.parseInt(parts[i].trim());
         }
 
         return integers;
