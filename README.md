@@ -1,15 +1,13 @@
 # POC : Spring Security Oauth2 Password JPA Implementation
 ## Overview
 
-* In the Spring Security 6 ecosystem, compared to 5, there is a preference for Jwt or Keycloak over traditional OAuth2, and for the Authorization Code flow over the Password Grant method. In this context, the OAuth2 Password Grant method has been implemented with the following advantages:
-
-  * Set up access & refresh token API on both ``/oauth2/token`` and on the controller layer, both of which function same. 
-  * Authentication management based on a combination of username, client id, and an extra token (referred to in the source code as ``App-Token``, which receives a unique value from the calling devices).
+* In the Spring Security 6 ecosystem, compared to 5, there is a preference for JWT or Keycloak over traditional OAuth2 using a Password Grant method with Spring Security Authorization and Resource Server. I needed to incorporate the current OAuth2 Password Grant with the Spring Security new version and am showing the customization.
+  * Set up access & refresh token APIs on both '/oauth2/token' and on our controller layer such as '/api/v1...', both of which function same.
+  * Authentication management based on a combination of username, client id, and an extra token (referred to in the source code as App-Token, which receives a unique value from the calling devices).
   * Separated UserDetails implementation for Admin and Customer roles.
   * Integration with spring-security-oauth2-authorization-server.
-    * Provision of MySQL DDL, which consists of ``oauth_access_token``, ``oauth_refresh_token`` and ``oauth_client_details``
+    * Provision of MySQL DDL, which consists of oauth\_access\_token, oauth\_refresh\_tokenand oauth\_client\_details
   * Application of Spring Rest Docs.
-
 ## Dependencies
 
 | Category          | Dependencies                               |
