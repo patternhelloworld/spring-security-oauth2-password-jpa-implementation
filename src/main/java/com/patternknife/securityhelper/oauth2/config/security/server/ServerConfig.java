@@ -9,12 +9,10 @@ import com.patternknife.securityhelper.oauth2.config.security.provider.auth.endp
 import com.patternknife.securityhelper.oauth2.config.security.provider.auth.introspectionendpoint.Oauth2OpaqueTokenAuthenticationProvider;
 import com.patternknife.securityhelper.oauth2.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationHashCheckService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.AdminDetailsService;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.CustomerDetailsService;
 import com.patternknife.securityhelper.oauth2.config.security.token.TokenResponseSuccessHandler;
 import com.patternknife.securityhelper.oauth2.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +59,6 @@ public class ServerConfig {
             HttpSecurity http,
             CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
             OAuth2AuthorizationServiceImpl authorizationService,
-            CustomerDetailsService customerDetailsService,
-            AdminDetailsService adminDetailsService,
             ConditionalDetailsService conditionalDetailsService,
             Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
@@ -87,21 +83,21 @@ public class ServerConfig {
 
                 ).tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
-                           .introspectionRequestConverter(httpServletRequest -> new Oauth2OpaqueTokenAuthenticationProvider(
-                                   tokenIntrospector(
-                                           authorizationService, customerDetailsService, adminDetailsService
-                                   ),authorizationService, customerDetailsService, adminDetailsService
-                           ).convert(httpServletRequest))
+                                .introspectionRequestConverter(httpServletRequest -> new Oauth2OpaqueTokenAuthenticationProvider(
+                                        tokenIntrospector(
+                                                authorizationService, conditionalDetailsService
+                                        ),authorizationService, conditionalDetailsService
+                                ).convert(httpServletRequest))
                                 .authenticationProvider(new Oauth2OpaqueTokenAuthenticationProvider(
                                         tokenIntrospector(
-                                                authorizationService, customerDetailsService, adminDetailsService
-                                        ),authorizationService, customerDetailsService, adminDetailsService
+                                                authorizationService, conditionalDetailsService
+                                        ),authorizationService, conditionalDetailsService
                                 )).errorResponseHandler(new AuthenticationFailureHandlerImpl()));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
         http.csrf(AbstractHttpConfigurer::disable).securityMatcher(endpointsMatcher).authorizeHttpRequests(authorize ->
-                        authorize.anyRequest().authenticated());
+                authorize.anyRequest().authenticated());
 
         return http.build();
     }
@@ -120,14 +116,14 @@ public class ServerConfig {
     }
 
     @Bean
-    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService, CustomerDetailsService customerDetailsService, AdminDetailsService adminDetailsService) {
-        return new JpaTokenStoringOauth2TokenIntrospector(authorizationService, customerDetailsService, adminDetailsService);
+    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService, ConditionalDetailsService conditionalDetailsService) {
+        return new JpaTokenStoringOauth2TokenIntrospector(authorizationService, conditionalDetailsService);
     }
 
     @Bean
     @Order(2)
     public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, OAuth2AuthorizationServiceImpl authorizationService,
-                                                                 CustomerDetailsService customerDetailsService, AdminDetailsService adminDetailsService,
+                                                                 ConditionalDetailsService conditionalDetailsService,
                                                                  HandlerExceptionResolver handlerExceptionResolver
                                                                  ) throws Exception {
 
@@ -139,7 +135,7 @@ public class ServerConfig {
                         .bearerTokenResolver(resolver)
                                 .authenticationEntryPoint(new AuthenticationEntryPointToGlobalExceptionHandler(handlerExceptionResolver))
                                 .accessDeniedHandler(new CustomAccessDeniedHandler())
-                        .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, customerDetailsService, adminDetailsService))));
+                        .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService))));
 
         return http.build();
     }

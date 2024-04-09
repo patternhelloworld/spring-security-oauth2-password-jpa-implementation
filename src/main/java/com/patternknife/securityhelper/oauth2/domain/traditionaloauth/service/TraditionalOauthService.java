@@ -29,6 +29,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -76,7 +78,7 @@ public class TraditionalOauthService {
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
-                new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), SecurityUtil.getTokenUsingSecurityAdditionalParameters(request));
+                new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), SecurityUtil.getTokenUsingSecurityAdditionalParameters(request), null);
 
         Instant now = Instant.now();
         Instant expiresAt = oAuth2Authorization.getAccessToken().getToken().getExpiresAt();
@@ -111,8 +113,12 @@ public class TraditionalOauthService {
             userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
         }
 
+        Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
+        modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
 
-        oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, new AuthorizationGrantType(refreshTokenRequest.getGrant_type()), basicCredentials.getClientId(), oAuth2Authorization.getAttributes());
+        oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
+                new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
+                basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
 
 
         Instant now = Instant.now();

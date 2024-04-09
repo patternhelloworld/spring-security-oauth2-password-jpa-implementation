@@ -30,10 +30,10 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
 
      @Override
      public OAuth2Authorization run(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
-                                                                   Map<String, Object> additionalParameters) {
+                                                                   Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
 
           OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByUserNameAndClientIdAndAppToken(userDetails.getUsername(), clientId, (String) additionalParameters.get(CustomHttpHeaders.APP_TOKEN));
-          if(((String)additionalParameters.get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())){
+          if(authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())){
                if (oAuth2Authorization == null || oAuth2Authorization.getAccessToken().isExpired()) {
                     int retryLogin = 0;
                     while (retryLogin < 5) {
@@ -52,12 +52,21 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
                          }
                     }
                }
-          }else if(((String)additionalParameters.get("grant_type")).equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())){
+          }else if(authorizationGrantType.getValue().equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())){
                int retryLogin = 0;
                while (retryLogin < 5) {
                     try {
+                         String refreshTokenValue = null;
+                         if(additionalParameters.containsKey("refresh_token")){
+                              refreshTokenValue = (String) additionalParameters.get("refresh_token");
+                         }else{
+                              assert modifiableAdditionalParameters != null;
+                              refreshTokenValue = (String)modifiableAdditionalParameters.get("refresh_token");
+                         }
+                         assert refreshTokenValue != null;
 
-                         OAuth2Authorization oAuth2AuthorizationFromRefreshToken = oAuth2AuthorizationService.findByToken((String)additionalParameters.get("refresh_token"), OAuth2TokenType.REFRESH_TOKEN);
+
+                         OAuth2Authorization oAuth2AuthorizationFromRefreshToken = oAuth2AuthorizationService.findByToken(refreshTokenValue, OAuth2TokenType.REFRESH_TOKEN);
 
                          if(oAuth2AuthorizationFromRefreshToken == null){
                               throw new UnauthenticatedException("Refresh Token Expired.");
@@ -85,6 +94,8 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
                     }
                }
 
+          }else{
+               // TO DO.
           }
 
 

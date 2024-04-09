@@ -2,7 +2,7 @@ package com.patternknife.securityhelper.oauth2.config.response.error;
 
 
 import com.patternknife.securityhelper.oauth2.config.logger.dto.ErrorDetails;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.ErrorMessagesContainedException;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.ErrorMessagesContainedExceptionForSecurityAuthentication;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.file.FileNotFoundException;
@@ -46,8 +46,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({InsufficientAuthenticationException.class, UnauthenticatedException.class, AuthenticationException.class})
     public ResponseEntity<?> authenticationException(Exception ex, WebRequest request) {
         ErrorDetails errorDetails;
-        if(ex instanceof ErrorMessagesContainedException && ((ErrorMessagesContainedException) ex).getErrorMessages() != null) {
-            errorDetails = new ErrorDetails(((ErrorMessagesContainedException) ex).getErrorMessages(),
+        if(ex instanceof ErrorMessagesContainedExceptionForSecurityAuthentication && ((ErrorMessagesContainedExceptionForSecurityAuthentication) ex).getErrorMessages() != null) {
+            errorDetails = new ErrorDetails(((ErrorMessagesContainedExceptionForSecurityAuthentication) ex).getErrorMessages(),
                     ex, request.getDescription(false), CustomExceptionUtils.getAllStackTraces(ex),
                     CustomExceptionUtils.getAllCauses(ex), null);
         }else {

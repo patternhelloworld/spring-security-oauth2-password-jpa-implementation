@@ -1,12 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.security.provider.auth.introspectionendpoint;
 
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.config.security.principal.AdditionalAccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.AdminDetailsService;
-import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.CustomerDetailsService;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,16 +37,15 @@ public final class Oauth2OpaqueTokenAuthenticationProvider implements Authentica
     private OpaqueTokenAuthenticationConverter authenticationConverter = Oauth2OpaqueTokenAuthenticationProvider::convert;
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
-    private final CustomerDetailsService customerDetailsService;
-    private final AdminDetailsService adminDetailsService;
+    private final ConditionalDetailsService conditionalDetailsService;
+
 
     public Oauth2OpaqueTokenAuthenticationProvider(OpaqueTokenIntrospector introspector, OAuth2AuthorizationServiceImpl authorizationService,
-                                                   CustomerDetailsService customerDetailsService,  AdminDetailsService adminDetailsService) {
+                                                   ConditionalDetailsService conditionalDetailsService) {
         Assert.notNull(introspector, "introspector cannot be null");
         this.introspector = introspector;
         this.authorizationService = authorizationService;
-        this.customerDetailsService = customerDetailsService;
-        this.adminDetailsService = adminDetailsService;
+        this.conditionalDetailsService = conditionalDetailsService;
     }
 
     @Override
@@ -117,18 +112,7 @@ public final class Oauth2OpaqueTokenAuthenticationProvider implements Authentica
             return null;
         }
 
-        OAuth2AuthenticatedPrincipal oAuth2AuthenticatedPrincipal  = null;
-        if (oAuth2Authorization.getAttributes().get("client_id").equals(AdditionalAccessTokenUserInfo.UserType.ADMIN.getValue())) {
-            oAuth2AuthenticatedPrincipal = (AccessTokenUserInfo) adminDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName());
-        } else if (oAuth2Authorization.getAttributes().get("client_id").equals(AdditionalAccessTokenUserInfo.UserType.CUSTOMER.getValue())) {
-            oAuth2AuthenticatedPrincipal = (AccessTokenUserInfo)customerDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName());
-        } else {
-            return null;
-        }
-
-        if(oAuth2AuthenticatedPrincipal == null){
-            throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_FAILURE.getMessage());
-        }
+        OAuth2AuthenticatedPrincipal oAuth2AuthenticatedPrincipal = (AccessTokenUserInfo) conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), (String)oAuth2Authorization.getAttributes().get("client_id"));
 
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, token, oAuth2Authorization.getAccessToken().getToken().getIssuedAt(), oAuth2Authorization.getAccessToken().getToken().getExpiresAt());
         return new BearerTokenAuthentication(oAuth2AuthenticatedPrincipal, accessToken, oAuth2AuthenticatedPrincipal.getAuthorities());

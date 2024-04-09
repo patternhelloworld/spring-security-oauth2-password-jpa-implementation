@@ -63,7 +63,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider, Ser
                 throw new IllegalStateException(SecurityExceptionMessage.WRONG_GRANT_TYPE.getMessage());
             }
 
-            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters());
+            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
 
             RegisteredClient registeredClient = oAuth2ClientAuthenticationToken.getRegisteredClient();
 
