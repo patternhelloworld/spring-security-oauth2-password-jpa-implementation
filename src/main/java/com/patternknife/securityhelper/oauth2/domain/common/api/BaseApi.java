@@ -10,8 +10,6 @@ public class BaseApi {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
-/*    @Autowired
-    private ServletWebServerApplicationContext server;*/
 
     @GetMapping("/systemProfile")
     public String getProfile () {
