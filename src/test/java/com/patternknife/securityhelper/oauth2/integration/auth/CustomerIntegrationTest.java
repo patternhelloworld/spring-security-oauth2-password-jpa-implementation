@@ -33,8 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -43,6 +42,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.relaxedResponseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.formParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(RestDocumentationExtension.class)
@@ -196,6 +197,12 @@ public class CustomerIntegrationTest {
         jsonResponse = new JSONObject(responseString);
         String accessToken2 = jsonResponse.getJSONObject("data").getString("access_token");
 
+        if(accessToken2.equals(accessToken)){
+            assertNotEquals("The new access_token issued with a refresh_token should not be the same value as the existing access_token.", accessToken2, accessToken);
+        }else{
+            assertTrue(true, "성공");
+        }
+
         /*
          *      LOGOUT
          *
@@ -246,7 +253,12 @@ public class CustomerIntegrationTest {
         refreshToken = jsonResponse.getJSONObject("data").getString("refresh_token");
         String finalAccessTokenForAppToken1 = jsonResponse.getJSONObject("data").getString("access_token");
 
-
+        // Check the availability of the access token for APPTOKENAAA
+        mockMvc.perform(get("/api/v1/customers/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + finalAccessTokenForAppToken1))
+                .andDo(print())
+                .andExpect(status().isOk());
 
         if(!accessTokenForAppToken1.equals(finalAccessTokenForAppToken1)){
             assertEquals("The Access Token corresponding to the initial app token was different.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
@@ -357,6 +369,12 @@ public class CustomerIntegrationTest {
         String accessToken2 = jsonResponse.getString("access_token");
 
 
+        if(accessToken2.equals(accessToken)){
+            assertNotEquals("The new access_token issued with a refresh_token should not be the same value as the existing access_token.", accessToken2, accessToken);
+        }else{
+            assertTrue(true, "성공");
+        }
+
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/me/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken2))
@@ -399,7 +417,12 @@ public class CustomerIntegrationTest {
         String finalAccessTokenForAppToken1 = jsonResponse.getString("access_token");
 
 
-
+        // Check the availability of the access token for APPTOKENAAA
+        mockMvc.perform(get("/api/v1/customers/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + finalAccessTokenForAppToken1))
+                .andDo(print())
+                .andExpect(status().isOk());
 
         if(!accessTokenForAppToken1.equals(finalAccessTokenForAppToken1)){
             assertEquals("The Access Token corresponding to the initial app token was different.", accessTokenForAppToken1, finalAccessTokenForAppToken1);
