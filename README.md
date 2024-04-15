@@ -22,7 +22,7 @@
 
 #### Import the SQL file in the ``mysql`` folder.
 
-#### The API information is on ``src/main/asciidoc/api-app.adoc``, managed by Spring Rest Doc.
+#### The API information is found on ``http://localhost:8505/docs/api-app.html``, managed by Spring Rest Doc 
 
 
 
