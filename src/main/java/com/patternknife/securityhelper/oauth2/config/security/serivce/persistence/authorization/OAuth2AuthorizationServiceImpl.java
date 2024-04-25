@@ -174,10 +174,18 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
                 oAuth2Authorization = customOauthAccessToken.getAuthentication();
             }
         } catch (Exception e) {
+
             exceptionHandler.accept(e);
+
+            // Retry only one more time
+            customOauthAccessToken = accessTokenSupplier.get().orElse(null);
+            if (customOauthAccessToken != null) {
+                oAuth2Authorization = customOauthAccessToken.getAuthentication();
+            }
         }
         if (customOauthAccessToken != null && oAuth2Authorization != null && oAuth2Authorization.getAccessToken() != null && oAuth2Authorization.getAccessToken().isExpired()) {
             customOauthAccessTokenRepository.deleteByTokenId(customOauthAccessToken.getTokenId());
+            return null;
         }
 
         return oAuth2Authorization;
@@ -222,15 +230,22 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
                 oAuth2Authorization = customOauthRefreshToken.getAuthentication();
             }
         } catch (Exception e) {
+
             exceptionHandler.accept(e);
+
+            // Retry only one more time
+            customOauthRefreshToken = refreshTokenSupplier.get().orElse(null);
+            if (customOauthRefreshToken != null) {
+                oAuth2Authorization = customOauthRefreshToken.getAuthentication();
+            }
         }
 
         if (customOauthRefreshToken != null && oAuth2Authorization != null && oAuth2Authorization.getRefreshToken() != null && oAuth2Authorization.getRefreshToken().isExpired()) {
             customOauthRefreshTokenRepository.deleteByTokenId(customOauthRefreshToken.getTokenId());
+            return null;
         }
         return oAuth2Authorization;
     }
-
 
 
 
