@@ -2,7 +2,6 @@ package com.patternknife.securityhelper.oauth2.config.security.serivce.userdetai
 
 
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UserDeletedException;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.ResourceNotFoundException;
 import com.patternknife.securityhelper.oauth2.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AdditionalAccessTokenUserInfo;
@@ -20,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     @Override
     public UserDetails loadUserByUsername(String username)  {
 
-        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("Customer (ID : \"" + username + "\") NOT foUND"));
+        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Customer (ID : \"" + username + "\") NOT foUND"));
         if(customer.getDeletedAt() != null){
             if(customer.getDeleteAdminId() == null) {
                 if (customer.getOneWeekAfterDeletedAsString() != null) {

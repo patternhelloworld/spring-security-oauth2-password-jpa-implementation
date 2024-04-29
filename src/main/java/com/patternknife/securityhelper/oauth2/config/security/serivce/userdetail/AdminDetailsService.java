@@ -1,7 +1,6 @@
 package com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail;
 
 
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.ResourceNotFoundException;
 import com.patternknife.securityhelper.oauth2.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AdditionalAccessTokenUserInfo;
@@ -20,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     @Override
     public UserDetails loadUserByUsername(String username){
 
-        Admin admin = adminRepository.findByIdName(username).orElseThrow(() -> new ResourceNotFoundException("Admin (ID : \"" + username + "\") NOT found."));
+        Admin admin = adminRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Admin (ID : \"" + username + "\") NOT found."));
         if(admin.getDeletedAt() != null){
             throw new DisabledException(admin.getIdName() + "'s account is currently disabled.");
         }
