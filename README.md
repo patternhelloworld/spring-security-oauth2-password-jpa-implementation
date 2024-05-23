@@ -6,7 +6,7 @@
   * Authentication management based on a combination of username, client id, and an extra token (referred to in the source code as App-Token, which receives a unique value from the calling devices).
   * Separated UserDetails implementation for Admin and Customer roles.
   * Integration with spring-security-oauth2-authorization-server.
-    * Provide MySQL DDL, which consists of oauth\_access\_token, oauth\_refresh\_token and oauth\_client\_details, which is tables in Security 5. As I mean to migrate current security system to Security 6, I haven't changed them to the ``oauth2_authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.
+    * Provide MySQL DDL, which consists of oauth\_access\_token, oauth\_refresh\_token and oauth\_client\_details, which is tables in Security 5. As I mean to migrate current security system to Security 6, I haven't changed them to the ``authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.
   * Application of Spring Rest Docs.
 ## Dependencies
 

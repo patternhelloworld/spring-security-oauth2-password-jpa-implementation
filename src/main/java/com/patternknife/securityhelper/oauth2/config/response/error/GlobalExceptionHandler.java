@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({UnauthorizedException.class, AccessDeniedException.class, DisabledException.class})
     public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(ex.getMessage() != null ? ex.getMessage() : CustomExceptionUtils.getAllCauses(ex), request.getDescription(false),
-                ex.getMessage() == null ? SecurityExceptionMessage.AUTHENTICATION_ERROR.getMessage() : ex.getMessage(), ex.getStackTrace()[0].toString());
+                ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? SecurityExceptionMessage.AUTHORIZATION_FAILURE.getMessage() : ex.getMessage(), ex.getStackTrace()[0].toString());
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
     // Custom or Admin
