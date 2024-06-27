@@ -271,7 +271,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
 
 
         // Pagination
-        PaginationUtil paginationUtil = new PaginationUtil(getQuerydsl());
+        PaginationUtil paginationUtil = new PaginationUtil();
         return paginationUtil.applyPagination(query, pageNum, pageSize, skipPagination, countQuery.fetchCount());
 
     }

@@ -52,7 +52,7 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)  {
+    public UserDetails loadUserByUsername(String username) {
 
         Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Customer (ID : \"" + username + "\") NOT foUND"));
         if(customer.getDeletedAt() != null){

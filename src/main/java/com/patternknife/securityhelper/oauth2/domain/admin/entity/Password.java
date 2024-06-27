@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.domain.admin.entity;
 
-import com.patternknife.securityhelper.oauth2.domain.admin.exception.PasswordFailedExceededException;
+import com.patternknife.securityhelper.oauth2.domain.admin.exception.PasswordFailedExceededExceptionCustomOauth2;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -38,7 +38,7 @@ public class Password {
 
     public boolean isMatched(final String rawPassword) {
         if (failedCount >= 5)
-            throw new PasswordFailedExceededException();
+            throw new PasswordFailedExceededExceptionCustomOauth2();
 
         final boolean matches = isMatches(rawPassword);
         updateFailedCount(matches);

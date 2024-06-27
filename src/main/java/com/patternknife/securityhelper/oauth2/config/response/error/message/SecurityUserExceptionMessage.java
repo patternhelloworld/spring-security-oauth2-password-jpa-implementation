@@ -1,11 +1,13 @@
 package com.patternknife.securityhelper.oauth2.config.response.error.message;
 
 
-public enum SecurityExceptionMessage implements ExceptionMessageInterface {
+public enum SecurityUserExceptionMessage implements ExceptionMessageInterface {
 
     // GENERAL (Failure : errors that customers need to recognize / Error : system errors that customers shouldn't understand.)
-    AUTHENTICATION_FAILURE("Authentication has been released. Please log in again."),
-    AUTHENTICATION_ERROR("An error occurred in authentication. If the problem persists, please contact customer service."),
+    AUTHENTICATION_LOGIN_FAILURE("Authentication failed. Please check your credentials."),
+    AUTHENTICATION_LOGIN_ERROR("An error occurred in authentication. If the problem persists, please contact customer service."),
+    AUTHENTICATION_TOKEN_FAILURE("Login expired. Please log in again."),
+    AUTHENTICATION_TOKEN_ERROR("An error occurred in token authentication. If the problem persists, please contact customer service."),
     AUTHORIZATION_FAILURE("You do not have access permission. Please request access from the administrator."),
     AUTHORIZATION_ERROR("An error occurred in access permissions. If the problem persists, please contact customer service."),
 
@@ -37,7 +39,7 @@ public enum SecurityExceptionMessage implements ExceptionMessageInterface {
         return message;
     }
 
-    SecurityExceptionMessage(String message) {
+    SecurityUserExceptionMessage(String message) {
         this.message = message;
     }
 

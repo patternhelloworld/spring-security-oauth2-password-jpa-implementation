@@ -1,5 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.client;
 
+import com.patternknife.securityhelper.oauth2.config.logger.dto.ErrorMessages;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.CustomOauth2AuthenticationException;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCachedInfo;
 import com.patternknife.securityhelper.oauth2.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.config.security.entity.OauthClientDetail;
@@ -48,18 +51,21 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
     @Override
-    public RegisteredClient findById(String id) {
+    public RegisteredClient findById(String id) throws CustomOauth2AuthenticationException {
         // Assuming the ID is the client ID for simplification. Adjust if necessary.
         return oauthClientDetailRepository.findById(id)
                 .map(this::mapToRegisteredClient)
-                .orElse(null);
+                .orElseThrow(()->
+                        new CustomOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
+                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build()));
     }
-
     @Override
-    public RegisteredClient findByClientId(String clientId) {
+    public RegisteredClient findByClientId(String clientId) throws CustomOauth2AuthenticationException {
         return oauthClientDetailRepository.findById(clientId)
                 .map(this::mapToRegisteredClient)
-                .orElse(null);
+                .orElseThrow(()->
+                        new CustomOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
+                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build()));
     }
 
 

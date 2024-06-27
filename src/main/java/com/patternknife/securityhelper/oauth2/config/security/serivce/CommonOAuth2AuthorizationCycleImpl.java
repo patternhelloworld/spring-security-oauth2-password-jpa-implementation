@@ -2,7 +2,7 @@ package com.patternknife.securityhelper.oauth2.config.security.serivce;
 
 import com.patternknife.securityhelper.oauth2.config.CustomHttpHeaders;
 import com.patternknife.securityhelper.oauth2.config.logger.module.NonStopErrorLogConfig;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.CustomOauth2AuthenticationException;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.authentication.OAuth2AuthorizationBuildingService;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -69,11 +69,11 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
                          OAuth2Authorization oAuth2AuthorizationFromRefreshToken = oAuth2AuthorizationService.findByToken(refreshTokenValue, OAuth2TokenType.REFRESH_TOKEN);
 
                          if(oAuth2AuthorizationFromRefreshToken == null){
-                              throw new UnauthenticatedException("Refresh Token Expired.");
+                              throw new CustomOauth2AuthenticationException("Refresh Token Expired.");
                          }
                          if(oAuth2AuthorizationFromRefreshToken.getRefreshToken() == null || oAuth2AuthorizationFromRefreshToken.getRefreshToken().isExpired()){
                               oAuth2AuthorizationService.remove(oAuth2AuthorizationFromRefreshToken);
-                              throw new UnauthenticatedException("Refresh Token Expired.");
+                              throw new CustomOauth2AuthenticationException("Refresh Token Expired.");
                          }
 
                          OAuth2RefreshToken shouldBePreservedRefreshToken = oAuth2AuthorizationFromRefreshToken.getRefreshToken().getToken();

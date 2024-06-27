@@ -69,6 +69,10 @@ public class ServerConfig {
         http.apply(authorizationServerConfigurer);
 
         authorizationServerConfigurer
+                .clientAuthentication(clientAuthentication ->
+                        clientAuthentication
+                                .errorResponseHandler(new AuthenticationFailureHandlerImpl())
+                )
                 .registeredClientRepository(registeredClientRepository)
                 .authorizationService(authorizationService)
                 .tokenGenerator(tokenGenerator)
@@ -76,6 +80,7 @@ public class ServerConfig {
                         tokenEndpoint
                                 .accessTokenResponseHandler(new TokenResponseSuccessHandler(authorizationService))
                                 .accessTokenRequestConverter(new CustomGrantAuthenticationConverter())
+                                // found only Oauth2AuthenticationException is tossed.
                                 .errorResponseHandler(new AuthenticationFailureHandlerImpl())
                                 .authenticationProvider(new CustomAuthenticationProvider(
                                         commonOAuth2AuthorizationCycle, conditionalDetailsService, oauth2AuthenticationHashCheckService, authorizationService

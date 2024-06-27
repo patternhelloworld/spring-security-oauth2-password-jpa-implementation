@@ -1,9 +1,9 @@
 package com.patternknife.securityhelper.oauth2.domain.traditionaloauth.service;
 
 import com.patternknife.securityhelper.oauth2.config.logger.module.NonStopErrorLogConfig;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.CustomOauth2AuthenticationException;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthorizedException;
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCachedInfo;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.CommonOAuth2AuthorizationCycle;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationHashCheckService;
@@ -70,6 +70,14 @@ public class TraditionalOauthService {
 
         BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(UnauthorizedException::new);
 
+        RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+
+        assert registeredClient != null;
+        if(!(basicCredentials.getClientId().equals(registeredClient.getClientId())
+                && oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
+            throw new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage());
+        }
+
         UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
 
         oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
@@ -93,7 +101,7 @@ public class TraditionalOauthService {
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
                                                                               String authorizationHeader) throws IOException {
 
-        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(()-> new UnauthorizedException(SecurityExceptionMessage.AUTHORIZATION_ERROR.getMessage()));
+        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(()-> new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage()));
 
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
@@ -101,14 +109,14 @@ public class TraditionalOauthService {
 
         if(!(basicCredentials.getClientId().equals(registeredClient.getClientId())
                 && oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
-            throw new UnauthorizedException(SecurityExceptionMessage.AUTHORIZATION_ERROR.getMessage());
+            throw new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage());
         }
 
         OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
 
         UserDetails userDetails;
         if (oAuth2Authorization == null || oAuth2Authorization.getRefreshToken() == null) {
-            throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_ERROR.getMessage());
+            throw new CustomOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
         }else{
             userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
         }

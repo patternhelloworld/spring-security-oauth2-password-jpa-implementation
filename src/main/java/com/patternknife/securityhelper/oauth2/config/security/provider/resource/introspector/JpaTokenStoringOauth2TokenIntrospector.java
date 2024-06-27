@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.security.provider.resource.introspector;
 
 
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.UnauthenticatedException;
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.CustomOauth2AuthenticationException;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.config.security.principal.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
@@ -41,14 +41,14 @@ public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntros
             return principal;
         }catch (Exception e){
             //throw e;
-            throw new UnauthenticatedException(e.getMessage());
+            throw new CustomOauth2AuthenticationException(e.getMessage());
         }*/
 
         OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);
 
         if(oAuth2Authorization == null || oAuth2Authorization.getAccessToken() == null || oAuth2Authorization.getAccessToken().isExpired()
                 || oAuth2Authorization.getRefreshToken() == null || oAuth2Authorization.getRefreshToken().isExpired()){
-            throw new UnauthenticatedException(SecurityExceptionMessage.AUTHENTICATION_FAILURE.getMessage());
+            throw new CustomOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE.getMessage());
             //return null;
         }
 

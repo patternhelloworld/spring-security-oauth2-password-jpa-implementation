@@ -2,13 +2,12 @@ package com.patternknife.securityhelper.oauth2.config.response.error;
 
 
 import com.patternknife.securityhelper.oauth2.config.logger.dto.ErrorDetails;
-import com.patternknife.securityhelper.oauth2.config.response.error.exception.ErrorMessagesContainedExceptionForSecurityAuthentication;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.data.*;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.file.FileNotFoundException;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.payload.SearchFilterException;
 import com.patternknife.securityhelper.oauth2.config.response.error.message.GeneralErrorMessage;
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.core.Ordered;
@@ -43,15 +42,15 @@ public class GlobalExceptionHandler {
     *   General
     * */
     // Login Failure
-    @ExceptionHandler({InsufficientAuthenticationException.class, UnauthenticatedException.class, AuthenticationException.class})
+    @ExceptionHandler({InsufficientAuthenticationException.class, CustomOauth2AuthenticationException.class, AuthenticationException.class})
     public ResponseEntity<?> authenticationException(Exception ex, WebRequest request) {
         ErrorDetails errorDetails;
-        if(ex instanceof ErrorMessagesContainedExceptionForSecurityAuthentication && ((ErrorMessagesContainedExceptionForSecurityAuthentication) ex).getErrorMessages() != null) {
-            errorDetails = new ErrorDetails(((ErrorMessagesContainedExceptionForSecurityAuthentication) ex).getErrorMessages(),
+        if(ex instanceof CustomOauth2AuthenticationException && ((CustomOauth2AuthenticationException) ex).getErrorMessages() != null) {
+            errorDetails = new ErrorDetails(((CustomOauth2AuthenticationException) ex).getErrorMessages(),
                     ex, request.getDescription(false), CustomExceptionUtils.getAllStackTraces(ex),
                     CustomExceptionUtils.getAllCauses(ex), null);
         }else {
-            errorDetails = new ErrorDetails(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityExceptionMessage.AUTHENTICATION_FAILURE.getMessage(),
+            errorDetails = new ErrorDetails(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage(),
                     ex.getMessage(), ex.getStackTrace()[0].toString());
         }
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
@@ -60,13 +59,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({UnauthorizedException.class, AccessDeniedException.class, DisabledException.class})
     public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(ex.getMessage() != null ? ex.getMessage() : CustomExceptionUtils.getAllCauses(ex), request.getDescription(false),
-                ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? SecurityExceptionMessage.AUTHORIZATION_FAILURE.getMessage() : ex.getMessage(), ex.getStackTrace()[0].toString());
+                ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? SecurityUserExceptionMessage.AUTHORIZATION_FAILURE.getMessage() : ex.getMessage(), ex.getStackTrace()[0].toString());
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
     // Custom or Admin
     @ExceptionHandler({CustomAuthGuardException.class})
     public ResponseEntity<?> customAuthorizationException(Exception ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityExceptionMessage.AUTHORIZATION_FAILURE.getMessage(),
+        ErrorDetails errorDetails = new ErrorDetails(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityUserExceptionMessage.AUTHORIZATION_FAILURE.getMessage(),
                 ex.getMessage(), ex.getStackTrace()[0].toString());
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }

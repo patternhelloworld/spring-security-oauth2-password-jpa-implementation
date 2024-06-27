@@ -52,7 +52,7 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username){
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Admin admin = adminRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Admin (ID : \"" + username + "\") NOT found."));
         if(admin.getDeletedAt() != null){

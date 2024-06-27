@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.config.security.serivce;
 
-import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityExceptionMessage;
+import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,19 +16,19 @@ public class Oauth2AuthenticationHashCheckService {
 
     public void validateUsernamePassword(String inputPassword, UserDetails userDetails){
         if (userDetails == null) {
-            throw new BadCredentialsException(SecurityExceptionMessage.ID_NO_EXISTS.getMessage());
+            throw new BadCredentialsException(SecurityUserExceptionMessage.ID_NO_EXISTS.getMessage());
         }
         if (!passwordEncoder.matches(inputPassword, userDetails.getPassword())) {
-            throw new BadCredentialsException(SecurityExceptionMessage.WRONG_ID_PASSWORD.getMessage());
+            throw new BadCredentialsException(SecurityUserExceptionMessage.WRONG_ID_PASSWORD.getMessage());
         }
     }
 
     public Boolean validateClientCredentials(String inputClientSecret, RegisteredClient registeredClient){
         if (registeredClient == null) {
-            throw new BadCredentialsException(SecurityExceptionMessage.CLIENT_NO_EXISTS.getMessage());
+            throw new BadCredentialsException(SecurityUserExceptionMessage.CLIENT_NO_EXISTS.getMessage());
         }
         if (!passwordEncoder.matches(inputClientSecret, registeredClient.getClientSecret())) {
-            throw new BadCredentialsException(SecurityExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
+            throw new BadCredentialsException(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
         }else{
             return true;
         }
