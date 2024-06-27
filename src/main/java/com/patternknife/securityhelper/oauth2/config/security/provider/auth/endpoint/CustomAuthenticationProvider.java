@@ -81,7 +81,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider, Ser
             }
         }catch (UsernameNotFoundException e){
             throw new CustomOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(e.getMessage()).build());
-        } catch (Exception e){
+        }catch (CustomOauth2AuthenticationException e){
+            throw e;
+        }  catch (Exception e){
            throw new CustomOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
         }
 

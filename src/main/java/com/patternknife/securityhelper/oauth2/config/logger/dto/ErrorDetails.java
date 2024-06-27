@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.config.logger.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patternknife.securityhelper.oauth2.config.response.TimestampUtil;
 import com.patternknife.securityhelper.oauth2.util.CustomUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.ToString;
 
 import java.util.Date;
@@ -12,15 +12,17 @@ import java.util.Map;
 public class ErrorDetails {
 	private Date timestamp;
 
-	// Never to be returned to clients, but must be logged.
-	// @JsonIgnore
+	// Never to be returned to clients, but must be logged. See the log file.
+	@JsonIgnore
 	private String message;
 	private String details;
 	private String userMessage;
 	private Map<String, String> userValidationMessage;
 
+	// Never to be returned to clients, but must be logged. See the log file.
 	@JsonIgnore
 	private String stackTrace;
+	// Never to be returned to clients, but must be logged. See the log file.
 	@JsonIgnore
 	private String cause;
 

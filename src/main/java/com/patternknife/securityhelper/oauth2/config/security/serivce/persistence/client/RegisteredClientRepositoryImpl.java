@@ -6,6 +6,7 @@ import com.patternknife.securityhelper.oauth2.config.response.error.message.Secu
 import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCachedInfo;
 import com.patternknife.securityhelper.oauth2.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.config.security.entity.OauthClientDetail;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -51,7 +52,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
     @Override
-    public RegisteredClient findById(String id) throws CustomOauth2AuthenticationException {
+    public @NotNull RegisteredClient findById(String id) throws CustomOauth2AuthenticationException {
         // Assuming the ID is the client ID for simplification. Adjust if necessary.
         return oauthClientDetailRepository.findById(id)
                 .map(this::mapToRegisteredClient)
@@ -60,7 +61,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                                 .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build()));
     }
     @Override
-    public RegisteredClient findByClientId(String clientId) throws CustomOauth2AuthenticationException {
+    public @NotNull RegisteredClient findByClientId(String clientId) throws CustomOauth2AuthenticationException {
         return oauthClientDetailRepository.findById(clientId)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->

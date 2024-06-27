@@ -2,11 +2,14 @@ package com.patternknife.securityhelper.oauth2.config.security.errorhandler.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patternknife.securityhelper.oauth2.config.logger.dto.ErrorDetails;
+import com.patternknife.securityhelper.oauth2.config.logger.module.NonStopErrorLogConfig;
 import com.patternknife.securityhelper.oauth2.config.response.error.CustomExceptionUtils;
 import com.patternknife.securityhelper.oauth2.config.response.error.exception.auth.CustomOauth2AuthenticationException;
 import com.patternknife.securityhelper.oauth2.config.response.error.message.SecurityUserExceptionMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,6 +19,8 @@ import java.io.IOException;
 
 
 public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(NonStopErrorLogConfig.class);
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
@@ -28,9 +33,9 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
                     "uri=" + request.getRequestURI(), ((CustomOauth2AuthenticationException) exception).getErrorMessages().getUserMessage(), stackTraces);
         }else if(exception instanceof OAuth2AuthenticationException) {
             errorDetails = new ErrorDetails(
-                    ((OAuth2AuthenticationException) exception).getError().getErrorCode(),
+                    ((OAuth2AuthenticationException) exception).getError().getErrorCode() + " / " + ((OAuth2AuthenticationException) exception).getError().getDescription(),
                     "uri=" + request.getRequestURI(),
-                    ((OAuth2AuthenticationException) exception).getError().getDescription(),
+                    SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage(),
                     stackTraces);
         }else{
             errorDetails = new ErrorDetails(
@@ -46,6 +51,8 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
 
         // Write the error details to the response
         response.getWriter().write(new ObjectMapper().writeValueAsString(errorDetails));
+
+        logger.warn(errorDetails.toString());
 
     }
 }

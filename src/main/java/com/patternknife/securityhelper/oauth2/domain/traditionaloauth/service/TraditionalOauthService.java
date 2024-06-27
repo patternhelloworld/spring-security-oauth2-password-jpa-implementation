@@ -8,6 +8,7 @@ import com.patternknife.securityhelper.oauth2.config.security.OAuth2ClientCached
 import com.patternknife.securityhelper.oauth2.config.security.serivce.CommonOAuth2AuthorizationCycle;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.Oauth2AuthenticationHashCheckService;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
+import com.patternknife.securityhelper.oauth2.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import com.patternknife.securityhelper.oauth2.config.security.serivce.userdetail.ConditionalDetailsService;
 import com.patternknife.securityhelper.oauth2.config.security.util.SecurityUtil;
 import com.patternknife.securityhelper.oauth2.domain.traditionaloauth.bo.BasicTokenResolver;
@@ -21,7 +22,6 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -39,7 +39,7 @@ public class TraditionalOauthService {
 
     private static final Logger logger = LoggerFactory.getLogger(NonStopErrorLogConfig.class);
 
-    private final RegisteredClientRepository registeredClientRepository;
+    private final RegisteredClientRepositoryImpl registeredClientRepository;
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
 
@@ -49,7 +49,7 @@ public class TraditionalOauthService {
     private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
-    public TraditionalOauthService(RegisteredClientRepository registeredClientRepository,
+    public TraditionalOauthService(RegisteredClientRepositoryImpl registeredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
                                    CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
@@ -72,11 +72,7 @@ public class TraditionalOauthService {
 
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
-        assert registeredClient != null;
-        if(!(basicCredentials.getClientId().equals(registeredClient.getClientId())
-                && oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
-            throw new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage());
-        }
+        oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
 
         UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
 
@@ -104,13 +100,6 @@ public class TraditionalOauthService {
         BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(()-> new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage()));
 
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
-
-        assert registeredClient != null;
-
-        if(!(basicCredentials.getClientId().equals(registeredClient.getClientId())
-                && oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient))) {
-            throw new UnauthorizedException(SecurityUserExceptionMessage.AUTHORIZATION_ERROR.getMessage());
-        }
 
         OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
 
