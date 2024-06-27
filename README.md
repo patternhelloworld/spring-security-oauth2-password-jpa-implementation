@@ -3,6 +3,16 @@
 
 * In the Spring Security 6 ecosystem, compared to 5, there is a preference for JWT or Keycloak over traditional OAuth2 using a Password Grant method with Spring Security Authorization and Resource Server. I needed to incorporate the current OAuth2 Password Grant with the Spring Security new version and am showing the customization.
   * Set up access & refresh token APIs on both '/oauth2/token' and on our controller layer such as '/api/v1...', both of which function same and have `the same request & response payloads for success and errors`.
+    * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
+      ````
+      {
+        "timestamp": 1719470948370,
+        "message": "Couldn't find the client ID : client_admi",
+        "details": "uri=/oauth2/token",
+        "userMessage": "Authentication failed. Please check your credentials.",
+        "userValidationMessage": null
+      }
+      ````
   * Authentication management based on a combination of username, client id, and an extra token (referred to in the source code as App-Token, which receives a unique value from the calling devices).
   * Separated UserDetails implementation for Admin and Customer roles.
   * Integration with spring-security-oauth2-authorization-server.
