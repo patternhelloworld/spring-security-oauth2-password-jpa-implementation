@@ -41,6 +41,9 @@ mvnw clean install
 ```
 - Run the client module by running ``SpringSecurityOauth2PasswordJpaImplApplication`` in the client.
 - The API information is found on ``http://localhost:8370/docs/api-app.html``, managed by Spring Rest Doc
+
+![img.png](reference/docs/img1.png)
+
 - In case you use IntelliJ, I recommend creating an empty project and importing the API (root) module and client module separately.
 - The client module definitely consumes the API module, but not vice versa.
 
@@ -94,7 +97,7 @@ public class CommonDataSourceConfiguration {
 - **Implementation**
   - In fact, the only mandatory settings are 'CustomAuthenticationProvider' and 'CustomUserDetailsServiceFactory'. The rest depend on your specific situation.
   
-![img.png](reference/doc/img.png)
+![img.png](reference/docs/img.png)
 
 
 ### Running this App with Docker
