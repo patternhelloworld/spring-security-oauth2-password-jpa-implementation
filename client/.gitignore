@@ -1,0 +1,45 @@
+/.docker/ssl/*
+!/.docker/ssl/.gitkeep
+
+/target/
+
+# docker
+/.docker/env/*
+!/.docker/env/.gitkeep
+/.docker/ssh/*
+!/.docker/ssh/.gitkeep
+
+### STS ###
+/.apt_generated
+/.classpath
+/.factorypath
+/.project
+/.settings
+/.springBeans
+/.sts4-cache
+
+# Mac
+/.DS_Store
+
+
+### IntelliJ IDEA ###
+/.idea
+/*.iws
+/*.iml
+/*.ipr
+
+# logs
+/logs/*
+!/logs/.gitkeep
+
+# files
+/files/*
+!/files/.gitkeep
+
+# .properties
+#/src/main/resources/application.properties
+
+# logback
+#/src/main/resources/logback-spring.xml
+
+

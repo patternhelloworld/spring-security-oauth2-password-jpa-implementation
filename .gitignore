@@ -1,7 +1,8 @@
-/.docker/ssl/*
-!/.docker/ssl/.gitkeep
+/client/.docker/ssl/*
+!/client/.docker/ssl/.gitkeep
 
 /target/
+/client/target/
 
 # docker
 /.docker/env/*
@@ -18,9 +19,17 @@
 /.springBeans
 /.sts4-cache
 
+/client/.apt_generated
+/client/.classpath
+/client/.factorypath
+/client/.project
+/client/.settings
+/client/.springBeans
+/client/.sts4-cache
+
 # Mac
 /.DS_Store
-
+/client/.DS_Store
 
 ### IntelliJ IDEA ###
 /.idea
@@ -28,18 +37,19 @@
 /*.iml
 /*.ipr
 
+/client/.idea
+/client/*.iws
+/client/*.iml
+/client/*.ipr
+
 # logs
 /logs/*
 !/logs/.gitkeep
 
+/client/logs/*
+!/client/logs/.gitkeep
+
 # files
 /files/*
 !/files/.gitkeep
-
-# .properties
-#/src/main/resources/application.properties
-
-# logback
-#/src/main/resources/logback-spring.xml
-
 

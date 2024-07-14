@@ -1,0 +1,65 @@
+= POC : Spring Security 6 Oauth2 Password JPA Implementation
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectnums:
+:sectlinks:
+:sectanchors:
+
+== Notice
+- ``/api/v1/traditional-oauth/token`` has the same function as ``/oauth2/token``, which is included in Spring Security, which can be more regarded as secure.
+
+== Authentication
+
+
+=== Access Token
+==== Request
+===== Payload
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-access-token/http-request.adoc[]
+====== Header
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-access-token/request-headers.adoc[]
+====== Parameters
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-access-token/form-parameters.adoc[]
+====== Body
+'application/x-www-form-urlencoded'
+
+==== Response
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-access-token/response-body.adoc[]
+
+
+=== Refresh Token
+
+==== Request
+===== Payload
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-refresh-token/http-request.adoc[]
+====== Header
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-refresh-token/request-headers.adoc[]
+====== Parameters
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-refresh-token/form-parameters.adoc[]
+====== Body
+'application/x-www-form-urlencoded'
+
+==== Response
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-refresh-token/response-body.adoc[]
+
+
+=== Logout
+
+==== Request
+===== Payload
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-customer-logout/http-request.adoc[]
+====== Header
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-customer-logout/request-headers.adoc[]
+====== Parameters
+
+X
+
+====== Body
+
+X
+
+==== Response
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-customer-logout/response-body.adoc[]
+include::{snippets}/customer-integration-test/test_-same-app-tokens-use-same-access-token_exposed/oauth-customer-logout/response-fields.adoc[]

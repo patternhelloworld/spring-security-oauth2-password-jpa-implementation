@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+
+    <property name="LOGS_ABSOLUTE_PATH" value="logs"/>
+
+    <appender name="RestTemplate" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/rest-template/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/rest-template/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+
+
+    <appender name="Console"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %yellow(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %magenta(%C{1}): %msg%n%throwable
+            </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="SuccessResponse"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/success-response/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/success-response/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ErrorResponse"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/error-response/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/error-response/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="SecurityError"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/security-error/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Create a log file every minute and operate it in 10MB increments. -->
+            <!-- %d -> dateTime, %i -> index : necessary -->
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/security-error/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+
+    <appender name="SQL"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/sql/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/sql/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>5</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ExcelAsyncUploadError"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/excel-async-upload-error/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/excel-async-upload-error/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="NonStopError"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_ABSOLUTE_PATH}/non-stop-error/current.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_ABSOLUTE_PATH}/non-stop-error/%d{yyyy-MM}/past-%d{yyyy-MM-dd_HH}.%i.log
+            </fileNamePattern>
+            <maxHistory>50</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+
+    <logger name="com.spring.jpa" level="trace" additivity="false">
+        <appender-ref ref="SQL" />
+        <appender-ref ref="Console" />
+    </logger>
+
+
+    <!--Database-->
+
+    <!--Show SQL-->
+    <logger name="org.hibernate.SQL" level="DEBUG">
+        <appender-ref ref="SQL" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- Display SQL parameters and optionally -->
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE">
+        <appender-ref ref="SQL" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!--Database connections-->
+    <logger name="com.zaxxer.hikari" level="DEBUG">
+        <!--<appender-ref ref="RollingFile" />-->
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+
+    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseSuccessLogConfig" level="TRACE">
+        <appender-ref ref="SuccessResponse" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseErrorLogConfig" level="TRACE">
+        <appender-ref ref="ErrorResponse" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ExcelAsyncUploadErrorLogConfig" level="TRACE">
+        <appender-ref ref="ExcelAsyncUploadError" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.NonStopErrorLogConfig" level="TRACE">
+        <appender-ref ref="NonStopError" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+
+    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.RestTemplateClientLogConfig" level="TRACE">
+        <appender-ref ref="RestTemplate" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+
+    <logger name="org.springframework.security" level="ERROR">
+        <appender-ref ref="SecurityError" />
+        <!--<appender-ref ref="Console" />-->
+    </logger>
+
+
+    <root level="info">
+        <appender-ref ref="Console"/>
+    </root>
+
+
+</configuration>
+
+

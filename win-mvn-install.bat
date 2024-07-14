@@ -1,2 +1,0 @@
-./mvnw clean install
-
