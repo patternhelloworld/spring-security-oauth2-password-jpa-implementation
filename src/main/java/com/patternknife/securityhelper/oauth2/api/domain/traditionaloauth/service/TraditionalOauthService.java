@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
@@ -67,65 +68,84 @@ public class TraditionalOauthService {
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse createAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest accessTokenRequest,
                                                                              String authorizationHeader) {
+        try {
 
-        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR.getMessage()).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
 
-        RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+            RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
-        oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
+            oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
 
-        UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
+            UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
 
-        oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
+            oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
 
-        HttpServletRequest request =
-                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            HttpServletRequest request =
+                    ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-        OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
-                new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request), null);
+            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
+                    new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request), null);
 
-        Instant now = Instant.now();
-        Instant expiresAt = oAuth2Authorization.getAccessToken().getToken().getExpiresAt();
-        int accessTokenRemainingSeconds = Math.toIntExact(Duration.between(now, expiresAt).getSeconds());
+            Instant now = Instant.now();
+            Instant expiresAt = oAuth2Authorization.getAccessToken().getToken().getExpiresAt();
+            int accessTokenRemainingSeconds = Math.toIntExact(Duration.between(now, expiresAt).getSeconds());
 
-        return new SpringSecurityTraditionalOauthDTO.TokenResponse(
-                oAuth2Authorization.getAccessToken().getToken().getTokenValue(), OAuth2AccessToken.TokenType.BEARER.getValue(), Objects.requireNonNull(oAuth2Authorization.getRefreshToken()).getToken().getTokenValue(),
-                accessTokenRemainingSeconds,
-                String.join(" ", registeredClient.getScopes()));
+            return new SpringSecurityTraditionalOauthDTO.TokenResponse(
+                    oAuth2Authorization.getAccessToken().getToken().getTokenValue(), OAuth2AccessToken.TokenType.BEARER.getValue(), Objects.requireNonNull(oAuth2Authorization.getRefreshToken()).getToken().getTokenValue(),
+                    accessTokenRemainingSeconds,
+                    String.join(" ", registeredClient.getScopes()));
+
+        } catch (UsernameNotFoundException e) {
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build());
+        } catch (KnifeOauth2AuthenticationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
+        }
     }
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
                                                                               String authorizationHeader) throws IOException {
 
-        BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR.getMessage()).build()));
+        try {
 
-        RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
 
-        OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
+            RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
-        UserDetails userDetails;
-        if (oAuth2Authorization == null || oAuth2Authorization.getRefreshToken() == null) {
-            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
-        }else{
-            userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
+            OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
+
+            UserDetails userDetails;
+            if (oAuth2Authorization == null || oAuth2Authorization.getRefreshToken() == null) {
+                throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
+            } else {
+                userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
+            }
+
+            Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
+            modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
+
+            oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
+                    new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
+                    basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
+
+
+            Instant now = Instant.now();
+            Instant expiresAt = oAuth2Authorization.getRefreshToken().getToken().getExpiresAt();
+            int refreshTokenRemainingSeconds = Math.toIntExact(Duration.between(now, expiresAt).getSeconds());
+
+            return new SpringSecurityTraditionalOauthDTO.TokenResponse(
+                    oAuth2Authorization.getAccessToken().getToken().getTokenValue(), OAuth2AccessToken.TokenType.BEARER.getValue(), Objects.requireNonNull(oAuth2Authorization.getRefreshToken()).getToken().getTokenValue(),
+                    refreshTokenRemainingSeconds,
+                    String.join(" ", registeredClient.getScopes()));
+
+        } catch (UsernameNotFoundException e) {
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build());
+        } catch (KnifeOauth2AuthenticationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
         }
-
-        Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
-        modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
-
-        oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
-                new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
-                basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
-
-
-        Instant now = Instant.now();
-        Instant expiresAt = oAuth2Authorization.getRefreshToken().getToken().getExpiresAt();
-        int refreshTokenRemainingSeconds = Math.toIntExact(Duration.between(now, expiresAt).getSeconds());
-
-        return new SpringSecurityTraditionalOauthDTO.TokenResponse(
-                oAuth2Authorization.getAccessToken().getToken().getTokenValue(), OAuth2AccessToken.TokenType.BEARER.getValue(), Objects.requireNonNull(oAuth2Authorization.getRefreshToken()).getToken().getTokenValue(),
-                refreshTokenRemainingSeconds,
-                String.join(" ", registeredClient.getScopes()));
     }
 
 }

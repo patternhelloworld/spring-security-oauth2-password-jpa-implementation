@@ -56,7 +56,7 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     @Override
     public UserDetails loadUserByUsername(String username) {
 
-        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Customer (ID : \"" + username + "\") NOT foUND"));
+        Customer customer = customerRepository.findByIdName(username).orElseThrow(() -> new UsernameNotFoundException("Customer (ID : \"" + username + "\") NOT Found"));
         if(customer.getDeletedAt() != null){
             if(customer.getDeleteAdminId() == null) {
                 if (customer.getOneWeekAfterDeletedAsString() != null) {

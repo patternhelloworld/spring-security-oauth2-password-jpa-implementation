@@ -16,16 +16,10 @@ public enum SecurityUserExceptionMessage implements ExceptionMessageInterface {
     PASSWORD_FAILED_EXCEEDED("The number of password attempts has been exceeded."),
 
     // CLIENT ID, SECRET
-    CLIENT_NO_EXISTS("The Client ID does not exist."),
     WRONG_CLIENT_ID_SECRET("Client information is not verified."),
 
     // GRANT TYPE
-    WRONG_GRANT_TYPE("Wrong Grant Type"),
-
-    // SOCIAL
-    SOCIAL_NO_RESPONSE("No response was received from social media. If the problem persists, please contact the administrator."),
-    SOCIAL_ID_NAME_NOT_AUTHENTICATED("Social account information cannot be found.");
-
+    WRONG_GRANT_TYPE("Wrong Grant Type");
 
     private String message;
 

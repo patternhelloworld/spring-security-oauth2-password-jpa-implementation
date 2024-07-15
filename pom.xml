@@ -15,20 +15,23 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <spring-boot-dependencies.version>3.1.2</spring-boot-dependencies.version>
         <querydsl.version>5.0.0</querydsl.version>
         <spring-restdocs.version>3.0.0</spring-restdocs.version>
+        <spring-security.version>6.1.2</spring-security.version>
+        <slf4j.version>2.0.7</slf4j.version>
     </properties>
 
     <groupId>com.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <packaging>jar</packaging>
 
 
-    <dependencyManagement>
+<!--    <dependencyManagement>
         <dependencies>
             <dependency>
-                <!-- Import dependency management from Spring Boot -->
+                &lt;!&ndash; Import dependency management from Spring Boot &ndash;&gt;
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>3.1.2</version>
@@ -36,23 +39,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>
+    </dependencyManagement>-->
 
     <dependencies>
 
-        <!-- DB -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.17</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+        <!-- 1. Necessary Libraries -->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -60,13 +51,38 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>1.18.24</version>
             <optional>true</optional>
         </dependency>
+        <!-- Expose API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
+        </dependency>
+        <!-- Text Utils -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <!-- Validation -->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
+        </dependency>
 
 
-        <!-- ORM -->
+        <!-- 2. This module uses JPA and QueryDSL -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
         </dependency>
 
         <dependency>
@@ -84,7 +100,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                 </exclusion>
             </exclusions>
         </dependency>
-
 
         <dependency>
             <groupId>com.querydsl</groupId>
@@ -104,19 +119,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>${querydsl.version}</version>
         </dependency>
 
-        <!-- Expose API -->
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-
-        <!-- spring-security & spring-security-oauth2-authorization-server -->
+        <!-- 3. spring-security & spring-security-oauth2-authorization-server -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
         <dependency>
@@ -127,42 +136,28 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 
 
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
-
-        <!--TEST-->
+        <!--4. TEST-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <version>${spring-security.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.restdocs</groupId>
             <artifactId>spring-restdocs-mockmvc</artifactId>
+            <version>${spring-restdocs.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Validation -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
 
 
         <dependency>
@@ -174,12 +169,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+            <version>${spring-boot-dependencies.version}</version>
             <optional>true</optional>
         </dependency>
 

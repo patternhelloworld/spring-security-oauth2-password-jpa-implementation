@@ -37,7 +37,7 @@
 ```shell
 mvnw clean install
 cd client
-mvnw clean install
+mvnw clean install # Integration tests are done here, which creates docs by Spring-Rest-Doc.
 ```
 - Run the client module by running ``SpringSecurityOauth2PasswordJpaImplApplication`` in the client.
 - The API information is found on ``http://localhost:8370/docs/api-app.html``, managed by Spring Rest Doc

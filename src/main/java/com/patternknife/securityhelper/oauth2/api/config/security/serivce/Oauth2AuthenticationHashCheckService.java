@@ -30,7 +30,7 @@ public class Oauth2AuthenticationHashCheckService {
 
     public void validateClientCredentials(String inputClientSecret, RegisteredClient registeredClient){
         if (registeredClient == null) {
-            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.CLIENT_NO_EXISTS.getMessage());
+            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
         }
         if (!passwordEncoder.matches(inputClientSecret, registeredClient.getClientSecret())) {
             throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()

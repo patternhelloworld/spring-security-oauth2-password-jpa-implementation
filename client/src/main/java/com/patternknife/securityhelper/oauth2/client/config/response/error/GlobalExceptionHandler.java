@@ -1,6 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error;
 
 
+import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorResponsePayload;
+import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.auth.*;
@@ -35,96 +37,10 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /*
-    *   General
-    * */
-    // Login Failure
-    @ExceptionHandler({InsufficientAuthenticationException.class, CustomOauth2AuthenticationException.class, AuthenticationException.class})
-    public ResponseEntity<?> authenticationException(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload;
-        if(ex instanceof CustomOauth2AuthenticationException && ((CustomOauth2AuthenticationException) ex).getErrorMessages() != null) {
-            customErrorResponsePayload = new CustomErrorResponsePayload(((CustomOauth2AuthenticationException) ex).getErrorMessages(),
-                    ex, request.getDescription(false), CustomExceptionUtils.getAllStackTraces(ex),
-                    CustomExceptionUtils.getAllCauses(ex), null);
-        }else {
-            customErrorResponsePayload = new CustomErrorResponsePayload(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage(),
-                    ex.getMessage(), ex.getStackTrace()[0].toString());
-        }
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.UNAUTHORIZED);
-    }
-    // Role (=Permission) Failure
-    @ExceptionHandler({UnauthorizedException.class, AccessDeniedException.class, DisabledException.class})
-    public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : CustomExceptionUtils.getAllCauses(ex), request.getDescription(false),
-                ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? SecurityUserExceptionMessage.AUTHORIZATION_FAILURE.getMessage() : ex.getMessage(), ex.getStackTrace()[0].toString());
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.FORBIDDEN);
-    }
-    // Custom or Admin
-    @ExceptionHandler({CustomAuthGuardException.class})
-    public ResponseEntity<?> customAuthorizationException(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), SecurityUserExceptionMessage.AUTHORIZATION_FAILURE.getMessage(),
-                ex.getMessage(), ex.getStackTrace()[0].toString());
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.FORBIDDEN);
-    }
-
-    /*
-    *  Issues with ID, Password
-    * */
-    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
-    public ResponseEntity<?> usernameOrPasswordIssueException(Exception ex, WebRequest request) {
-
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), ex.getMessage(),
-                ex.getMessage(), ex.getStackTrace()[0].toString());
-
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.UNAUTHORIZED);
-    }
-
-    /*
-    *   Social Login (Access Token Failure)
-    * */
-    // 1. NoSocialRegisteredException: Trying to do social login but the user does not exist (TO DO. Need separation. The app is branching based on the message of this Exception)
-    // 2. AlreadySocialRegisteredException: Trying to create a social user but it already exists
-    @ExceptionHandler({ AlreadySocialRegisteredException.class, NoSocialRegisteredException.class })
-    public ResponseEntity<?> socialLoginFailureException(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage(), request.getDescription(false), ex.getMessage(),
-                CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.UNAUTHORIZED);
-    }
-    // SocialEmailNotProvidedException: The app received a 200 status from the social platform using the access token store, but the social platform did not provide the user's email information. In this case, the company needs to obtain authorization from the social platform.
-    @ExceptionHandler({ SocialEmailNotProvidedException.class})
-    public ResponseEntity<?> accessToSocialSuccessButIssuesWithReturnedValue(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage(), request.getDescription(false), ex.getMessage(),
-                CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.FORBIDDEN);
-    }
-
-    // Social Resource Access Failure (Access Token OK but No Permission)
-    // The social platform has blocked access to the requested resource.
-    @ExceptionHandler({SocialUnauthorizedException.class})
-    public ResponseEntity<?> accessToSocialDenied(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : CustomExceptionUtils.getAllCauses(ex),
-                request.getDescription(false),"Not a valid access token." , ex.getStackTrace()[0].toString());
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.FORBIDDEN);
-    }
-
-    // OTP (Only for Admin)
-    @ExceptionHandler({OtpValueUnauthorizedException.class})
-    public ResponseEntity<?> otpException(Exception ex, WebRequest request) {
-
-        Map<String, String> userValidationMessages = new HashMap<>();
-        userValidationMessages.put("otp_value", ex.getMessage());
-
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage(), request.getDescription(false),
-                null,
-                userValidationMessages,
-                CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
-
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.UNAUTHORIZED);
-    }
 
     // UserDeletedException : caused by the process of user deactivation
     // UserRestoredException : caused by the process of user reactivation
