@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.security.dao.OauthClientDetailRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.auth.UserDeletedException;

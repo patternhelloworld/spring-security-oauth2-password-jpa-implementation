@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.domain.admin.api;
 
-import com.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.ResourceNotFoundException;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 

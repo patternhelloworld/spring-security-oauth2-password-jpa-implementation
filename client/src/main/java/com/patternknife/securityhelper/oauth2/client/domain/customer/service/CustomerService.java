@@ -1,9 +1,9 @@
 package com.patternknife.securityhelper.oauth2.client.domain.customer.service;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthAccessTokenRepository;
-import com.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthRefreshTokenRepository;
-import com.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthAccessTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthRefreshTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 import com.patternknife.securityhelper.oauth2.client.util.CustomUtils;

@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.UserDetailsServiceFactory;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.UserDetailsServiceFactory;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;

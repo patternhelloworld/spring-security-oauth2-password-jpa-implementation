@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.message;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
