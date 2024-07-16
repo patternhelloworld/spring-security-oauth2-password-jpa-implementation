@@ -70,7 +70,7 @@ public class TraditionalOauthService {
                                                                              String authorizationHeader) {
         try {
 
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
 
             RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
@@ -109,7 +109,7 @@ public class TraditionalOauthService {
 
         try {
 
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
 
             RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 

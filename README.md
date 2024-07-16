@@ -95,8 +95,8 @@ public class CommonDataSourceConfiguration {
 ```
 
 - **Implementation**
-  - In fact, the only mandatory settings are 'CustomAuthenticationProvider' and 'CustomUserDetailsServiceFactory'. The rest depend on your specific situation.
-  
+  - In fact, the only mandatory settings are 'CustomUserDetailsServiceFactory'. The rest depend on your specific situation.
+
 ![img.png](reference/docs/img.png)
 
 

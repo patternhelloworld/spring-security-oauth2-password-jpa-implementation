@@ -1,6 +1,9 @@
 package com.patternknife.securityhelper.oauth2.api.config.security.token;
 
 
+import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
+import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
+import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -64,7 +67,7 @@ public class TokenResponseSuccessHandler  implements AuthenticationSuccessHandle
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
         }else{
-            throw new IllegalStateException("Wrong Grant Type");
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage()).build());
         }
 
 

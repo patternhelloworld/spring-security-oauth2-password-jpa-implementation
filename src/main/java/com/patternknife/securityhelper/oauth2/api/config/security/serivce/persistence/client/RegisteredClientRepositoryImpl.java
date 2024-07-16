@@ -58,7 +58,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
-                                .userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
     }
     @Override
     public @NotNull RegisteredClient findByClientId(String clientId) throws KnifeOauth2AuthenticationException {
@@ -85,7 +85,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
-                                .userMessage(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
 
 
     }

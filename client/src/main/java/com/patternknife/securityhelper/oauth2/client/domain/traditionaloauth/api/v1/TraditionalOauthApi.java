@@ -28,7 +28,7 @@ public class TraditionalOauthApi {
             case "refresh_token":
                 return traditionalOauthService.refreshAccessToken(tokenRequest, authorizationHeader);
             default:
-                throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.WRONG_GRANT_TYPE.getMessage());
+                throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
         }
     }
 

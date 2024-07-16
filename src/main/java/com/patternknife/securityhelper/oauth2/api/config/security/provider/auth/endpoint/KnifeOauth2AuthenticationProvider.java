@@ -61,7 +61,7 @@ public class KnifeOauth2AuthenticationProvider implements AuthenticationProvider
                         throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
                     }
                 } else {
-                    throw new IllegalStateException(SecurityUserExceptionMessage.WRONG_GRANT_TYPE.getMessage());
+                    throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
                 }
 
                 OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);

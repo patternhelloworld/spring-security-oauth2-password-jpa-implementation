@@ -6,7 +6,7 @@ import com.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPo
 import com.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.CustomGrantAuthenticationConverter;
 import com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication.AuthenticationFailureHandlerImpl;
 import com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.resource.authentication.AuthenticationEntryPointToGlobalExceptionHandler;
-import com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.resource.authorization.CustomAccessDeniedHandler;
+
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthenticationProvider;
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.Oauth2OpaqueTokenAuthenticationProvider;
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;

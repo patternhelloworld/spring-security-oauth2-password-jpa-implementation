@@ -122,7 +122,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        String responseString = result.getResponse().getContentAsString();
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         JSONObject jsonResponse = new JSONObject(responseString);
         String refreshToken = jsonResponse.getString("refresh_token");
         String accessTokenForAppToken1 = jsonResponse.getString("access_token");
@@ -154,7 +154,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         String accessToken = jsonResponse.getString("access_token");
@@ -172,7 +172,7 @@ public class CustomerIntegrationTest {
                 .andExpect(status().isOk()).andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         accessToken = jsonResponse.getString("access_token");
@@ -202,7 +202,7 @@ public class CustomerIntegrationTest {
                         )))
                 .andReturn();
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         String accessToken2 = jsonResponse.getString("access_token");
 
@@ -257,7 +257,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         String finalAccessTokenForAppToken1 = jsonResponse.getString("access_token");
@@ -302,7 +302,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        String responseString = result.getResponse().getContentAsString();
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         JSONObject jsonResponse = new JSONObject(responseString);
         String refreshToken = jsonResponse.getString("refresh_token");
         String accessTokenForAppToken1 = jsonResponse.getString("access_token");
@@ -330,7 +330,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         String accessToken = jsonResponse.getString("access_token");
@@ -346,7 +346,7 @@ public class CustomerIntegrationTest {
                 .andExpect(status().isOk()).andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         accessToken = jsonResponse.getString("access_token");
@@ -373,7 +373,7 @@ public class CustomerIntegrationTest {
                         )))
                 .andReturn();
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         String accessToken2 = jsonResponse.getString("access_token");
 
@@ -420,7 +420,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         refreshToken = jsonResponse.getString("refresh_token");
         String finalAccessTokenForAppToken1 = jsonResponse.getString("access_token");
@@ -466,7 +466,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        String responseString = result.getResponse().getContentAsString();
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
@@ -496,11 +496,41 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
+        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
+
+
+
+        result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
+                        .header(HttpHeaders.AUTHORIZATION, basicHeader)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("grant_type", "password" + "wronggrant")
+                        .param("username", testUserName)
+                        .param("password", testUserPassword))
+                .andExpect(status().isUnauthorized()) // 401
+                .andDo(document( "{class-name}/{method-name}/oauth-access-token",
+                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
+                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(KnifeHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
+                        ),
+                        formParameters(
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
+                        )))
+                .andReturn();
+
+
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        jsonResponse = new JSONObject(responseString);
+        userMessage = jsonResponse.getString("userMessage");
+
+        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
 
 
@@ -529,7 +559,7 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        String responseString = result.getResponse().getContentAsString();
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
@@ -559,11 +589,40 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString();
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
+        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
+
+
+        result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
+                        .header(HttpHeaders.AUTHORIZATION, basicHeader)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("grant_type", "password" + "wronggrant")
+                        .param("username", testUserName)
+                        .param("password", testUserPassword))
+                .andExpect(status().isUnauthorized()) // 401
+                .andDo(document( "{class-name}/{method-name}/oauth-access-token",
+                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
+                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(KnifeHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
+                        ),
+                        formParameters(
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
+                        )))
+                .andReturn();
+
+
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        jsonResponse = new JSONObject(responseString);
+        userMessage = jsonResponse.getString("userMessage");
+
+        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
 
 

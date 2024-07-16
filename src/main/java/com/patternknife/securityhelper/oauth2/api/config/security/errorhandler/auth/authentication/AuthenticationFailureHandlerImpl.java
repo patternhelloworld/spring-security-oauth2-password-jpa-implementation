@@ -42,7 +42,7 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
             errorResponsePayload = new ErrorResponsePayload(
                     exception.getMessage(),
                     "uri=" + request.getRequestURI(),
-                    SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage(),
+                    SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage(),
                     stackTraces);
         }
 

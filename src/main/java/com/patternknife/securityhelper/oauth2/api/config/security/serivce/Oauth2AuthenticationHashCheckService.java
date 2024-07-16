@@ -20,21 +20,21 @@ public class Oauth2AuthenticationHashCheckService {
 
     public void validateUsernamePassword(String inputPassword, @Nullable UserDetails userDetails){
         if (userDetails == null) {
-            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.ID_NO_EXISTS.getMessage());
+            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_ID_NO_EXISTS.getMessage());
         }
         if (!passwordEncoder.matches(inputPassword, userDetails.getPassword())) {
             throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
-                    .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).message(SecurityUserExceptionMessage.WRONG_ID_PASSWORD.getMessage() + " (inputPassword : " + inputPassword + ", input username : " + userDetails.getUsername() + ")").build());
+                    .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).message(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_ID_PASSWORD.getMessage() + " (inputPassword : " + inputPassword + ", input username : " + userDetails.getUsername() + ")").build());
         }
     }
 
     public void validateClientCredentials(String inputClientSecret, RegisteredClient registeredClient){
         if (registeredClient == null) {
-            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage());
+            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
         }
         if (!passwordEncoder.matches(inputClientSecret, registeredClient.getClientSecret())) {
             throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
-                    .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).message(SecurityUserExceptionMessage.WRONG_CLIENT_ID_SECRET.getMessage() + " (inputClientSecret : " + inputClientSecret+ ")").build());
+                    .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).message(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage() + " (inputClientSecret : " + inputClientSecret+ ")").build());
         }
     }
 

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -92,7 +93,7 @@ public abstract class AbstractMockAuth implements MockAuth {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"));
 
-        String resultString = result.andReturn().getResponse().getContentAsString();
+        String resultString = result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         JacksonJsonParser jsonParser = new JacksonJsonParser();
         return jsonParser.parseMap(resultString).get("access_token").toString();

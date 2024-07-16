@@ -11,15 +11,15 @@ public enum SecurityUserExceptionMessage implements ExceptionMessageInterface {
     AUTHORIZATION_ERROR("An error occurred with access permissions. If the problem persists, please contact customer service."),
 
     // ID PASSWORD
-    ID_NO_EXISTS("The specified ID does not exist."),
-    WRONG_ID_PASSWORD("User information could not be verified. Please check your ID or password. If the problem persists, please contact customer service."),
-    PASSWORD_FAILED_EXCEEDED("The number of password attempts has been exceeded."),
+    AUTHENTICATION_ID_NO_EXISTS("The specified ID does not exist."),
+    AUTHENTICATION_WRONG_ID_PASSWORD("User information could not be verified. Please check your ID or password. If the problem persists, please contact customer service."),
+    AUTHENTICATION_PASSWORD_FAILED_EXCEEDED("The number of password attempts has been exceeded."),
 
     // CLIENT ID, SECRET
-    WRONG_CLIENT_ID_SECRET("Client information is not verified."),
+    AUTHENTICATION_WRONG_CLIENT_ID_SECRET("Client information is not verified."),
 
     // GRANT TYPE
-    WRONG_GRANT_TYPE("Wrong Grant Type");
+    AUTHENTICATION_WRONG_GRANT_TYPE("Wrong Grant Type detected.");
 
     private String message;
 
