@@ -1,7 +1,7 @@
-package com.patternknife.securityhelper.oauth2.api.config.response.error.message;
+package com.patternknife.securityhelper.oauth2.api.config.security.message;
 
 
-public enum SecurityUserExceptionMessage implements ExceptionMessageInterface {
+public enum DefaultSecurityUserExceptionMessage implements ExceptionMessageInterface {
 
     AUTHENTICATION_LOGIN_FAILURE("Authentication information is not valid. Please check and try again."),
     AUTHENTICATION_LOGIN_ERROR("An error occurred during authentication. If the problem persists, please contact customer service."),
@@ -28,7 +28,7 @@ public enum SecurityUserExceptionMessage implements ExceptionMessageInterface {
         return message;
     }
 
-    SecurityUserExceptionMessage(String message) {
+    DefaultSecurityUserExceptionMessage(String message) {
         this.message = message;
     }
 

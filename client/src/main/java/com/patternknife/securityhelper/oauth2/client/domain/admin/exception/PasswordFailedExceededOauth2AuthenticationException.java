@@ -2,11 +2,11 @@ package com.patternknife.securityhelper.oauth2.client.domain.admin.exception;
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 
 public class PasswordFailedExceededOauth2AuthenticationException extends KnifeOauth2AuthenticationException {
     public PasswordFailedExceededOauth2AuthenticationException() {
-        super(SecurityUserExceptionMessage.AUTHENTICATION_PASSWORD_FAILED_EXCEEDED.getMessage());
+        super(DefaultSecurityUserExceptionMessage.AUTHENTICATION_PASSWORD_FAILED_EXCEEDED.getMessage());
     }
 
     public PasswordFailedExceededOauth2AuthenticationException(String message) {

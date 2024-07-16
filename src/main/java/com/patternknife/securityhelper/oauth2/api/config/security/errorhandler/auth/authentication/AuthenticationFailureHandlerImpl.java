@@ -4,11 +4,13 @@ package com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.
 import com.patternknife.securityhelper.oauth2.api.config.logger.module.CustomSecurityLogConfig;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorResponsePayload;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.CustomExceptionUtils;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,9 +21,12 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import java.io.IOException;
 
 
+@RequiredArgsConstructor
 public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomSecurityLogConfig.class);
+
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
@@ -36,13 +41,13 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
             errorResponsePayload = new ErrorResponsePayload(
                     ((OAuth2AuthenticationException) exception).getError().getErrorCode() + " / " + ((OAuth2AuthenticationException) exception).getError().getDescription(),
                     "uri=" + request.getRequestURI(),
-                    SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage(),
+                    iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
                     stackTraces);
         }else{
             errorResponsePayload = new ErrorResponsePayload(
                     exception.getMessage(),
                     "uri=" + request.getRequestURI(),
-                    SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage(),
+                    iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR),
                     stackTraces);
         }
 

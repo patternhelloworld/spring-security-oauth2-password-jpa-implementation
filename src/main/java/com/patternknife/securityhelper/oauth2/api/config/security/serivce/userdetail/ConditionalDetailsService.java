@@ -2,8 +2,9 @@ package com.patternknife.securityhelper.oauth2.api.config.security.serivce.userd
 
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class ConditionalDetailsService {
 
     private final UserDetailsServiceFactory userDetailsServiceFactory;
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     public UserDetails loadUserByUsername(String username, String clientId) throws UsernameNotFoundException, KnifeOauth2AuthenticationException {
 
@@ -24,7 +26,7 @@ public class ConditionalDetailsService {
         }
         throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
                 .message("Unable to distinguish whether the user is an Admin or a Customer. (username : " + username + " / client_id: " + clientId + ")")
-                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage())
+                .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
                 .build());
 
     }

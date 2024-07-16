@@ -7,6 +7,8 @@ import com.patternknife.securityhelper.oauth2.api.config.security.converter.auth
 import com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication.AuthenticationFailureHandlerImpl;
 import com.patternknife.securityhelper.oauth2.api.config.security.errorhandler.resource.authentication.AuthenticationEntryPointToGlobalExceptionHandler;
 
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthenticationProvider;
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.Oauth2OpaqueTokenAuthenticationProvider;
 import com.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;
@@ -54,8 +56,6 @@ public class ServerConfig {
                 accessTokenGenerator, refreshTokenGenerator);
     }
 
-
-
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
@@ -65,7 +65,8 @@ public class ServerConfig {
             ConditionalDetailsService conditionalDetailsService,
             Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
-            RegisteredClientRepositoryImpl registeredClientRepository) throws Exception {
+            RegisteredClientRepositoryImpl registeredClientRepository,
+            ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
@@ -74,33 +75,34 @@ public class ServerConfig {
         authorizationServerConfigurer
                 .clientAuthentication(clientAuthentication ->
                         clientAuthentication
-                                .errorResponseHandler(new AuthenticationFailureHandlerImpl())
+                                .errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService))
                 )
                 .registeredClientRepository(registeredClientRepository)
                 .authorizationService(authorizationService)
                 .tokenGenerator(tokenGenerator)
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
-                                .accessTokenResponseHandler(new TokenResponseSuccessHandler(authorizationService))
+                                .accessTokenResponseHandler(new TokenResponseSuccessHandler(iSecurityUserExceptionMessageService))
                                 .accessTokenRequestConverter(new CustomGrantAuthenticationConverter())
                                 // found only Oauth2AuthenticationException is tossed.
-                                .errorResponseHandler(new AuthenticationFailureHandlerImpl())
+                                .errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService))
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
-                                        commonOAuth2AuthorizationCycle, conditionalDetailsService, oauth2AuthenticationHashCheckService, authorizationService
+                                        commonOAuth2AuthorizationCycle, conditionalDetailsService, oauth2AuthenticationHashCheckService,
+                                        authorizationService, iSecurityUserExceptionMessageService
                                 ))
 
                 ).tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
                                 .introspectionRequestConverter(httpServletRequest -> new Oauth2OpaqueTokenAuthenticationProvider(
                                         tokenIntrospector(
-                                                authorizationService, conditionalDetailsService
+                                                authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
                                         ),authorizationService, conditionalDetailsService
                                 ).convert(httpServletRequest))
                                 .authenticationProvider(new Oauth2OpaqueTokenAuthenticationProvider(
                                         tokenIntrospector(
-                                                authorizationService, conditionalDetailsService
+                                                authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
                                         ),authorizationService, conditionalDetailsService
-                                )).errorResponseHandler(new AuthenticationFailureHandlerImpl()));
+                                )).errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService)));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
@@ -124,32 +126,40 @@ public class ServerConfig {
     }
 
     @Bean
-    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService, ConditionalDetailsService conditionalDetailsService) {
-        return new JpaTokenStoringOauth2TokenIntrospector(authorizationService, conditionalDetailsService);
+    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
+                                                     ConditionalDetailsService conditionalDetailsService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new JpaTokenStoringOauth2TokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService);
     }
 
     @Bean
     @Order(2)
     public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, OAuth2AuthorizationServiceImpl authorizationService,
                                                                  ConditionalDetailsService conditionalDetailsService,
-                                                                 HandlerExceptionResolver handlerExceptionResolver
-                                                                 ) throws Exception {
+                                                                 HandlerExceptionResolver handlerExceptionResolver, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService
+    ) throws Exception {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
         resolver.setAllowFormEncodedBodyParameter(true);
 
         http.csrf(AbstractHttpConfigurer::disable)
-                        .oauth2ResourceServer(oauth2 -> oauth2
+                .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenResolver(resolver)
-                                .authenticationEntryPoint(new AuthenticationEntryPointToGlobalExceptionHandler(handlerExceptionResolver))
-                        .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService))));
+                        .authenticationEntryPoint(new AuthenticationEntryPointToGlobalExceptionHandler(handlerExceptionResolver))
+                        .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService))));
 
         return http.build();
     }
+
 
     @Bean
     @ConditionalOnMissingBean(SecurityPointCut.class)
     public SecurityPointCut securityPointCut() {
         return new DefaultSecurityPointCut();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ISecurityUserExceptionMessageService.class)
+    public ISecurityUserExceptionMessageService securityUserExceptionMessageService() {
+        return new DefaultSecurityMessageServiceImpl();
     }
 }

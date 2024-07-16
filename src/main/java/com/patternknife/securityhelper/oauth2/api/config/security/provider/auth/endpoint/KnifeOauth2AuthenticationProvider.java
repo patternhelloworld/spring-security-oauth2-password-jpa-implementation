@@ -3,7 +3,8 @@ package com.patternknife.securityhelper.oauth2.api.config.security.provider.auth
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
@@ -34,6 +35,7 @@ public class KnifeOauth2AuthenticationProvider implements AuthenticationProvider
     private final ConditionalDetailsService conditionalDetailsService;
     private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public Authentication authenticate(Authentication authentication)
@@ -58,11 +60,12 @@ public class KnifeOauth2AuthenticationProvider implements AuthenticationProvider
                     if (oAuth2Authorization != null) {
                         userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
                     } else {
-                        throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
+                        throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR));
                     }
                 } else {
-                    throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
+                    throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE));
                 }
+
 
                 OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
 
@@ -80,11 +83,11 @@ public class KnifeOauth2AuthenticationProvider implements AuthenticationProvider
                 throw new KnifeOauth2AuthenticationException();
             }
         }catch (UsernameNotFoundException e){
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build());
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
         }catch (KnifeOauth2AuthenticationException e){
             throw e;
         }  catch (Exception e){
-           throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
+           throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
 
     }

@@ -2,7 +2,8 @@ package com.patternknife.securityhelper.oauth2.api.config.security.provider.reso
 
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -24,12 +25,14 @@ public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntros
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
     private final ConditionalDetailsService conditionalDetailsService;
-
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     public JpaTokenStoringOauth2TokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
-                                                  ConditionalDetailsService conditionalDetailsService) {
+                                                  ConditionalDetailsService conditionalDetailsService,
+                                                  ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
+        this.iSecurityUserExceptionMessageService = iSecurityUserExceptionMessageService;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntros
 
         if(oAuth2Authorization == null || oAuth2Authorization.getAccessToken() == null || oAuth2Authorization.getAccessToken().isExpired()
                 || oAuth2Authorization.getRefreshToken() == null || oAuth2Authorization.getRefreshToken().isExpired()){
-            throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE.getMessage());
+            throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE));
             //return null;
         }
 

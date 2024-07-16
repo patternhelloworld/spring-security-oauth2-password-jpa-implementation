@@ -4,7 +4,8 @@ import com.patternknife.securityhelper.oauth2.api.config.logger.module.CustomSec
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
 
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
 import com.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
@@ -50,11 +51,14 @@ public class TraditionalOauthService {
     private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
+
     public TraditionalOauthService(RegisteredClientRepositoryImpl registeredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
                                    CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
-                                   Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService) {
+                                   Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
+                                   ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
         this.registeredClientRepository = registeredClientRepository;
         this.authorizationService = authorizationService;
@@ -63,14 +67,15 @@ public class TraditionalOauthService {
         this.commonOAuth2AuthorizationCycle = commonOAuth2AuthorizationCycle;
         this.oauth2AuthenticationHashCheckService = oauth2AuthenticationHashCheckService;
 
+        this.iSecurityUserExceptionMessageService = iSecurityUserExceptionMessageService;
+
     }
 
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse createAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest accessTokenRequest,
                                                                              String authorizationHeader) {
         try {
-
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
             RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
@@ -96,20 +101,18 @@ public class TraditionalOauthService {
                     String.join(" ", registeredClient.getScopes()));
 
         } catch (UsernameNotFoundException e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build());
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
         } catch (KnifeOauth2AuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
     }
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
-                                                                              String authorizationHeader) throws IOException {
-
+                                                                              String authorizationHeader) {
         try {
-
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
             RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
@@ -117,7 +120,7 @@ public class TraditionalOauthService {
 
             UserDetails userDetails;
             if (oAuth2Authorization == null || oAuth2Authorization.getRefreshToken() == null) {
-                throw new KnifeOauth2AuthenticationException(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
+                throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR));
             } else {
                 userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
             }
@@ -139,12 +142,12 @@ public class TraditionalOauthService {
                     refreshTokenRemainingSeconds,
                     String.join(" ", registeredClient.getScopes()));
 
-        } catch (UsernameNotFoundException e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage()).build());
-        } catch (KnifeOauth2AuthenticationException e) {
+        }catch (UsernameNotFoundException e){
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
+        }catch (KnifeOauth2AuthenticationException e){
             throw e;
-        } catch (Exception e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage()).build());
+        }  catch (Exception e){
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
     }
 

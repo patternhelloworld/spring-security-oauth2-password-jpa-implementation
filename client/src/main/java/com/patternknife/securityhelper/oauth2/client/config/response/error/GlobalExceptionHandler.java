@@ -1,9 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorResponsePayload;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.auth.*;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.*;
@@ -13,18 +10,9 @@ import com.patternknife.securityhelper.oauth2.client.config.response.error.excep
 import com.patternknife.securityhelper.oauth2.client.config.response.error.message.GeneralErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

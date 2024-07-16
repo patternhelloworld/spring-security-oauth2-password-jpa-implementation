@@ -3,9 +3,11 @@ package com.patternknife.securityhelper.oauth2.api.config.security.token;
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.core.Authentication;
@@ -23,17 +25,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class TokenResponseSuccessHandler  implements AuthenticationSuccessHandler {
 
     private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter =
             new OAuth2AccessTokenResponseHttpMessageConverter();
 
-    private OAuth2AuthorizationService authorizationService;
-
-    public TokenResponseSuccessHandler(OAuth2AuthorizationService authorizationService) {
-        this.authorizationService = authorizationService;
-    }
-
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) throws IOException {
@@ -67,7 +65,7 @@ public class TokenResponseSuccessHandler  implements AuthenticationSuccessHandle
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
         }else{
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage()).build());
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
         }
 
 

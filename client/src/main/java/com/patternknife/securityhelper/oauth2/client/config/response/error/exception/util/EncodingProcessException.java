@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error.exception.util;
 
-import com.patternknife.securityhelper.oauth2.client.config.response.error.message.ExceptionMessageInterface;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ExceptionMessageInterface;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 

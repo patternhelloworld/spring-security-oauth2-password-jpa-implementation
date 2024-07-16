@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.integration.auth;
 
 
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.api.config.security.KnifeHttpHeaders;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.message.CustomSecurityUserExceptionMessage;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -470,7 +470,7 @@ public class CustomerIntegrationTest {
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
 
 
 
@@ -500,7 +500,7 @@ public class CustomerIntegrationTest {
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
 
 
 
@@ -530,7 +530,7 @@ public class CustomerIntegrationTest {
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
 
 
@@ -563,7 +563,7 @@ public class CustomerIntegrationTest {
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
 
 
 
@@ -593,7 +593,7 @@ public class CustomerIntegrationTest {
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
 
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
@@ -622,7 +622,7 @@ public class CustomerIntegrationTest {
         jsonResponse = new JSONObject(responseString);
         userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, SecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
 
 

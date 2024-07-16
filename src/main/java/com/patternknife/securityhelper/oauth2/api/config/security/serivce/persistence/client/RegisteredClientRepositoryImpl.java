@@ -3,9 +3,10 @@ package com.patternknife.securityhelper.oauth2.api.config.security.serivce.persi
 
 import com.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
 import com.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import com.patternknife.securityhelper.oauth2.api.config.response.error.message.SecurityUserExceptionMessage;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import com.patternknife.securityhelper.oauth2.api.config.security.dao.OauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.api.config.security.entity.OauthClientDetail;
+import com.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -28,6 +29,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     private Map<String, @NotNull RegisteredClient> cachedRegisteredClientsByClientId = new HashMap<>();
 
     private final OauthClientDetailRepository oauthClientDetailRepository;
+    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public void save(RegisteredClient registeredClient) {
@@ -58,7 +60,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
-                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+                                .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
     }
     @Override
     public @NotNull RegisteredClient findByClientId(String clientId) throws KnifeOauth2AuthenticationException {
@@ -85,7 +87,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
-                                .userMessage(SecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage()).build()));
+                                .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
 
     }
