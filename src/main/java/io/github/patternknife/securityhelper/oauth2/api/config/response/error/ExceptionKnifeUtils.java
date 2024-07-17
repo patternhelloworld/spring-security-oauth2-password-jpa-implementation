@@ -2,8 +2,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.response.error;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public class CustomExceptionUtils {
-
+public class ExceptionKnifeUtils {
 
     public static String getAllCausesWithStartMessage(Throwable e, String causes) {
         if (e.getCause() == null) return causes;

@@ -2,7 +2,6 @@ package io.github.patternknife.securityhelper.oauth2.api.config.response.error;
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorResponsePayload;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.*;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 
@@ -21,10 +20,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.web.context.request.WebRequest;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE)
 @ControllerAdvice
 @RequiredArgsConstructor
-public class SecurityGlobalExceptionHandler {
+public class SecurityKnifeExceptionHandler {
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
@@ -34,10 +33,10 @@ public class SecurityGlobalExceptionHandler {
         ErrorResponsePayload errorResponsePayload;
         if(ex instanceof KnifeOauth2AuthenticationException && ((KnifeOauth2AuthenticationException) ex).getErrorMessages() != null) {
             errorResponsePayload = new ErrorResponsePayload(((KnifeOauth2AuthenticationException) ex).getErrorMessages(),
-                    ex, request.getDescription(false), CustomExceptionUtils.getAllStackTraces(ex),
-                    CustomExceptionUtils.getAllCauses(ex), null);
+                    ex, request.getDescription(false), ExceptionKnifeUtils.getAllStackTraces(ex),
+                    ExceptionKnifeUtils.getAllCauses(ex), null);
         }else {
-            errorResponsePayload = new ErrorResponsePayload(CustomExceptionUtils.getAllCauses(ex), request.getDescription(false), iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
+            errorResponsePayload = new ErrorResponsePayload(ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false), iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
                     ex.getMessage(), ex.getStackTrace()[0].toString());
         }
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.UNAUTHORIZED);
@@ -46,7 +45,7 @@ public class SecurityGlobalExceptionHandler {
     // 403 : Authorization
     @ExceptionHandler({ AccessDeniedException.class })
     public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
-        ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : CustomExceptionUtils.getAllCauses(ex), request.getDescription(false),
+        ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false),
                 ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHORIZATION_FAILURE) : ex.getMessage(), ex.getStackTrace()[0].toString());
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.FORBIDDEN);
     }

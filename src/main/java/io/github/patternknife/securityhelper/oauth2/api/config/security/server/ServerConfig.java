@@ -4,7 +4,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.server;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.CustomGrantAuthenticationConverter;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication.AuthenticationFailureHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.resource.authentication.AuthenticationEntryPointToGlobalExceptionHandler;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -66,7 +67,8 @@ public class ServerConfig {
             Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
             RegisteredClientRepositoryImpl registeredClientRepository,
-            ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) throws Exception {
+            ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
+            AuthenticationFailureHandler iAuthenticationFailureHandler) throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
@@ -75,7 +77,7 @@ public class ServerConfig {
         authorizationServerConfigurer
                 .clientAuthentication(clientAuthentication ->
                         clientAuthentication
-                                .errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService))
+                                .errorResponseHandler(iAuthenticationFailureHandler)
                 )
                 .registeredClientRepository(registeredClientRepository)
                 .authorizationService(authorizationService)
@@ -85,7 +87,7 @@ public class ServerConfig {
                                 .accessTokenResponseHandler(new TokenResponseSuccessHandler(iSecurityUserExceptionMessageService))
                                 .accessTokenRequestConverter(new CustomGrantAuthenticationConverter())
                                 // found only Oauth2AuthenticationException is tossed.
-                                .errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService))
+                                .errorResponseHandler(iAuthenticationFailureHandler)
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
                                         commonOAuth2AuthorizationCycle, conditionalDetailsService, oauth2AuthenticationHashCheckService,
                                         authorizationService, iSecurityUserExceptionMessageService
@@ -102,7 +104,7 @@ public class ServerConfig {
                                         tokenIntrospector(
                                                 authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
                                         ),authorizationService, conditionalDetailsService
-                                )).errorResponseHandler(new AuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService)));
+                                )).errorResponseHandler(iAuthenticationFailureHandler));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
@@ -161,5 +163,11 @@ public class ServerConfig {
     @ConditionalOnMissingBean(ISecurityUserExceptionMessageService.class)
     public ISecurityUserExceptionMessageService securityUserExceptionMessageService() {
         return new DefaultSecurityMessageServiceImpl();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationFailureHandler.class)
+    public AuthenticationFailureHandler iAuthenticationFailureHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultAuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService);
     }
 }

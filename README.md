@@ -23,7 +23,7 @@
            }
         ```
       
-        * Error Payload 
+        * Error Payload (Customizable) 
         ```json
           {
               "timestamp": 1719470948370,
@@ -71,10 +71,9 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 - The client module definitely consumes the API module, but not vice versa.
 
 ## API Guide
-#### The implementation method is shown in the client source code.
 
 ### **Registration**
-  - As the Api module consumes JPA, adding it to Beans is required.
+  - See the `client` folder. As the Api module consumes JPA, adding it to Beans is required.
 
 ```java
 
@@ -117,16 +116,23 @@ public class CommonDataSourceConfiguration {
 }
 ```
 
-### **Implementation**
+### **Implementation of...**
+
+#### "Mandatory" settings
   - The only mandatory setting is ``client.config.securityimpl.service.userdetail.CustomUserDetailsServiceFactory``. The rest depend on your specific situation.
-  
-    - **Use PointCut when events happen such as tokens created**
-      - ``SecurityPointCut``
-      - See the source code in ``client.config.securityimpl.aop`` 
-    - **Register error user messages as desired**
-      - ``ISecurityUserExceptionMessageService``
-      - See the source code in ``client.config.securityimpl.message``
-    
+
+#### "Customizable" settings
+
+  - **Use PointCut when events happen such as tokens created**
+    - ``SecurityPointCut``
+    - See the source code in ``client.config.securityimpl.aop`` 
+  - **Register error user messages as desired**
+    - ``ISecurityUserExceptionMessageService``
+    - See the source code in ``client.config.securityimpl.message``
+  - **Customize the whole error payload as desired**
+    - Customize only two points in
+      - ``client.config.securityimpl.errorhandler.CustomAuthenticationFailureHandlerImpl``
+      - ``client.config.response.error.GlobalExceptionHandler``
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
   * https://github.com/patternknife/docker-blue-green-runner

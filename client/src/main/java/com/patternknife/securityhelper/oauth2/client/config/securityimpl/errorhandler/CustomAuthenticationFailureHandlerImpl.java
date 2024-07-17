@@ -1,28 +1,37 @@
-package io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication;
+package com.patternknife.securityhelper.oauth2.client.config.securityimpl.errorhandler;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.module.CustomSecurityLogConfig;
+import io.github.patternknife.securityhelper.oauth2.api.config.response.error.ExceptionKnifeUtils;
 import io.github.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorResponsePayload;
 import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.CustomExceptionUtils;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
+
 import java.io.IOException;
 
 
+/*
+*
+*   Customize the exception payload by implementing this, which replaces
+*          'io.github.patternknife.securityhelper.oauth2.api.security.errorhandler.auth.authentication.DefaultAuthenticationFailureHandlerImpl'
+*
+* */
+@Configuration
 @RequiredArgsConstructor
-public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
+public class CustomAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomSecurityLogConfig.class);
 
@@ -33,7 +42,7 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
             throws IOException {
 
         ErrorResponsePayload errorResponsePayload;
-        String stackTraces = CustomExceptionUtils.getAllStackTraces(exception);
+        String stackTraces = ExceptionKnifeUtils.getAllStackTraces(exception);
         if(exception instanceof KnifeOauth2AuthenticationException){
             errorResponsePayload = new ErrorResponsePayload(((KnifeOauth2AuthenticationException) exception).getErrorMessages().getMessage(),
                     "uri=" + request.getRequestURI(), ((KnifeOauth2AuthenticationException) exception).getErrorMessages().getUserMessage(), stackTraces);

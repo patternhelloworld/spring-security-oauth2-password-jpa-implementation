@@ -1,5 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.unit.customer;
 
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.GlobalExceptionHandler;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
@@ -67,6 +68,9 @@ public class CustomerApiTest {
     @Mock
     private CustomerRepository customerRepository;
 
+    @Mock
+    private ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
+
 
     private MockMvc mockMvc;
     private AccessTokenUserInfo accessTokenUserInfo;
@@ -112,7 +116,7 @@ public class CustomerApiTest {
         customerApi = new CustomerApi(customerService, oAuth2AuthorizationServiceImpl, customerRepository);
 
         mockMvc = MockMvcBuilders.standaloneSetup(customerApi)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(iSecurityUserExceptionMessageService))
                 .setCustomArgumentResolvers(putAuthenticationPrincipal)
                 .apply(documentationConfiguration(restDocumentationContextProvider).uris()
                         .withScheme("https")
