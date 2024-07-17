@@ -340,7 +340,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>3.0.1</version>
@@ -353,13 +353,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                         </goals>
                         <configuration>
                             <gpgArguments>
-                                <arg>--pinentry-mode</arg>
+                                <arg>&#45;&#45;pinentry-mode</arg>
                                 <arg>loopback</arg>
                             </gpgArguments>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
