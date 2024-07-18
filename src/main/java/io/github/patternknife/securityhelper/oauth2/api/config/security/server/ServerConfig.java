@@ -5,7 +5,6 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.Defa
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeGrantAuthenticationConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAccessDeniedHandler;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
@@ -43,7 +42,6 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenResolv
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -143,8 +141,8 @@ public class ServerConfig {
     public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, OAuth2AuthorizationServiceImpl authorizationService,
                                                                  ConditionalDetailsService conditionalDetailsService,
                                                                  ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
-                                                                 AuthenticationEntryPoint iAuthenticationEntryPoint,
-                                                                 AccessDeniedHandler iAccessDeniedHandler
+                                                                 AuthenticationEntryPoint iAuthenticationEntryPoint
+
     ) throws Exception {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
@@ -153,7 +151,7 @@ public class ServerConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenResolver(resolver)
-                        .authenticationEntryPoint(iAuthenticationEntryPoint).accessDeniedHandler(iAccessDeniedHandler)
+                        .authenticationEntryPoint(iAuthenticationEntryPoint)
                         .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService))));
 
         return http.build();
@@ -196,11 +194,6 @@ public class ServerConfig {
     @ConditionalOnMissingBean(AuthenticationEntryPoint.class)
     public AuthenticationEntryPoint iAuthenticationEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         return new DefaultAuthenticationEntryPoint(resolver);
-    }
-    @Bean
-    @ConditionalOnMissingBean(AccessDeniedHandler.class)
-    public AccessDeniedHandler iAccessDeniedHandler(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        return new DefaultAccessDeniedHandler(resolver);
     }
 
 }

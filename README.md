@@ -6,7 +6,7 @@
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.6.0</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
@@ -44,13 +44,13 @@
  
 ## Dependencies
 
-| Category          | Dependencies                               |
-|-------------------|--------------------------------------------|
-| Backend-Language  | Java 17                                    |
-| Backend-Framework | Spring Boot 3.1.2                          |
-| Main Libraries    | Spring Security Authorization Server 1.2.3 |
-| Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)             |
-| RDBMS             | Mysql 8.0.17                               |
+| Category          | Dependencies                                                      |
+|-------------------|-------------------------------------------------------------------|
+| Backend-Language  | Java 17                                                           |
+| Backend-Framework | Spring Boot 3.1.2                                                 |
+| Main Libraries    | Spring Security 6.1.2, Spring Security Authorization Server 1.2.3 |
+| Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                    |
+| RDBMS             | Mysql 8.0.17                                                      |
 
 ## Run the App
 
@@ -119,27 +119,34 @@ public class CommonDataSourceConfiguration {
 ### **Implementation of...**
 
 #### "Mandatory" settings
+
   - The only mandatory setting is ``client.config.securityimpl.service.userdetail.CustomUserDetailsServiceFactory``. The rest depend on your specific situation.
 
 #### "Customizable" settings
 
-  - **Use PointCut when events happen such as tokens created**
+  - **Insert your code when events happen such as tokens created**
     - ``SecurityPointCut``
-    - See the source code in ``client.config.securityimpl.aop`` 
+    - See the source code in ``client.config.securityimpl.aop``
+    
+
   - **Register error user messages as desired**
     - ``ISecurityUserExceptionMessageService``
     - See the source code in ``client.config.securityimpl.message``
+    
+
   - **Customize the whole error payload as desired for all cases**
     - What is "all cases"?
       - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token inspection : 401, Permission : 403)
-    - Customize two points such as
-      - ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl`` ("/oauth2/token")
-      - ``client.config.response.error.GlobalExceptionHandler`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
-      - ``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl`` (Resource Server (Bearer token inspection : 401)) 
-      - ``client.config.securityimpl.response.CustomAccessDeniedHandlerImpl`` (Resource Server (Permission inspection : 403)) 
+    - Customize errors of the following cases
+      - Login (/oauth2/token) : ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl``
+      - Login (/api/v1/traditional-oauth/token) : ``client.config.response.error.GlobalExceptionHandler.authenticationException`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
+      - Resource Server (Bearer token expired or with a wrong value, 401) :``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl`` 
+      - Resource Server (Permission, 403, @PreAuthorized on your APIs) ``client.config.response.error.GlobalExceptionHandler.authorizationException``
+      
+
   - **Customize the whole success payload as desired for the only "/oauth2/token"**
       - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
-      - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto``, which doesn't yet to be customizable.  
+      - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto`` and is not yet customizable.
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:

@@ -45,7 +45,7 @@ public class SecurityKnifeExceptionHandler {
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.UNAUTHORIZED);
     }
 
-    // 403 : Authorization
+    // 403 : Authorization (= Forbidden, AccessDenied)
     @ExceptionHandler({ AccessDeniedException.class })
     public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
         ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false),

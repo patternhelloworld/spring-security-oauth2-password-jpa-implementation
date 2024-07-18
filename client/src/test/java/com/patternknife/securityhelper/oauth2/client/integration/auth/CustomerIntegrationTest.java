@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -61,6 +63,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/generated-snippets",uriScheme = "https", uriHost = "vholic.com", uriPort = 8300)
 public class CustomerIntegrationTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerIntegrationTest.class);
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -624,6 +629,93 @@ public class CustomerIntegrationTest {
 
         assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
+
+    @Test
+    public void testFetchResourceWithInvalidCredentialsAndValidCredentialsButWithNoPermission() throws Exception {
+
+        MvcResult result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
+                        .header(HttpHeaders.AUTHORIZATION, basicHeader)
+                        .header(KnifeHttpHeaders.APP_TOKEN, "APPTOKENTESTRESOURCE")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("grant_type", "password")
+                        .param("username", testUserName)
+                        .param("password", testUserPassword))
+                .andExpect(status().isOk())
+                .andDo(document( "{class-name}/{method-name}/oauth-access-token",
+                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
+                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
+                                headerWithName(KnifeHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
+                        ),
+                        formParameters(
+                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
+                                parameterWithName("username").description("This is the user's email address."),
+                                parameterWithName("password").description("This is the user's password.")
+                        )))
+                .andReturn();
+
+
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        JSONObject jsonResponse = new JSONObject(responseString);
+        String finalAccessTokenForTestResource = jsonResponse.getString("access_token");
+
+
+
+        result = mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + finalAccessTokenForTestResource + "1"))
+                .andDo(document( "{class-name}/{method-name}/customers-id",
+                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
+                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer XXX")
+                        )))
+                .andExpect(status().isUnauthorized()).andReturn(); // 401
+
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        jsonResponse = new JSONObject(responseString);
+
+
+        String userMessage = jsonResponse.getString("userMessage");
+
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE.getMessage());
+
+
+
+
+        result = mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + finalAccessTokenForTestResource))
+                .andDo(document( "{class-name}/{method-name}/customers-id",
+                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
+                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer XXX")
+                        )))
+                .andExpect(status().isForbidden()).andReturn(); // 403
+
+        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        jsonResponse = new JSONObject(responseString);
+        userMessage = jsonResponse.getString("userMessage");
+
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHORIZATION_FAILURE.getMessage());
+
+
+        // Remove Access Token DB done tested
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/customers/me/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + finalAccessTokenForTestResource))
+
+                .andDo(document( "{class-name}/{method-name}/oauth-customer-logout",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer XXX")
+                        ),relaxedResponseFields(
+                                fieldWithPath("logout").description("If true, logout is successful on the backend, if false, it fails. However, ignore this message and, considering UX, delete the token on the client side and move to the login screen.")
+
+                        )));
+    }
+
 
 
 

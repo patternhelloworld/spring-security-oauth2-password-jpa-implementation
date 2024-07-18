@@ -97,13 +97,4 @@ public class CustomerService  {
     }
 
 
-    public boolean checkIdNameDuplicate(String idName) {
-        return customerRepository.existsByIdName(idName);
-    }
-
-    public boolean checkHpDuplicate(String hp) {
-        return customerRepository.existsByHp(CustomUtils.removeSpecialCharacters(hp));
-    }
-
-
 }

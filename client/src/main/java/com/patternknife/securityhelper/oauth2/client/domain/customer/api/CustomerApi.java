@@ -9,6 +9,7 @@ import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.Custome
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerResDTO;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.service.CustomerService;
 import com.patternknife.securityhelper.oauth2.client.util.CustomUtils;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -40,8 +41,6 @@ public class CustomerApi {
     @GetMapping("/customers/me")
     public CustomerResDTO.IdNameWithAccessTokenRemainingSeconds getCustomerSelf(@AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo,
                                                                                                       @RequestHeader("Authorization") String authorizationHeader) throws ResourceNotFoundException {
-
-
         String token = authorizationHeader.substring("Bearer ".length());
 
         int accessTokenRemainingSeconds = 0;
@@ -102,7 +101,12 @@ public class CustomerApi {
         return response;
     }
 
-
+    @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
+    @GetMapping("/customers/{id}")
+    public @Nullable CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable final long id)
+            throws ResourceNotFoundException {
+        return null;
+    }
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PutMapping("/customers/{id}")
