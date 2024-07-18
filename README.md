@@ -6,12 +6,12 @@
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.5.0</version>
+    <version>2.6.0</version>
 </dependency>
 ```
-* Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`.
+* Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
-    * ``/api/v1/traditional-oauth/token`` is what this library implemented manually.
+    * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
         * Success Payload
          ```json
           {
@@ -129,10 +129,18 @@ public class CommonDataSourceConfiguration {
   - **Register error user messages as desired**
     - ``ISecurityUserExceptionMessageService``
     - See the source code in ``client.config.securityimpl.message``
-  - **Customize the whole error payload as desired**
-    - Customize only two points in
-      - ``client.config.securityimpl.errorhandler.CustomAuthenticationFailureHandlerImpl``
-      - ``client.config.response.error.GlobalExceptionHandler``
+  - **Customize the whole error payload as desired for all cases**
+    - What is "all cases"?
+      - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token inspection : 401, Permission : 403)
+    - Customize two points such as
+      - ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl`` ("/oauth2/token")
+      - ``client.config.response.error.GlobalExceptionHandler`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
+      - ``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl`` (Resource Server (Bearer token inspection : 401)) 
+      - ``client.config.securityimpl.response.CustomAccessDeniedHandlerImpl`` (Resource Server (Permission inspection : 403)) 
+  - **Customize the whole success payload as desired for the only "/oauth2/token"**
+      - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
+      - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto``, which doesn't yet to be customizable.  
+
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
   * https://github.com/patternknife/docker-blue-green-runner

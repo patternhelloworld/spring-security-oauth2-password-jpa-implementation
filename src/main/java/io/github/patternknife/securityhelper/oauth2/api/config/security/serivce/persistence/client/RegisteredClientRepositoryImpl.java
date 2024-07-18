@@ -1,11 +1,11 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.OauthClientDetailRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.OauthClientDetail;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthClientDetailRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +28,13 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
 
     private Map<String, @NotNull RegisteredClient> cachedRegisteredClientsByClientId = new HashMap<>();
 
-    private final OauthClientDetailRepository oauthClientDetailRepository;
+    private final KnifeOauthClientDetailRepository knifeOauthClientDetailRepository;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public void save(RegisteredClient registeredClient) {
 
-        OauthClientDetail detail = new OauthClientDetail();
+        KnifeOauthClientDetail detail = new KnifeOauthClientDetail();
         detail.setClientId(registeredClient.getClientId());
         detail.setClientSecret(registeredClient.getClientSecret());
         detail.setScope(String.join(",", registeredClient.getScopes()));
@@ -48,7 +48,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
         detail.setAccessTokenValidity(registeredClient.getTokenSettings().getAccessTokenTimeToLive().getSeconds());
         detail.setRefreshTokenValidity(registeredClient.getTokenSettings().getRefreshTokenTimeToLive().getSeconds());
 
-        oauthClientDetailRepository.save(detail);
+        knifeOauthClientDetailRepository.save(detail);
 
         // Cache the registered client as long as the persistence logic above is successful.
         cachedRegisteredClientsByClientId.put(registeredClient.getClientId(), registeredClient);
@@ -56,7 +56,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
 
     @Override
     public @NotNull RegisteredClient findById(String id) throws KnifeOauth2AuthenticationException {
-        return oauthClientDetailRepository.findById(id)
+        return knifeOauthClientDetailRepository.findById(id)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
@@ -83,7 +83,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
         }
 
 
-        return oauthClientDetailRepository.findById(clientId)
+        return knifeOauthClientDetailRepository.findById(clientId)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
@@ -93,7 +93,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
 
-    private RegisteredClient mapToRegisteredClient(OauthClientDetail detail) {
+    private RegisteredClient mapToRegisteredClient(KnifeOauthClientDetail detail) {
         Set<String> scopesSet = Arrays.stream(detail.getScope().split(","))
                 .map(String::trim)
                 .collect(Collectors.toSet());
@@ -123,7 +123,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
     public void cache() {
-        List<RegisteredClient> allClients = oauthClientDetailRepository.findAll().stream()
+        List<RegisteredClient> allClients = knifeOauthClientDetailRepository.findAll().stream()
                 .map(this::mapToRegisteredClient)
                 .toList();
         // Cache all registered clients

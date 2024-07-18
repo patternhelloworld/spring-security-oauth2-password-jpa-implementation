@@ -1,10 +1,10 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.aop;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthRefreshToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.OauthClientDetail;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthRefreshToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
 import jakarta.annotation.Nullable;
 
 public interface SecurityPointCut {
-    <T> @Nullable T afterTokensSaved(@Nullable CustomOauthAccessToken customOauthAccessToken, @Nullable CustomOauthRefreshToken customOauthRefreshToken, @Nullable OauthClientDetail oauthClientDetail);
+    <T> @Nullable T afterTokensSaved(@Nullable KnifeOauthAccessToken knifeOauthAccessToken, @Nullable KnifeOauthRefreshToken knifeOauthRefreshToken, @Nullable KnifeOauthClientDetail knifeOauthClientDetail);
 }

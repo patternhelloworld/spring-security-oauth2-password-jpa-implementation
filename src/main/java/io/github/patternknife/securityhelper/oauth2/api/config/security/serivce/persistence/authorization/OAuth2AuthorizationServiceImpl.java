@@ -1,12 +1,12 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthRefreshToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.util.KnifeHttpHeaders;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthAccessTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthRefreshTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthRefreshToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthAccessTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthRefreshTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
 
 import jakarta.annotation.Nullable;
@@ -34,8 +34,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationService {
 
-    private final CustomOauthAccessTokenRepository customOauthAccessTokenRepository;
-    private final CustomOauthRefreshTokenRepository customOauthRefreshTokenRepository;
+    private final KnifeOauthAccessTokenRepository knifeOauthAccessTokenRepository;
+    private final KnifeOauthRefreshTokenRepository knifeOauthRefreshTokenRepository;
     private final SecurityPointCut securityPointCut;
 
     /*
@@ -63,7 +63,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         String authenticationId = CustomAuthenticationKeyGenerator.hashUniqueCompositeColumnsToAuthenticationId(authorization, appTokenValue);
 
-        CustomOauthAccessToken cat = new CustomOauthAccessToken();
+        KnifeOauthAccessToken cat = new KnifeOauthAccessToken();
 
 
         cat.setTokenId(CustomAuthenticationKeyGenerator.hashTokenValueToTokenId(authorization.getAccessToken().getToken().getTokenValue()));
@@ -101,7 +101,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
             cat.setRemoteIp(remoteIp);
         }
 
-        customOauthAccessTokenRepository.save(cat);
+        knifeOauthAccessTokenRepository.save(cat);
 
         saveRefreshToken(authorization.getRefreshToken().getToken(), authorization);
 
@@ -116,7 +116,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     */
     private void saveRefreshToken(OAuth2RefreshToken oAuth2RefreshToken, OAuth2Authorization oAuth2Authorization) {
 
-        CustomOauthRefreshToken crt = new CustomOauthRefreshToken();
+        KnifeOauthRefreshToken crt = new KnifeOauthRefreshToken();
 
 
         // crt.setId(UUID.randomUUID().toString() + UUID.randomUUID().toString());
@@ -131,7 +131,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         );
         crt.setExpirationDate(localDateTimeExpiration);
 
-        customOauthRefreshTokenRepository.save(crt);
+        knifeOauthRefreshTokenRepository.save(crt);
     }
 
 
@@ -155,11 +155,11 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         } else if (tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)) {
 
-            return findOAuth2AuthorizationByCustomOauthRefreshTokenSafely(() -> customOauthRefreshTokenRepository.findByTokenId(tokenId), e -> {
-                List<CustomOauthRefreshToken> customOauthRefreshTokens = customOauthRefreshTokenRepository.findAllByTokenId(tokenId).orElse(null);
-                if (customOauthRefreshTokens != null) {
-                    for (CustomOauthRefreshToken customOauthRefreshToken : customOauthRefreshTokens) {
-                        customOauthRefreshTokenRepository.deleteByTokenId(customOauthRefreshToken.getTokenId());
+            return findOAuth2AuthorizationByCustomOauthRefreshTokenSafely(() -> knifeOauthRefreshTokenRepository.findByTokenId(tokenId), e -> {
+                List<KnifeOauthRefreshToken> knifeOauthRefreshTokens = knifeOauthRefreshTokenRepository.findAllByTokenId(tokenId).orElse(null);
+                if (knifeOauthRefreshTokens != null) {
+                    for (KnifeOauthRefreshToken knifeOauthRefreshToken : knifeOauthRefreshTokens) {
+                        knifeOauthRefreshTokenRepository.deleteByTokenId(knifeOauthRefreshToken.getTokenId());
                     }
                 }
             });
@@ -172,26 +172,26 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     *    2) AccessToken Token R
     * */
     private @Nullable OAuth2Authorization findOAuth2AuthorizationByCustomOauthAccessTokenSafely(
-            Supplier<Optional<CustomOauthAccessToken>> accessTokenSupplier, Consumer<Exception> exceptionHandler) {
-        CustomOauthAccessToken customOauthAccessToken = null;
+            Supplier<Optional<KnifeOauthAccessToken>> accessTokenSupplier, Consumer<Exception> exceptionHandler) {
+        KnifeOauthAccessToken knifeOauthAccessToken = null;
         OAuth2Authorization oAuth2Authorization = null;
         try {
-            customOauthAccessToken = accessTokenSupplier.get().orElse(null);
-            if (customOauthAccessToken != null) {
-                oAuth2Authorization = customOauthAccessToken.getAuthentication();
+            knifeOauthAccessToken = accessTokenSupplier.get().orElse(null);
+            if (knifeOauthAccessToken != null) {
+                oAuth2Authorization = knifeOauthAccessToken.getAuthentication();
             }
         } catch (Exception e) {
 
             exceptionHandler.accept(e);
 
             // Retry only one more time
-            customOauthAccessToken = accessTokenSupplier.get().orElse(null);
-            if (customOauthAccessToken != null) {
-                oAuth2Authorization = customOauthAccessToken.getAuthentication();
+            knifeOauthAccessToken = accessTokenSupplier.get().orElse(null);
+            if (knifeOauthAccessToken != null) {
+                oAuth2Authorization = knifeOauthAccessToken.getAuthentication();
             }
         }
-        if (customOauthAccessToken != null && oAuth2Authorization != null && oAuth2Authorization.getAccessToken() != null && oAuth2Authorization.getAccessToken().isExpired()) {
-            customOauthAccessTokenRepository.deleteByTokenId(customOauthAccessToken.getTokenId());
+        if (knifeOauthAccessToken != null && oAuth2Authorization != null && oAuth2Authorization.getAccessToken() != null && oAuth2Authorization.getAccessToken().isExpired()) {
+            knifeOauthAccessTokenRepository.deleteByTokenId(knifeOauthAccessToken.getTokenId());
             return null;
         }
 
@@ -199,12 +199,12 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     }
     @Override
     public @Nullable OAuth2Authorization findById(@NotEmpty String tokenId) {
-        return findOAuth2AuthorizationByCustomOauthAccessTokenSafely(() -> customOauthAccessTokenRepository.findByTokenId(tokenId), e -> {
-            List<CustomOauthAccessToken> customOauthAccessTokens = customOauthAccessTokenRepository.findAllByTokenId(tokenId).orElse(null);
-            if (customOauthAccessTokens != null) {
-                for (CustomOauthAccessToken customOauthAccessToken : customOauthAccessTokens) {
-                    customOauthAccessTokenRepository.deleteByTokenId(tokenId);
-                    customOauthRefreshTokenRepository.deleteByTokenId(customOauthAccessToken.getRefreshToken());
+        return findOAuth2AuthorizationByCustomOauthAccessTokenSafely(() -> knifeOauthAccessTokenRepository.findByTokenId(tokenId), e -> {
+            List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findAllByTokenId(tokenId).orElse(null);
+            if (knifeOauthAccessTokens != null) {
+                for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
+                    knifeOauthAccessTokenRepository.deleteByTokenId(tokenId);
+                    knifeOauthRefreshTokenRepository.deleteByTokenId(knifeOauthAccessToken.getRefreshToken());
                 }
             }
         });
@@ -214,13 +214,13 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
      *   [IMPORTANT] KEY = Username + ClientId + AppToken
      * */
     public @Nullable OAuth2Authorization findByUserNameAndClientIdAndAppToken(@NotEmpty String username, @NotEmpty String clientId, @Nullable String appTokenValue) {
-        return findOAuth2AuthorizationByCustomOauthAccessTokenSafely(() -> customOauthAccessTokenRepository.findByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue),
+        return findOAuth2AuthorizationByCustomOauthAccessTokenSafely(() -> knifeOauthAccessTokenRepository.findByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue),
                 e -> {
-                    List<CustomOauthAccessToken> customOauthAccessTokens = customOauthAccessTokenRepository.findListByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue).orElse(null);
-                    if (customOauthAccessTokens != null) {
-                        for (CustomOauthAccessToken customOauthAccessToken : customOauthAccessTokens) {
-                            customOauthAccessTokenRepository.deleteByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue);
-                            customOauthRefreshTokenRepository.deleteByTokenId(customOauthAccessToken.getRefreshToken());
+                    List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findListByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue).orElse(null);
+                    if (knifeOauthAccessTokens != null) {
+                        for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
+                            knifeOauthAccessTokenRepository.deleteByUserNameAndClientIdAndAppToken(username, clientId, appTokenValue);
+                            knifeOauthRefreshTokenRepository.deleteByTokenId(knifeOauthAccessToken.getRefreshToken());
                         }
                     }
                 });
@@ -228,27 +228,27 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     /*
      *    3) RefreshToken Token R
      * */
-    private @Nullable OAuth2Authorization findOAuth2AuthorizationByCustomOauthRefreshTokenSafely(Supplier<Optional<CustomOauthRefreshToken>> refreshTokenSupplier, Consumer<Exception> exceptionHandler) {
-        CustomOauthRefreshToken customOauthRefreshToken = null;
+    private @Nullable OAuth2Authorization findOAuth2AuthorizationByCustomOauthRefreshTokenSafely(Supplier<Optional<KnifeOauthRefreshToken>> refreshTokenSupplier, Consumer<Exception> exceptionHandler) {
+        KnifeOauthRefreshToken knifeOauthRefreshToken = null;
         OAuth2Authorization oAuth2Authorization = null;
         try {
-            customOauthRefreshToken = refreshTokenSupplier.get().orElse(null);
-            if (customOauthRefreshToken != null) {
-                oAuth2Authorization = customOauthRefreshToken.getAuthentication();
+            knifeOauthRefreshToken = refreshTokenSupplier.get().orElse(null);
+            if (knifeOauthRefreshToken != null) {
+                oAuth2Authorization = knifeOauthRefreshToken.getAuthentication();
             }
         } catch (Exception e) {
 
             exceptionHandler.accept(e);
 
             // Retry only one more time
-            customOauthRefreshToken = refreshTokenSupplier.get().orElse(null);
-            if (customOauthRefreshToken != null) {
-                oAuth2Authorization = customOauthRefreshToken.getAuthentication();
+            knifeOauthRefreshToken = refreshTokenSupplier.get().orElse(null);
+            if (knifeOauthRefreshToken != null) {
+                oAuth2Authorization = knifeOauthRefreshToken.getAuthentication();
             }
         }
 
-        if (customOauthRefreshToken != null && oAuth2Authorization != null && oAuth2Authorization.getRefreshToken() != null && oAuth2Authorization.getRefreshToken().isExpired()) {
-            customOauthRefreshTokenRepository.deleteByTokenId(customOauthRefreshToken.getTokenId());
+        if (knifeOauthRefreshToken != null && oAuth2Authorization != null && oAuth2Authorization.getRefreshToken() != null && oAuth2Authorization.getRefreshToken().isExpired()) {
+            knifeOauthRefreshTokenRepository.deleteByTokenId(knifeOauthRefreshToken.getTokenId());
             return null;
         }
         return oAuth2Authorization;
@@ -281,13 +281,13 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         Remove Access Token From Persistence
      */
     private void removeAccessToken(OAuth2AccessToken oAuth2AccessToken) {
-        Optional<CustomOauthAccessToken> accessToken = customOauthAccessTokenRepository.findByTokenId(CustomAuthenticationKeyGenerator.hashTokenValueToTokenId(oAuth2AccessToken.getTokenValue()));
-        accessToken.ifPresent(customOauthAccessTokenRepository::delete);
+        Optional<KnifeOauthAccessToken> accessToken = knifeOauthAccessTokenRepository.findByTokenId(CustomAuthenticationKeyGenerator.hashTokenValueToTokenId(oAuth2AccessToken.getTokenValue()));
+        accessToken.ifPresent(knifeOauthAccessTokenRepository::delete);
     }
 
     private void removeRefreshToken(OAuth2RefreshToken oAuth2RefreshToken) {
-        Optional<CustomOauthRefreshToken> refreshToken = customOauthRefreshTokenRepository.findByTokenId(CustomAuthenticationKeyGenerator.hashTokenValueToTokenId(oAuth2RefreshToken.getTokenValue()));
-        refreshToken.ifPresent(customOauthRefreshTokenRepository::delete);
+        Optional<KnifeOauthRefreshToken> refreshToken = knifeOauthRefreshTokenRepository.findByTokenId(CustomAuthenticationKeyGenerator.hashTokenValueToTokenId(oAuth2RefreshToken.getTokenValue()));
+        refreshToken.ifPresent(knifeOauthRefreshTokenRepository::delete);
     }
 
 

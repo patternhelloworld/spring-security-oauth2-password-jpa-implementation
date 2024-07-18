@@ -3,23 +3,25 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.server;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.CustomGrantAuthenticationConverter;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.errorhandler.resource.authentication.AuthenticationEntryPointToGlobalExceptionHandler;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeGrantAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAccessDeniedHandler;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthenticationProvider;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.Oauth2OpaqueTokenAuthenticationProvider;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.KnifeOauth2OpaqueTokenAuthenticationProvider;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.token.TokenResponseSuccessHandler;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationSuccessHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +41,11 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -68,7 +73,7 @@ public class ServerConfig {
             OAuth2TokenGenerator<?> tokenGenerator,
             RegisteredClientRepositoryImpl registeredClientRepository,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
-            AuthenticationFailureHandler iAuthenticationFailureHandler) throws Exception {
+            AuthenticationFailureHandler iAuthenticationFailureHandler, AuthenticationSuccessHandler iAuthenticationSuccessHandler) throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
@@ -84,8 +89,8 @@ public class ServerConfig {
                 .tokenGenerator(tokenGenerator)
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
-                                .accessTokenResponseHandler(new TokenResponseSuccessHandler(iSecurityUserExceptionMessageService))
-                                .accessTokenRequestConverter(new CustomGrantAuthenticationConverter())
+                                .accessTokenResponseHandler(iAuthenticationSuccessHandler)
+                                .accessTokenRequestConverter(new KnifeGrantAuthenticationConverter())
                                 // found only Oauth2AuthenticationException is tossed.
                                 .errorResponseHandler(iAuthenticationFailureHandler)
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
@@ -95,12 +100,12 @@ public class ServerConfig {
 
                 ).tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
-                                .introspectionRequestConverter(httpServletRequest -> new Oauth2OpaqueTokenAuthenticationProvider(
+                                .introspectionRequestConverter(httpServletRequest -> new KnifeOauth2OpaqueTokenAuthenticationProvider(
                                         tokenIntrospector(
                                                 authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
                                         ),authorizationService, conditionalDetailsService
                                 ).convert(httpServletRequest))
-                                .authenticationProvider(new Oauth2OpaqueTokenAuthenticationProvider(
+                                .authenticationProvider(new KnifeOauth2OpaqueTokenAuthenticationProvider(
                                         tokenIntrospector(
                                                 authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
                                         ),authorizationService, conditionalDetailsService
@@ -137,7 +142,9 @@ public class ServerConfig {
     @Order(2)
     public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, OAuth2AuthorizationServiceImpl authorizationService,
                                                                  ConditionalDetailsService conditionalDetailsService,
-                                                                 HandlerExceptionResolver handlerExceptionResolver, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService
+                                                                 ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
+                                                                 AuthenticationEntryPoint iAuthenticationEntryPoint,
+                                                                 AccessDeniedHandler iAccessDeniedHandler
     ) throws Exception {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
@@ -146,7 +153,7 @@ public class ServerConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenResolver(resolver)
-                        .authenticationEntryPoint(new AuthenticationEntryPointToGlobalExceptionHandler(handlerExceptionResolver))
+                        .authenticationEntryPoint(iAuthenticationEntryPoint).accessDeniedHandler(iAccessDeniedHandler)
                         .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService))));
 
         return http.build();
@@ -165,9 +172,35 @@ public class ServerConfig {
         return new DefaultSecurityMessageServiceImpl();
     }
 
+
+    /*
+     *    Auth
+     * */
     @Bean
     @ConditionalOnMissingBean(AuthenticationFailureHandler.class)
     public AuthenticationFailureHandler iAuthenticationFailureHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
         return new DefaultAuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService);
     }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationSuccessHandler.class)
+    public AuthenticationSuccessHandler iAuthenticationSuccessHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultAuthenticationSuccessHandlerImpl(iSecurityUserExceptionMessageService);
+    }
+
+
+    /*
+     *    Resource
+     * */
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationEntryPoint.class)
+    public AuthenticationEntryPoint iAuthenticationEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        return new DefaultAuthenticationEntryPoint(resolver);
+    }
+    @Bean
+    @ConditionalOnMissingBean(AccessDeniedHandler.class)
+    public AccessDeniedHandler iAccessDeniedHandler(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        return new DefaultAccessDeniedHandler(resolver);
+    }
+
 }

@@ -1,9 +1,9 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.logger.module.CustomSecurityLogConfig;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.util.KnifeHttpHeaders;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.authentication.OAuth2AuthorizationBuildingService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2AuthorizationCycle {
 
-     private static final Logger logger = LoggerFactory.getLogger(CustomSecurityLogConfig.class);
+     private static final Logger logger = LoggerFactory.getLogger(KnifeSecurityLogConfig.class);
 
      private final OAuth2AuthorizationBuildingService oAuth2AuthorizationBuildingService;
      private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;

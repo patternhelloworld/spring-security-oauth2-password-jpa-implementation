@@ -2,9 +2,9 @@ package com.patternknife.securityhelper.oauth2.client.config.securityimpl.aop;
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthRefreshToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.OauthClientDetail;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthRefreshToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class SecurityPointCutImpl implements SecurityPointCut {
 
     @Override
-    public <T> @Nullable T afterTokensSaved(@Nullable CustomOauthAccessToken customOauthAccessToken, @Nullable CustomOauthRefreshToken customOauthRefreshToken, @Nullable OauthClientDetail oauthClientDetail) {
+    public <T> @Nullable T afterTokensSaved(@Nullable KnifeOauthAccessToken knifeOauthAccessToken, @Nullable KnifeOauthRefreshToken knifeOauthRefreshToken, @Nullable KnifeOauthClientDetail knifeOauthClientDetail) {
 
         // Implement what you need right after tokens are persisted.
         return null;

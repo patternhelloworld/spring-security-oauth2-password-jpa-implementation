@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.integration.auth;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.util.KnifeHttpHeaders;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.message.CustomSecurityUserExceptionMessage;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;

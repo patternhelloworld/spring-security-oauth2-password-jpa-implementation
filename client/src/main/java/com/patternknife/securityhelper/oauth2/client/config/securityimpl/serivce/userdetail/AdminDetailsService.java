@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.OauthClientDetailRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
 
@@ -34,16 +34,16 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     private final JPAQueryFactory jpaQueryFactory;
 
     private final AdminRepository adminRepository;
-    private final OauthClientDetailRepository oauthClientDetailRepository;
+    private final KnifeOauthClientDetailRepository knifeOauthClientDetailRepository;
 
     private EntityManager entityManager;
 
     public AdminDetailsService(AdminRepository adminRepository,
-                               @Qualifier("authJpaQueryFactory") JPAQueryFactory jpaQueryFactory, OauthClientDetailRepository oauthClientDetailRepository) {
+                               @Qualifier("authJpaQueryFactory") JPAQueryFactory jpaQueryFactory, KnifeOauthClientDetailRepository knifeOauthClientDetailRepository) {
         super(Admin.class);
         this.adminRepository = adminRepository;
         this.jpaQueryFactory = jpaQueryFactory;
-        this.oauthClientDetailRepository = oauthClientDetailRepository;
+        this.knifeOauthClientDetailRepository = knifeOauthClientDetailRepository;
     }
 
     @Override

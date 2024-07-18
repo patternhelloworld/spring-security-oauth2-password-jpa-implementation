@@ -1,8 +1,8 @@
 package io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.service;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.logger.module.CustomSecurityLogConfig;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -38,7 +38,7 @@ import java.util.Objects;
 @Service
 public class TraditionalOauthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CustomSecurityLogConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(KnifeSecurityLogConfig.class);
 
     private final RegisteredClientRepositoryImpl registeredClientRepository;
 

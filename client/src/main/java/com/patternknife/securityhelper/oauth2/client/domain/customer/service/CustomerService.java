@@ -1,9 +1,9 @@
 package com.patternknife.securityhelper.oauth2.client.domain.customer.service;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthAccessTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.CustomOauthRefreshTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.CustomOauthAccessToken;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthAccessTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthRefreshTokenRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 import com.patternknife.securityhelper.oauth2.client.util.CustomUtils;
@@ -30,8 +30,8 @@ public class CustomerService  {
     private final CustomerRepositorySupport customerRepositorySupport;
 
 
-    private final CustomOauthAccessTokenRepository customOauthAccessTokenRepository;
-    private final CustomOauthRefreshTokenRepository customOauthRefreshTokenRepository;
+    private final KnifeOauthAccessTokenRepository knifeOauthAccessTokenRepository;
+    private final KnifeOauthRefreshTokenRepository knifeOauthRefreshTokenRepository;
 
 
     @Value("${spring.jpa.properties.hibernate.dialect}")
@@ -47,13 +47,13 @@ public class CustomerService  {
     public void deleteCustomer(Long id, Long adminId){
         Customer customer = customerRepositorySupport.findById(id);
 
-        List<CustomOauthAccessToken> customOauthAccessTokens = customOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
+        List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
 
-        for (CustomOauthAccessToken customOauthAccessToken : customOauthAccessTokens) {
-            customOauthRefreshTokenRepository.deleteById(customOauthAccessToken.getRefreshToken());
+        for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
+            knifeOauthRefreshTokenRepository.deleteById(knifeOauthAccessToken.getRefreshToken());
         }
 
-        customOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
+        knifeOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
 
         customerRepositorySupport.deleteOne(id, adminId);
     }
@@ -66,13 +66,13 @@ public class CustomerService  {
 
         Customer customer = customerRepositorySupport.findById(accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
 
-        List<CustomOauthAccessToken> customOauthAccessTokens = customOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
+        List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
 
-        for (CustomOauthAccessToken customOauthAccessToken : customOauthAccessTokens) {
-            customOauthRefreshTokenRepository.deleteById(customOauthAccessToken.getRefreshToken());
+        for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
+            knifeOauthRefreshTokenRepository.deleteById(knifeOauthAccessToken.getRefreshToken());
         }
 
-        customOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
+        knifeOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
 
         // The criteria for a member withdrawal is the presence of values in the deleted_at and deleted_ci columns. Additionally, such users are considered withdrawn members and cannot be restored by the administrator.
         customer.setDeletedAt(LocalDateTime.now());

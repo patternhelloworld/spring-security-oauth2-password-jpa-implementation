@@ -1,8 +1,8 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.dto.ErrorMessages;
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
@@ -29,7 +29,7 @@ import java.util.Objects;
 
 
 @AllArgsConstructor
-public class KnifeOauth2AuthenticationProvider implements AuthenticationProvider {
+public final class KnifeOauth2AuthenticationProvider implements AuthenticationProvider {
 
     private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
     private final ConditionalDetailsService conditionalDetailsService;

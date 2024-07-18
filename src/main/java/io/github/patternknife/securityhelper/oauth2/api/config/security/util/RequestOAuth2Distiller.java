@@ -1,8 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.util;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.response.error.exception.auth.KnifeOauth2AuthenticationException;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.bo.BasicTokenResolver;
 
 import jakarta.servlet.http.HttpServletRequest;
