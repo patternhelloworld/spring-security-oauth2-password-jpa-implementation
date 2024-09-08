@@ -2,9 +2,10 @@
 ## Overview
 
 * Complete separation of the library (API) and the client for testing it
+* [NOTICE] Currently the artifact below is NOT available temporarily due to a verification issue.
 ```xml
 <dependency>
-    <groupId>com.github.patternknife.securityhelper.oauth2.api</groupId>
+    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
     <version>2.8.1</version>
 </dependency>
@@ -77,8 +78,8 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 
 ```java
 
-// ADD 'com.github.patternknife.securityhelper.oauth2.api'
-@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "com.github.patternknife.securityhelper.oauth2.api"})
+// ADD 'io.github.patternknife.securityhelper.oauth2.api'
+@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "io.github.patternknife.securityhelper.oauth2.api"})
 public class SpringSecurityOauth2PasswordJpaImplApplication {
 
     public static void main(String[] args) {
@@ -90,25 +91,25 @@ public class SpringSecurityOauth2PasswordJpaImplApplication {
 
 ```java
 @Configuration
-// ADD 'com.github.patternknife.securityhelper.oauth2.api.config.security'
+// ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
 @EnableJpaRepositories(
         basePackages = {"com.patternknife.securityhelper.oauth2.client.domain",
                 "com.patternknife.securityhelper.oauth2.client.config.securityimpl",
-                "com.github.patternknife.securityhelper.oauth2.api.config.security"},
+                "io.github.patternknife.securityhelper.oauth2.api.config.security"},
         entityManagerFactoryRef = "commonEntityManagerFactory",
         transactionManagerRef= "commonTransactionManager"
 )
 public class CommonDataSourceConfiguration {
     
 
-   // ADD 'com.github.patternknife.securityhelper.oauth2.api.config.security'
+   // ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
     @Primary
     @Bean(name = "commonEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean commonEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(commonDataSource())
                 .packages("com.patternknife.securityhelper.oauth2.client.domain",
-                        "com.github.patternknife.securityhelper.oauth2.api.config.security")
+                        "io.github.patternknife.securityhelper.oauth2.api.config.security")
                 .persistenceUnit("commonEntityManager")
                 .build();
     }

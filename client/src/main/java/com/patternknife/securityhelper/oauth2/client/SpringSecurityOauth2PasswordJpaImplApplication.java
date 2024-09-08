@@ -7,7 +7,7 @@ import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 
-@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "com.github.patternknife.securityhelper.oauth2.api"})
+@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "io.github.patternknife.securityhelper.oauth2.api"})
 public class SpringSecurityOauth2PasswordJpaImplApplication {
 
     @PostConstruct

@@ -2,12 +2,12 @@ package com.patternknife.securityhelper.oauth2.client.config.securityimpl.respon
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
-import com.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import com.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
-import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
-import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
+import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.io.IOException;
 /*
  *
  *   Customize the exception payload by implementing this, which replaces
- *          'com.github.patternknife.securityhelper.oauth2.api.security.response.auth.authentication.CustomAuthenticationFailureHandlerImpl'
+ *          'io.github.patternknife.securityhelper.oauth2.api.security.response.auth.authentication.CustomAuthenticationFailureHandlerImpl'
  *
  * */
 @Configuration
