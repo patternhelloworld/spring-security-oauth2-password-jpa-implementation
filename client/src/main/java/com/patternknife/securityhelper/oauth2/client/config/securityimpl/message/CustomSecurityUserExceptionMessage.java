@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.message;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ExceptionMessageInterface;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.message.ExceptionMessageInterface;
 
 public enum CustomSecurityUserExceptionMessage implements ExceptionMessageInterface {
 

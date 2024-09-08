@@ -2,8 +2,8 @@ package com.patternknife.securityhelper.oauth2.client.config.response.error.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.patternknife.securityhelper.oauth2.api.config.util.TimestampUtil;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import com.github.patternknife.securityhelper.oauth2.api.config.util.TimestampUtil;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
 
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;

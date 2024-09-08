@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error.message;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ExceptionMessageInterface;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.message.ExceptionMessageInterface;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

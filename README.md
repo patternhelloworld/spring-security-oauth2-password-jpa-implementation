@@ -4,9 +4,9 @@
 * Complete separation of the library (API) and the client for testing it
 ```xml
 <dependency>
-    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
+    <groupId>com.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.8.0</version>
+    <version>2.8.1</version>
 </dependency>
 ```
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
@@ -77,8 +77,8 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 
 ```java
 
-// ADD 'io.github.patternknife.securityhelper.oauth2.api'
-@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "io.github.patternknife.securityhelper.oauth2.api"})
+// ADD 'com.github.patternknife.securityhelper.oauth2.api'
+@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "com.github.patternknife.securityhelper.oauth2.api"})
 public class SpringSecurityOauth2PasswordJpaImplApplication {
 
     public static void main(String[] args) {
@@ -90,25 +90,25 @@ public class SpringSecurityOauth2PasswordJpaImplApplication {
 
 ```java
 @Configuration
-// ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
+// ADD 'com.github.patternknife.securityhelper.oauth2.api.config.security'
 @EnableJpaRepositories(
         basePackages = {"com.patternknife.securityhelper.oauth2.client.domain",
                 "com.patternknife.securityhelper.oauth2.client.config.securityimpl",
-                "io.github.patternknife.securityhelper.oauth2.api.config.security"},
+                "com.github.patternknife.securityhelper.oauth2.api.config.security"},
         entityManagerFactoryRef = "commonEntityManagerFactory",
         transactionManagerRef= "commonTransactionManager"
 )
 public class CommonDataSourceConfiguration {
     
 
-   // ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
+   // ADD 'com.github.patternknife.securityhelper.oauth2.api.config.security'
     @Primary
     @Bean(name = "commonEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean commonEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(commonDataSource())
                 .packages("com.patternknife.securityhelper.oauth2.client.domain",
-                        "io.github.patternknife.securityhelper.oauth2.api.config.security")
+                        "com.github.patternknife.securityhelper.oauth2.api.config.security")
                 .persistenceUnit("commonEntityManager")
                 .build();
     }

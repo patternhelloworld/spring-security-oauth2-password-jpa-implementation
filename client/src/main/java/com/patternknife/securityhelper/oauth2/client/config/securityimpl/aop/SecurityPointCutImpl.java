@@ -1,10 +1,10 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.aop;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthRefreshToken;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthRefreshToken;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;

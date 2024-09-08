@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 @EnableJpaRepositories(
         basePackages = {"com.patternknife.securityhelper.oauth2.client.domain",
                 "com.patternknife.securityhelper.oauth2.client.config.securityimpl",
-                "io.github.patternknife.securityhelper.oauth2.api.config.security"},
+                "com.github.patternknife.securityhelper.oauth2.api.config.security"},
         entityManagerFactoryRef = "commonEntityManagerFactory",
         transactionManagerRef= "commonTransactionManager"
 )
@@ -49,7 +49,7 @@ public class CommonDataSourceConfiguration {
         return builder
                 .dataSource(commonDataSource())
                 .packages("com.patternknife.securityhelper.oauth2.client.domain",
-                        "io.github.patternknife.securityhelper.oauth2.api.config.security")
+                        "com.github.patternknife.securityhelper.oauth2.api.config.security")
                 .persistenceUnit("commonEntityManager")
                 .build();
     }

@@ -4,15 +4,13 @@ package com.patternknife.securityhelper.oauth2.client.config.response.error;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
 
 import com.patternknife.securityhelper.oauth2.client.config.response.error.message.GeneralErrorMessage;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.OrderConstants;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
+import com.github.patternknife.securityhelper.oauth2.api.config.security.util.OrderConstants;
 import lombok.RequiredArgsConstructor;;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +25,9 @@ import org.springframework.web.context.request.WebRequest;
 /*
  *
  *   Customize the exception payload by implementing this, which replaces
- *          'io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler'
+ *          'com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler'
  *
- *   Once you create 'GlobalExceptionHandler', you should insert the following two (authenticationException, authorizationException)  as default. Otherwise, 'unhandledExceptionHandler' is prior to 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler'.
+ *   Once you create 'GlobalExceptionHandler', you should insert the following two (authenticationException, authorizationException)  as default. Otherwise, 'unhandledExceptionHandler' is prior to 'com.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler'.
  *   "OrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER - 1" means this is prior to "SecurityKnifeExceptionHandler"
  * */
 @Order(OrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER - 1)
