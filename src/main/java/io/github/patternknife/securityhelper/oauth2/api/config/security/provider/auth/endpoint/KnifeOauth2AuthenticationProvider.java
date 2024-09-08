@@ -6,7 +6,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.response
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.CustomGrantAuthenticationToken;
@@ -33,7 +33,7 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
 
     private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
     private final ConditionalDetailsService conditionalDetailsService;
-    private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
+    private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 

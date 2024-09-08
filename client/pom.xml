@@ -7,7 +7,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.patternknife.securityhelper.oauth2.client</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation-client</artifactId>
-    <version>2.7.0</version>
+    <version>2.8.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -19,8 +19,15 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <querydsl.version>5.0.0</querydsl.version>
-        <spring-restdocs.version>3.0.0</spring-restdocs.version>
+        <!-- The versions indicated are just the same as ones in spring-boot-dependencies. In the 1) 'build' section and 2) one with ;<classifier>jakarta</classifier>' don't automatically recognize the dependency management. -->
+        <spring-boot-dependencies.version>3.3.2</spring-boot-dependencies.version>
+        <querydsl.version>5.1.0</querydsl.version>
+        <slf4j.version>2.0.7</slf4j.version>
+        <querydsl.version>5.1.0</querydsl.version>
+        <spring-restdocs.version>3.0.1</spring-restdocs.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -29,19 +36,19 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.1.2</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
+
         <dependency>
             <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
             <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-            <version>2.7.0</version>
+            <version>2.8.0</version>
         </dependency>
 
         <!-- DB -->
@@ -58,25 +65,52 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <scope>runtime</scope>
         </dependency>
 
+        <!-- 1. Necessary Libraries -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <optional>true</optional>
+        </dependency>
+        <!-- Expose API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
+        </dependency>
+        <!-- Text Utils -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
+        </dependency>
+        <!-- Validation -->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
-        <!-- ORM -->
+        <!-- 2. This module uses JPA and QueryDSL -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-core</artifactId>
-            <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -89,89 +123,62 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             </exclusions>
         </dependency>
 
-
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <classifier>jakarta</classifier>
         </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
-            <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql-spring</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
-
-        <!-- Expose API -->
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
-        <!-- spring-security & spring-security-oauth2-authorization-server -->
+        <!-- 3. spring-security & spring-security-oauth2-authorization-server -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
-            <version>1.2.3</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
-        <!-- https://mvnrepository.com/artifact/com.warrenstrange/googleauth -->
-        <dependency>
-            <groupId>com.warrenstrange</groupId>
-            <artifactId>googleauth</artifactId>
-            <version>1.5.0</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
-
-        <!--TEST-->
+        <!--4. TEST-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.restdocs</groupId>
             <artifactId>spring-restdocs-mockmvc</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
-        </dependency>
-
-        <!-- Validation -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
 
@@ -184,12 +191,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <optional>true</optional>
         </dependency>
 
@@ -202,6 +211,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
                 <configuration>
                     <executable>true</executable>
                 </configuration>
@@ -225,7 +235,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                 <dependency>
                     <groupId>com.querydsl</groupId>
                     <artifactId>querydsl-apt</artifactId>
-                    <version>5.0.0</version>
+                    <version>${querydsl.version}</version>
                     <classifier>jakarta</classifier>
                     <scope>runtime</scope>
                     <exclusions>
@@ -264,7 +274,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
+                <version>${maven-resources-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -290,7 +300,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/SecretCustomerIntegrationTest.java</exclude>

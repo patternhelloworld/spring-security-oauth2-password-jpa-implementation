@@ -103,14 +103,14 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @GetMapping("/customers/{id}")
-    public @Nullable CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable final long id)
+    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id)
             throws ResourceNotFoundException {
-        return null;
+        return new CustomerResDTO.Id(id);
     }
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PutMapping("/customers/{id}")
-    public CustomerResDTO.Id update(@PathVariable final long id, @Valid @RequestBody final CustomerReqDTO.Update dto)
+    public CustomerResDTO.Id update(@PathVariable("id") final long id, @Valid @RequestBody final CustomerReqDTO.Update dto)
             throws ResourceNotFoundException {
         return customerService.update(id, dto);
     }

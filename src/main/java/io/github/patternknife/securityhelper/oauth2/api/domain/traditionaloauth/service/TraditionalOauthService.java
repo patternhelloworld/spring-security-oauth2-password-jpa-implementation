@@ -7,7 +7,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.response
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
@@ -47,7 +47,7 @@ public class TraditionalOauthService {
     private final ConditionalDetailsService conditionalDetailsService;
 
     private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
-    private final Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
+    private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
@@ -56,7 +56,7 @@ public class TraditionalOauthService {
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
                                    CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
-                                   Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
+                                   DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
                                    ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
         this.registeredClientRepository = registeredClientRepository;

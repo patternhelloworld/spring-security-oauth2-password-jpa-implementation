@@ -13,7 +13,8 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.provider
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.KnifeOauth2OpaqueTokenAuthenticationProvider;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.Oauth2AuthenticationHashCheckService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.IOauth2AuthenticationHashCheckService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -52,6 +54,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class ServerConfig {
 
+    @Primary
     @Bean
     public OAuth2TokenGenerator<OAuth2Token> tokenGenerator() {
         OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
@@ -67,7 +70,7 @@ public class ServerConfig {
             CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
             OAuth2AuthorizationServiceImpl authorizationService,
             ConditionalDetailsService conditionalDetailsService,
-            Oauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
+            DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
             RegisteredClientRepositoryImpl registeredClientRepository,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
@@ -75,7 +78,7 @@ public class ServerConfig {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
-        http.apply(authorizationServerConfigurer);
+        http.with(authorizationServerConfigurer, Customizer.withDefaults());
 
         authorizationServerConfigurer
                 .clientAuthentication(clientAuthentication ->
@@ -142,7 +145,6 @@ public class ServerConfig {
                                                                  ConditionalDetailsService conditionalDetailsService,
                                                                  ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
                                                                  AuthenticationEntryPoint iAuthenticationEntryPoint
-
     ) throws Exception {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
@@ -184,6 +186,11 @@ public class ServerConfig {
     @ConditionalOnMissingBean(AuthenticationSuccessHandler.class)
     public AuthenticationSuccessHandler iAuthenticationSuccessHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
         return new DefaultAuthenticationSuccessHandlerImpl(iSecurityUserExceptionMessageService);
+    }
+    @Bean
+    @ConditionalOnMissingBean(IOauth2AuthenticationHashCheckService.class)
+    public IOauth2AuthenticationHashCheckService iOauth2AuthenticationHashCheckService(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultOauth2AuthenticationHashCheckService(passwordEncoder(), iSecurityUserExceptionMessageService);
     }
 
 

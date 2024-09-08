@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class Oauth2AuthenticationHashCheckService {
+public class DefaultOauth2AuthenticationHashCheckService implements IOauth2AuthenticationHashCheckService {
 
     private final PasswordEncoder passwordEncoder;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;

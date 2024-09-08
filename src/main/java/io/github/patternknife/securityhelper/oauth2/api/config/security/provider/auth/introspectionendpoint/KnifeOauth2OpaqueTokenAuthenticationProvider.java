@@ -66,7 +66,6 @@ public final class KnifeOauth2OpaqueTokenAuthenticationProvider implements Authe
                     }
                 }
 
-                this.logger.debug("Authenticated token");
                 return result;
             }
         }

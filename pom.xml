@@ -8,7 +8,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.7.0</version>
+    <version>2.8.0</version>
     <name>spring-security-oauth2-password-jpa-implementation</name>
     <description>The implementation of Spring Security 6 Spring Authorization Server for stateful OAuth2 Password Grant</description>
     <packaging>jar</packaging>
@@ -51,12 +51,29 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-boot-dependencies.version>3.1.2</spring-boot-dependencies.version>
-        <querydsl.version>5.0.0</querydsl.version>
-        <spring-restdocs.version>3.0.0</spring-restdocs.version>
-        <spring-security.version>6.1.2</spring-security.version>
+        <!-- The versions indicated are just the same as ones in spring-boot-dependencies. In the 1) 'build' section and 2) one with ;<classifier>jakarta</classifier>' don't automatically recognize the dependency management. -->
+        <spring-boot-dependencies.version>3.3.2</spring-boot-dependencies.version>
+        <querydsl.version>5.1.0</querydsl.version>
         <slf4j.version>2.0.7</slf4j.version>
+        <querydsl.version>5.1.0</querydsl.version>
+        <spring-restdocs.version>3.0.1</spring-restdocs.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
     <dependencies>
@@ -66,14 +83,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <optional>true</optional>
         </dependency>
         <!-- Expose API -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <!-- Text Utils -->
         <dependency>
@@ -84,14 +101,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <!-- Validation -->
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
@@ -100,13 +117,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-core</artifactId>
-            <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -123,18 +140,19 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <classifier>jakarta</classifier>
         </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
-            <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql-spring</artifactId>
-            <version>${querydsl.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
@@ -143,13 +161,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
-            <version>1.2.3</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
@@ -158,24 +176,23 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>${spring-security.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.restdocs</groupId>
             <artifactId>spring-restdocs-mockmvc</artifactId>
-            <version>${spring-restdocs.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <scope>test</scope>
         </dependency>
-
 
 
         <dependency>
@@ -187,14 +204,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
+            <!-- Follow ${spring-boot-dependencies.version} -->
             <optional>true</optional>
         </dependency>
 
@@ -218,6 +235,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
                 <configuration>
                     <executable>true</executable>
                 </configuration>
@@ -238,19 +256,19 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                     </execution>
                 </executions>
                 <dependencies>
-                <dependency>
-                    <groupId>com.querydsl</groupId>
-                    <artifactId>querydsl-apt</artifactId>
-                    <version>5.0.0</version>
-                    <classifier>jakarta</classifier>
-                    <scope>runtime</scope>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>com.google.guava</groupId>
-                            <artifactId>guava</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
+                    <dependency>
+                        <groupId>com.querydsl</groupId>
+                        <artifactId>querydsl-apt</artifactId>
+                        <version>${querydsl.version}</version>
+                        <classifier>jakarta</classifier>
+                        <scope>runtime</scope>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>com.google.guava</groupId>
+                                <artifactId>guava</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
                 </dependencies>
             </plugin>
             <plugin>
@@ -280,7 +298,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
+                <version>${maven-resources-plugin.version}</version>
+                <!-- Follow ${spring-boot-dependencies.version} -->
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -306,7 +325,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/SecretCustomerIntegrationTest.java</exclude>
@@ -316,7 +335,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>${maven-resources-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -329,7 +348,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>${maven-javadoc-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -340,36 +359,36 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                     </execution>
                 </executions>
             </plugin>
-<!--           <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                        <configuration>
-                            <gpgArguments>
-                                <arg>&#45;&#45;pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.4.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <tokenAuth>true</tokenAuth>
-                </configuration>
-            </plugin>
+            <!--           <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-gpg-plugin</artifactId>
+                            <version>3.0.1</version>
+                            <executions>
+                                <execution>
+                                    <id>sign-artifacts</id>
+                                    <phase>verify</phase>
+                                    <goals>
+                                        <goal>sign</goal>
+                                    </goals>
+                                    <configuration>
+                                        <gpgArguments>
+                                            <arg>&#45;&#45;pinentry-mode</arg>
+                                            <arg>loopback</arg>
+                                        </gpgArguments>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.sonatype.central</groupId>
+                            <artifactId>central-publishing-maven-plugin</artifactId>
+                            <version>0.4.0</version>
+                            <extensions>true</extensions>
+                            <configuration>
+                                <publishingServerId>central</publishingServerId>
+                                <tokenAuth>true</tokenAuth>
+                            </configuration>
+                        </plugin>-->
         </plugins>
     </build>
 </project>
