@@ -48,7 +48,7 @@
 | Category          | Dependencies                                                      |
 |-------------------|-------------------------------------------------------------------|
 | Backend-Language  | Java 17                                                           |
-| Backend-Framework | Spring Boot 3.1.2                                                 |
+| Backend-Framework | Spring Boot 3.3.2                                                 |
 | Main Libraries    | Spring Security 6.1.2, Spring Security Authorization Server 1.2.3 |
 | Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                    |
 | RDBMS             | Mysql 8.0.17                                                      |
