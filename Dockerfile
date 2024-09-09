@@ -1,4 +1,4 @@
-FROM maven:3.6.3-jdk-8-slim AS build
+FROM maven:3.6.3-openjdk-17-slim AS build
 
 ARG PROJECT_ROOT_IN_CONTAINER
 
