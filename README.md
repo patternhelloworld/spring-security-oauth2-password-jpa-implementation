@@ -2,7 +2,7 @@
 ## Overview
 
 * Complete separation of the library (API) and the client for testing it
-* [NOTICE] Currently the artifact below is NOT available temporarily due to a verification issue.
+
 ```xml
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
