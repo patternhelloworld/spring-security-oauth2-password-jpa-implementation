@@ -1,8 +1,8 @@
 # Spring Security Oauth2 Password JPA Implementation
-## Overview
 
-* Complete separation of the library (API) and the client for testing it
+> One OAuth2 ROPC POC built to grow with Spring Boot and ORM
 
+## Quick Start
 ```xml
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
@@ -10,6 +10,11 @@
     <version>3.0.0</version>
 </dependency>
 ```
+
+## Overview
+
+* Complete separation of the library (API) and the client for testing it
+
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
     * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
@@ -50,7 +55,7 @@
 | Category          | Dependencies                                                      |
 |-------------------|-------------------------------------------------------------------|
 | Backend-Language  | Java 17                                                           |
-| Backend-Framework | Spring Boot 3.3.2                                                 |
+| Backend-Framework | Spring Boot 3.3.2 (the latest version)                            |
 | Main Libraries    | Spring Security 6.3.1, Spring Security Authorization Server 1.3.1 |
 | Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                    |
 | RDBMS             | Mysql 8.0.17                                                      |
@@ -150,6 +155,9 @@ public class CommonDataSourceConfiguration {
   - **Customize the whole success payload as desired for the only "/oauth2/token"**
       - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
       - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto`` and is not yet customizable.
+
+ - **Customize the verification logic for UsernamePassword and Client as desired**
+    - ``IOauth2AuthenticationHashCheckService``
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:

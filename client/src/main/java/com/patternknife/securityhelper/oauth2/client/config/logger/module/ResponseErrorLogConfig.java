@@ -4,7 +4,7 @@ import com.patternknife.securityhelper.oauth2.client.config.response.error.Globa
 import com.patternknife.securityhelper.oauth2.client.config.logger.common.CommonLoggingRequest;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -31,7 +31,7 @@ public class ResponseErrorLogConfig {
         try {
             if (p.getTarget().getClass().equals(GlobalExceptionHandler.class)) {
 
-                ErrorResponsePayload errorResponsePayload = (ErrorResponsePayload) ((ResponseEntity) returnValue).getBody();
+                SecurityKnifeErrorResponsePayload errorResponsePayload = (SecurityKnifeErrorResponsePayload) ((ResponseEntity) returnValue).getBody();
                 loggedText += String.format("[After - Error Response]\n message : %s || \n userMessage : %s || \n cause : %s || \n stackTrace : %s",
                         errorResponsePayload != null ? errorResponsePayload.getMessage() : "No error message",
                         errorResponsePayload != null ? errorResponsePayload.getUserMessage() : "No error userMessage",

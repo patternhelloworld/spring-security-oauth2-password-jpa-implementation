@@ -4,7 +4,7 @@ import com.patternknife.securityhelper.oauth2.client.config.logger.common.Common
 
 import com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseSuccessLogConfig;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class CustomExceptionUtils {
         } catch (Exception ex2) {
             logger.error(ex2.getMessage());
         } finally {
-            ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
+            SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
                     message, "", "");
 
             logger.error(" / " + errorResponsePayload.toString());
@@ -46,7 +46,7 @@ public class CustomExceptionUtils {
         } catch (Exception ex2) {
             logger.error(ex2.getMessage());
         } finally {
-            ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
+            SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
                     message, CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
 
             logger.error(" / " + errorResponsePayload.toString());

@@ -3,7 +3,7 @@ package com.patternknife.securityhelper.oauth2.client.config.response.error;
 
 import com.patternknife.securityhelper.oauth2.client.config.response.error.message.GeneralErrorMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -38,13 +38,13 @@ public class GlobalExceptionHandler {
     // 401 : Authentication
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<?> authenticationException(Exception ex, WebRequest request) {
-        ErrorResponsePayload errorResponsePayload;
+        SecurityKnifeErrorResponsePayload errorResponsePayload;
         if(ex instanceof KnifeOauth2AuthenticationException && ((KnifeOauth2AuthenticationException) ex).getErrorMessages() != null) {
-            errorResponsePayload = new ErrorResponsePayload(((KnifeOauth2AuthenticationException) ex).getErrorMessages(),
+            errorResponsePayload = new SecurityKnifeErrorResponsePayload(((KnifeOauth2AuthenticationException) ex).getErrorMessages(),
                     ex, request.getDescription(false), ExceptionKnifeUtils.getAllStackTraces(ex),
                     ExceptionKnifeUtils.getAllCauses(ex), null);
         }else {
-            errorResponsePayload = new ErrorResponsePayload(ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false), iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
+            errorResponsePayload = new SecurityKnifeErrorResponsePayload(ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false), iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
                     ex.getMessage(), ex.getStackTrace()[0].toString());
         }
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.UNAUTHORIZED);
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     // 403 : Authorization
     @ExceptionHandler({ AccessDeniedException.class })
     public ResponseEntity<?> authorizationException(Exception ex, WebRequest request) {
-        ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false),
+        SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(ex.getMessage() != null ? ex.getMessage() : ExceptionKnifeUtils.getAllCauses(ex), request.getDescription(false),
                 ex.getMessage() == null || ex.getMessage().equals("Access Denied") ? iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHORIZATION_FAILURE) : ex.getMessage(), ex.getStackTrace()[0].toString());
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.FORBIDDEN);
     }
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
     // Unhandled
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> unhandledExceptionHandler(Exception ex, WebRequest request) {
-        ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
+        SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
                 CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Map;
 
 @ToString
-public class ErrorResponsePayload {
+public class SecurityKnifeErrorResponsePayload {
 	private Date timestamp;
 
 	// Never to be returned to clients, but must be logged.
@@ -26,7 +26,7 @@ public class ErrorResponsePayload {
 	private String cause;
 
 
-	public ErrorResponsePayload(ErrorMessages errorMessages, Exception e, String details, String stackTrace, String userMessage, Map<String, String> userValidationMessage) {
+	public SecurityKnifeErrorResponsePayload(ErrorMessages errorMessages, Exception e, String details, String stackTrace, String userMessage, Map<String, String> userValidationMessage) {
 		this.timestamp = TimestampUtil.getPayloadTimestamp();
 		this.message = !StringUtils.isEmpty(errorMessages.getMessage()) ? errorMessages.getMessage() : e.getMessage() ;
 		this.details = details;
@@ -35,7 +35,7 @@ public class ErrorResponsePayload {
 		this.userValidationMessage = errorMessages.getUserValidationMessage() != null && !errorMessages.getUserValidationMessage().isEmpty() ? errorMessages.getUserValidationMessage() : userValidationMessage;
 	}
 
-	public ErrorResponsePayload(String message, String details, String userMessage, String stackTrace) {
+	public SecurityKnifeErrorResponsePayload(String message, String details, String userMessage, String stackTrace) {
 		this.timestamp = TimestampUtil.getPayloadTimestamp();
 		this.message = message;
 		this.details = details;
@@ -43,7 +43,7 @@ public class ErrorResponsePayload {
 		this.stackTrace = stackTrace;
 	}
 
-	public ErrorResponsePayload(String message, String details, String userMessage, String stackTrace, String cause) {
+	public SecurityKnifeErrorResponsePayload(String message, String details, String userMessage, String stackTrace, String cause) {
 		this.timestamp = TimestampUtil.getPayloadTimestamp();
 		this.message = message;
 		this.details = details;
@@ -52,8 +52,8 @@ public class ErrorResponsePayload {
 		this.cause = cause;
 	}
 
-	public ErrorResponsePayload(String message, String details, String userMessage, Map<String, String> userValidationMessage,
-								String stackTrace, String cause) {
+	public SecurityKnifeErrorResponsePayload(String message, String details, String userMessage, Map<String, String> userValidationMessage,
+											 String stackTrace, String cause) {
 
 		this.timestamp = TimestampUtil.getPayloadTimestamp();
 		this.message = message;
