@@ -10,6 +10,14 @@
     <version>3.0.0</version>
 </dependency>
 ```
+For v2, using the database tables from Spring Security 5 (only the database tables; follow the dependencies as above):
+```xml
+<dependency>
+    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
+    <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
+    <version>2.8.2</version>
+</dependency>
+```
 
 ## Overview
 
