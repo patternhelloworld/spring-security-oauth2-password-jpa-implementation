@@ -42,7 +42,7 @@ public class CustomAuthenticationKeyGenerator {
         }
     }
 
-    public static String hashTokenValueToTokenId(String value) {
+    public static String hashTokenValue(String value) {
         if(value == null) {
             return null;
         } else {

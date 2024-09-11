@@ -1,7 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
 
@@ -12,6 +11,7 @@ import com.patternknife.securityhelper.oauth2.client.domain.admin.entity.QAdmin;
 import com.patternknife.securityhelper.oauth2.client.domain.admin.entity.QAdminRole;
 import com.patternknife.securityhelper.oauth2.client.domain.role.entity.QRole;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeClientRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,16 +34,16 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     private final JPAQueryFactory jpaQueryFactory;
 
     private final AdminRepository adminRepository;
-    private final KnifeOauthClientDetailRepository knifeOauthClientDetailRepository;
+    private final KnifeClientRepository knifeClientRepository;
 
     private EntityManager entityManager;
 
     public AdminDetailsService(AdminRepository adminRepository,
-                               @Qualifier("authJpaQueryFactory") JPAQueryFactory jpaQueryFactory, KnifeOauthClientDetailRepository knifeOauthClientDetailRepository) {
+                               @Qualifier("authJpaQueryFactory") JPAQueryFactory jpaQueryFactory, KnifeClientRepository knifeClientRepository) {
         super(Admin.class);
         this.adminRepository = adminRepository;
         this.jpaQueryFactory = jpaQueryFactory;
-        this.knifeOauthClientDetailRepository = knifeOauthClientDetailRepository;
+        this.knifeClientRepository = knifeClientRepository;
     }
 
     @Override

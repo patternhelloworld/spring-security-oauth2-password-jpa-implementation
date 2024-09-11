@@ -91,7 +91,7 @@ public class CustomerIntegrationTest {
 
 
     @BeforeEach
-    public void setUp(RestDocumentationContextProvider restDocumentationContextProvide) throws UnsupportedEncodingException {
+    public void setUp(RestDocumentationContextProvider restDocumentationContextProvider) throws UnsupportedEncodingException {
 
         basicHeader = "Basic " + DatatypeConverter.printBase64Binary((appUserClientId + ":" + appUserClientSecret).getBytes("UTF-8"));
 

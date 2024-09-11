@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,19 +40,19 @@ public class CustomAuthenticationFailureHandlerImpl implements AuthenticationFai
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException {
 
-        ErrorResponsePayload errorResponsePayload;
+        SecurityKnifeErrorResponsePayload errorResponsePayload;
         String stackTraces = ExceptionKnifeUtils.getAllStackTraces(exception);
         if(exception instanceof KnifeOauth2AuthenticationException){
-            errorResponsePayload = new ErrorResponsePayload(((KnifeOauth2AuthenticationException) exception).getErrorMessages().getMessage(),
+            errorResponsePayload = new SecurityKnifeErrorResponsePayload(((KnifeOauth2AuthenticationException) exception).getErrorMessages().getMessage(),
                     "uri=" + request.getRequestURI(), ((KnifeOauth2AuthenticationException) exception).getErrorMessages().getUserMessage(), stackTraces);
         }else if(exception instanceof OAuth2AuthenticationException) {
-            errorResponsePayload = new ErrorResponsePayload(
+            errorResponsePayload = new SecurityKnifeErrorResponsePayload(
                     ((OAuth2AuthenticationException) exception).getError().getErrorCode() + " / " + ((OAuth2AuthenticationException) exception).getError().getDescription(),
                     "uri=" + request.getRequestURI(),
                     iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE),
                     stackTraces);
         }else{
-            errorResponsePayload = new ErrorResponsePayload(
+            errorResponsePayload = new SecurityKnifeErrorResponsePayload(
                     exception.getMessage(),
                     "uri=" + request.getRequestURI(),
                     iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR),

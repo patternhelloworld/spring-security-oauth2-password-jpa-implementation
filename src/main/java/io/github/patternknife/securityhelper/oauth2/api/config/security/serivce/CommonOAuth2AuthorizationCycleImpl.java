@@ -51,6 +51,11 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
 
                               logger.error("An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername() + "... Retrying up to 5 times.... (Count: " + retryLogin + ") - " + e.getMessage());
                               retryLogin += 1;
+
+                              if(retryLogin == 4){
+                                   throw e;
+                              }
+
                          }
                     }
                }
@@ -93,6 +98,10 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
 
                          logger.error("An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername() + "... Retrying up to 5 times.... (Count: " + retryLogin + ") - " + e.getMessage());
                          retryLogin += 1;
+
+                         if(retryLogin == 4){
+                              throw e;
+                         }
                     }
                }
 
