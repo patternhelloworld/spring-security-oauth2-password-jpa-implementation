@@ -18,20 +18,20 @@ public interface KnifeOauthAccessTokenRepository extends JpaRepository<KnifeOaut
     Optional<KnifeOauthAccessToken> findByTokenId(String tokenId);
     Optional<List<KnifeOauthAccessToken>> findAllByTokenId(String tokenId);
     @Modifying
-    @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
+    @Transactional( rollbackFor=Exception.class)
     void deleteByTokenId(String tokenId);
 
 
     Optional<KnifeOauthAccessToken> findByUserNameAndClientIdAndAppToken(String userName, String clientId, String appTokenValue);
     Optional<List<KnifeOauthAccessToken>> findListByUserNameAndClientIdAndAppToken(String userName, String clientId, String appTokenValue);
     @Modifying
-    @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
+    @Transactional( rollbackFor=Exception.class)
     void deleteByUserNameAndClientIdAndAppToken(String userName, String clientId, String appTokenValue);
 
 
 
     @Modifying
-    @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
+    @Transactional( rollbackFor=Exception.class)
     void deleteByUserName(String username);
 
 

@@ -16,7 +16,7 @@ public interface KnifeOauthRefreshTokenRepository extends JpaRepository<KnifeOau
     Optional<List<KnifeOauthRefreshToken>> findAllByTokenId(String tokenId);
 
     @Modifying
-    @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
+    @Transactional( rollbackFor=Exception.class)
     void deleteByTokenId(String tokenId);
 
 }
