@@ -3,7 +3,8 @@ package com.patternknife.securityhelper.oauth2.client.config.response.error;
 import com.patternknife.securityhelper.oauth2.client.config.logger.common.CommonLoggingRequest;
 
 import com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseSuccessLogConfig;
-import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
+
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,10 @@ public class CustomExceptionUtils {
         } catch (Exception ex2) {
             logger.error(ex2.getMessage());
         } finally {
-            CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
+            ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
                     message, "", "");
 
-            logger.error(" / " + customErrorResponsePayload.toString());
+            logger.error(" / " + errorResponsePayload.toString());
         }
 
     }
@@ -45,10 +46,10 @@ public class CustomExceptionUtils {
         } catch (Exception ex2) {
             logger.error(ex2.getMessage());
         } finally {
-            CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
+            ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(message, "Without error param " + " / Thread ID = " + Thread.currentThread().getId() + " / StackTrace",
                     message, CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
 
-            logger.error(" / " + customErrorResponsePayload.toString());
+            logger.error(" / " + errorResponsePayload.toString());
         }
 
     }

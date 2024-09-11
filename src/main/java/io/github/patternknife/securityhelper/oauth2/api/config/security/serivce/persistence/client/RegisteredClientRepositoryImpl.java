@@ -1,8 +1,10 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthClientDetailRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthClientDetail;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeClientRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeClient;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Repository;
 
+
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,27 +31,51 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
 
     private Map<String, @NotNull RegisteredClient> cachedRegisteredClientsByClientId = new HashMap<>();
 
-    private final KnifeOauthClientDetailRepository knifeOauthClientDetailRepository;
+    private final KnifeClientRepository knifeClientRepository;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
+
+    private Map<String, Object> parseMap(String data) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+    }
+
+    private String writeMap(Map<String, Object> data) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(data);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+    }
 
     @Override
     public void save(RegisteredClient registeredClient) {
 
-        KnifeOauthClientDetail detail = new KnifeOauthClientDetail();
-        detail.setClientId(registeredClient.getClientId());
-        detail.setClientSecret(registeredClient.getClientSecret());
-        detail.setScope(String.join(",", registeredClient.getScopes()));
+        KnifeClient knifeClient = new KnifeClient();
+
+        knifeClient.setId(UUID.randomUUID().toString());
+        knifeClient.setClientId(registeredClient.getClientId());
+        knifeClient.setClientSecret(registeredClient.getClientSecret());
+        knifeClient.setScopes(String.join(",", registeredClient.getScopes()));
 
         String grantTypes = registeredClient.getAuthorizationGrantTypes().stream()
                 .map(AuthorizationGrantType::getValue)
                 .collect(Collectors.joining(","));
-        detail.setAuthorizedGrantTypes(grantTypes);
+        knifeClient.setAuthorizationGrantTypes(grantTypes);
 
+        // Parse and set Client Settings
+        String clientSettingsJson = writeMap(registeredClient.getClientSettings().getSettings());
+        knifeClient.setClientSettings(clientSettingsJson);
 
-        detail.setAccessTokenValidity(registeredClient.getTokenSettings().getAccessTokenTimeToLive().getSeconds());
-        detail.setRefreshTokenValidity(registeredClient.getTokenSettings().getRefreshTokenTimeToLive().getSeconds());
+        // Parse and set Token Settings
+        String tokenSettingsJson = writeMap(registeredClient.getTokenSettings().getSettings());
+        knifeClient.setTokenSettings(tokenSettingsJson);
 
-        knifeOauthClientDetailRepository.save(detail);
+        knifeClientRepository.save(knifeClient);
 
         // Cache the registered client as long as the persistence logic above is successful.
         cachedRegisteredClientsByClientId.put(registeredClient.getClientId(), registeredClient);
@@ -56,7 +83,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
 
     @Override
     public @NotNull RegisteredClient findById(String id) throws KnifeOauth2AuthenticationException {
-        return knifeOauthClientDetailRepository.findById(id)
+        return knifeClientRepository.findById(id)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
@@ -83,7 +110,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
         }
 
 
-        return knifeOauthClientDetailRepository.findById(clientId)
+        return knifeClientRepository.findByClientId(clientId)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
                         new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
@@ -93,15 +120,16 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
 
-    private RegisteredClient mapToRegisteredClient(KnifeOauthClientDetail detail) {
-        Set<String> scopesSet = Arrays.stream(detail.getScope().split(","))
+    private RegisteredClient mapToRegisteredClient(KnifeClient detail) {
+        Set<String> scopesSet = Arrays.stream(detail.getScopes().split(","))
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
-        Set<AuthorizationGrantType> grantTypesSet = Arrays.stream(detail.getAuthorizedGrantTypes().split(","))
+        Set<AuthorizationGrantType> grantTypesSet = Arrays.stream(detail.getAuthorizationGrantTypes().split(","))
                 .map(String::trim)
                 .map(AuthorizationGrantType::new)
                 .collect(Collectors.toSet());
+
 
         return RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId(detail.getClientId())
@@ -112,18 +140,17 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .authorizationGrantTypes(grantTypes -> grantTypes.addAll(grantTypesSet))
                 .scopes(scopes -> scopes.addAll(scopesSet))
                 .redirectUri("")
-                // Add additional configurations as needed, e.g., redirectUris
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
-                        .accessTokenTimeToLive(Duration.ofSeconds(detail.getAccessTokenValidity()))
-                        .refreshTokenTimeToLive(Duration.ofSeconds(detail.getRefreshTokenValidity()))
+                        .accessTokenTimeToLive(Duration.ofSeconds(3600))
+                        .refreshTokenTimeToLive(Duration.ofSeconds(9900))
                         .build())
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()) // Adjust accordingly
                 .build();
     }
 
     public void cache() {
-        List<RegisteredClient> allClients = knifeOauthClientDetailRepository.findAll().stream()
+        List<RegisteredClient> allClients = knifeClientRepository.findAll().stream()
                 .map(this::mapToRegisteredClient)
                 .toList();
         // Cache all registered clients

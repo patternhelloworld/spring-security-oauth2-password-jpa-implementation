@@ -3,7 +3,8 @@ package com.patternknife.securityhelper.oauth2.client.config.logger.module;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.GlobalExceptionHandler;
 import com.patternknife.securityhelper.oauth2.client.config.logger.common.CommonLoggingRequest;
 
-import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
+
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -30,12 +31,12 @@ public class ResponseErrorLogConfig {
         try {
             if (p.getTarget().getClass().equals(GlobalExceptionHandler.class)) {
 
-                CustomErrorResponsePayload customErrorResponsePayload = (CustomErrorResponsePayload) ((ResponseEntity) returnValue).getBody();
+                ErrorResponsePayload errorResponsePayload = (ErrorResponsePayload) ((ResponseEntity) returnValue).getBody();
                 loggedText += String.format("[After - Error Response]\n message : %s || \n userMessage : %s || \n cause : %s || \n stackTrace : %s",
-                        customErrorResponsePayload != null ? customErrorResponsePayload.getMessage() : "No error message",
-                        customErrorResponsePayload != null ? customErrorResponsePayload.getUserMessage() : "No error userMessage",
-                        customErrorResponsePayload != null ? customErrorResponsePayload.getCause() : "No error detail cause",
-                        customErrorResponsePayload != null ? customErrorResponsePayload.getStackTrace() : "No error detail stack trace");
+                        errorResponsePayload != null ? errorResponsePayload.getMessage() : "No error message",
+                        errorResponsePayload != null ? errorResponsePayload.getUserMessage() : "No error userMessage",
+                        errorResponsePayload != null ? errorResponsePayload.getCause() : "No error detail cause",
+                        errorResponsePayload != null ? errorResponsePayload.getStackTrace() : "No error detail stack trace");
             }
         } catch (Exception ex4) {
 

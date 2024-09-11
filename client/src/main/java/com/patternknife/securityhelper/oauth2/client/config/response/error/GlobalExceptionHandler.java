@@ -1,8 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error;
 
 
-import com.patternknife.securityhelper.oauth2.client.config.response.error.dto.CustomErrorResponsePayload;
-
 import com.patternknife.securityhelper.oauth2.client.config.response.error.message.GeneralErrorMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorResponsePayload;
@@ -63,9 +61,9 @@ public class GlobalExceptionHandler {
     // Unhandled
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> unhandledExceptionHandler(Exception ex, WebRequest request) {
-        CustomErrorResponsePayload customErrorResponsePayload = new CustomErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
+        ErrorResponsePayload errorResponsePayload = new ErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
                 CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
-        return new ResponseEntity<>(customErrorResponsePayload, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponsePayload, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

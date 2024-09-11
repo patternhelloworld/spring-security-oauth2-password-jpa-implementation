@@ -1,15 +1,14 @@
 package com.patternknife.securityhelper.oauth2.client.domain.customer.service;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthAccessTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthRefreshTokenRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeOauthAccessToken;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepository;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepositorySupport;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerReqDTO;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerResDTO;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeAuthorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,10 +27,7 @@ public class CustomerService  {
 
     private final CustomerRepositorySupport customerRepositorySupport;
 
-
-    private final KnifeOauthAccessTokenRepository knifeOauthAccessTokenRepository;
-    private final KnifeOauthRefreshTokenRepository knifeOauthRefreshTokenRepository;
-
+    private final KnifeAuthorizationRepository knifeAuthorizationRepository;
 
     @Value("${spring.jpa.properties.hibernate.dialect}")
     String dbDialect;
@@ -46,13 +42,13 @@ public class CustomerService  {
     public void deleteCustomer(Long id, Long adminId){
         Customer customer = customerRepositorySupport.findById(id);
 
-        List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
+        List<KnifeAuthorization> knifeAuthorizations = knifeAuthorizationRepository.findByRegisteredClientIdAndPrincipalName(appUserClientId, customer.getIdName());
 
-        for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
-            knifeOauthRefreshTokenRepository.deleteById(knifeOauthAccessToken.getRefreshToken());
+        for (KnifeAuthorization knifeAuthorization : knifeAuthorizations) {
+            knifeAuthorizationRepository.deleteById(knifeAuthorization.getId());
         }
 
-        knifeOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
+        knifeAuthorizationRepository.deleteByPrincipalName(customer.getIdName());
 
         customerRepositorySupport.deleteOne(id, adminId);
     }
@@ -65,13 +61,14 @@ public class CustomerService  {
 
         Customer customer = customerRepositorySupport.findById(accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
 
-        List<KnifeOauthAccessToken> knifeOauthAccessTokens = knifeOauthAccessTokenRepository.findByClientIdAndUserName(appUserClientId, customer.getIdName());
 
-        for (KnifeOauthAccessToken knifeOauthAccessToken : knifeOauthAccessTokens) {
-            knifeOauthRefreshTokenRepository.deleteById(knifeOauthAccessToken.getRefreshToken());
+        List<KnifeAuthorization> knifeAuthorizations = knifeAuthorizationRepository.findByRegisteredClientIdAndPrincipalName(appUserClientId, customer.getIdName());
+
+        for (KnifeAuthorization knifeAuthorization : knifeAuthorizations) {
+            knifeAuthorizationRepository.deleteById(knifeAuthorization.getId());
         }
 
-        knifeOauthAccessTokenRepository.deleteByUserName(customer.getIdName());
+        knifeAuthorizationRepository.deleteByPrincipalName(customer.getIdName());
 
         // The criteria for a member withdrawal is the presence of values in the deleted_at and deleted_ci columns. Additionally, such users are considered withdrawn members and cannot be restored by the administrator.
         customer.setDeletedAt(LocalDateTime.now());

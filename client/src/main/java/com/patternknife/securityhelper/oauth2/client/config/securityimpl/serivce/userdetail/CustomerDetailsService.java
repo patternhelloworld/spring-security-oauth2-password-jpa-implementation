@@ -1,7 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeOauthClientDetailRepository;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.auth.UserDeletedException;
@@ -13,6 +12,7 @@ import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.QCus
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.QCustomerRole;
 import com.patternknife.securityhelper.oauth2.client.domain.role.entity.QRole;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeClientRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,15 +34,13 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     private final JPAQueryFactory jpaQueryFactory;
 
     private final CustomerRepository customerRepository;
-    private final KnifeOauthClientDetailRepository knifeOauthClientDetailRepository;
 
     private EntityManager entityManager;
 
-    public CustomerDetailsService (CustomerRepository customerRepository, KnifeOauthClientDetailRepository knifeOauthClientDetailRepository,
+    public CustomerDetailsService (CustomerRepository customerRepository,
                        @Qualifier("authJpaQueryFactory") JPAQueryFactory jpaQueryFactory) {
         super(Customer.class);
         this.customerRepository = customerRepository;
-        this.knifeOauthClientDetailRepository = knifeOauthClientDetailRepository;
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
