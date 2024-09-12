@@ -1,13 +1,13 @@
 # Spring Security Oauth2 Password JPA Implementation
 
-> One OAuth2 ROPC POC built to grow with Spring Boot and ORM
+> App-Token based OAuth2 ROPC POC built to grow with Spring Boot and ORM
 
 ## Quick Start
 ```xml
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.0.1</version>
+    <version>3.1.0</version>
 </dependency>
 ```
 For v2, using the database tables from Spring Security 5 (only the database tables; follow the dependencies as above):
@@ -52,6 +52,23 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
       
 * Authentication management based on a combination of username, client ID, and App-Token
   * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
+
+| App-Token Status       | Access Token Behavior      |
+|------------------------|----------------------------|
+| same for the same user | Access-Token is shared     |
+| different for the same user              | Access-Token is NOT shared |
+
+  * Set this in your ``application.properties``. 
+    * App-Token Behavior Based on `io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token`
+
+| `no-app-token-same-access-token` Value | App-Token Status                          | Access Token Sharing Behavior                                                                                     |
+|------------------------------------------------------------|-------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| `true`                                                     | App-Token is `null` for the same user     | Same user with a `null` App-Token shares the same access token across multiple logins.                             |
+| `false`                                                    | App-Token is `null` for the same user                       | Even if the App-Token is `null`, the same user will receive a new access token for each login.                     |
+| `-`                                                        | App-Token is shared for the same user     | Access tokens will not be shared. A new access token is generated for each unique App-Token, even for the same user.|
+| `-`                                                        | App-Token is NOT shared for the same user | Each unique App-Token generates a new access token for the same user.                                              |
+
+
 * Separated UserDetails implementation for Admin and Customer roles as an example. (This can be extended as desired by implementing ``UserDetailsServiceFactory``)
 * For versions greater than or equal to v3, including the latest version (Spring Security 6), provide MySQL DDL, which consists of ``oauth2_authorization`` and ``oauth2_registered_client``.
 * For v2 (Spring Security 5), provide MySQL DDL, which consists of ``oauth_access_token, oauth_refresh_token and oauth_client_details``, which are tables in Security 5. As I meant to migrate current security system to Security 6 back then, I hadn't changed them to the ``oauth2_authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.

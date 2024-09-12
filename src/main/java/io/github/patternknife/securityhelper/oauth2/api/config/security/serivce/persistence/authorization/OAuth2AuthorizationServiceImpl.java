@@ -11,19 +11,20 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
+
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 
-import java.time.Duration;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -34,6 +35,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     private final KnifeAuthorizationRepository knifeAuthorizationRepository;
     private final SecurityPointCut securityPointCut;
+
 
     /*
     *   1. C for Create
@@ -155,12 +157,24 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
                 .orElse(null);
 
     }
+
+
+    @Value("${io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token:true}")
+    private boolean noAppTokenSameAccessToken;
     /*
      *   [IMPORTANT] KEY = Username (principalName) + ClientId + AppToken
      *      Same ( org.springframework.security.core.userdetails : userName + spring-authorization-server : principalName )
      * */
     public @Nullable OAuth2Authorization findByUserNameAndClientIdAndAppToken(@NotEmpty String userName, @NotEmpty String clientId, @Nullable String appToken) {
-        return findOAuth2AuthorizationByAccessTokenValueSafely(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(userName, clientId, appToken).map(KnifeAuthorization::getAttributes),
+        if (noAppTokenSameAccessToken) {
+            return findAuthorization(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndNullableAppToken(userName, clientId, appToken), userName, clientId, appToken);
+        } else {
+            return findAuthorization(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(userName, clientId, appToken), userName, clientId, appToken);
+        }
+    }
+
+    private @Nullable OAuth2Authorization findAuthorization(Supplier<Optional<KnifeAuthorization>> authorizationSupplier, String userName, String clientId, @Nullable String appToken) {
+        return findOAuth2AuthorizationByAccessTokenValueSafely(() -> authorizationSupplier.get().map(KnifeAuthorization::getAttributes),
                 e -> {
                     knifeAuthorizationRepository.findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken).ifPresent(knifeAuthorizationRepository::deleteAll);
                     knifeAuthorizationRepository.deleteByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken);

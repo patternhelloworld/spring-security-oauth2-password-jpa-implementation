@@ -120,28 +120,28 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
     }
 
 
-    private RegisteredClient mapToRegisteredClient(KnifeClient detail) {
-        Set<String> scopesSet = Arrays.stream(detail.getScopes().split(","))
+    private RegisteredClient mapToRegisteredClient(KnifeClient knifeClient) {
+        Set<String> scopesSet = Arrays.stream(knifeClient.getScopes().split(","))
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
-        Set<AuthorizationGrantType> grantTypesSet = Arrays.stream(detail.getAuthorizationGrantTypes().split(","))
+        Set<AuthorizationGrantType> grantTypesSet = Arrays.stream(knifeClient.getAuthorizationGrantTypes().split(","))
                 .map(String::trim)
                 .map(AuthorizationGrantType::new)
                 .collect(Collectors.toSet());
 
         // Assuming getTokenSettings() returns a map-like structure for token settings.
-        Map<String, Object> tokenSettings =  parseMap(detail.getTokenSettings());
+        Map<String, Object> tokenSettings =  parseMap(knifeClient.getTokenSettings());
 
         // Extract token time-to-live values from tokenSettings (assuming they are stored as strings or numbers)
         Duration accessTokenTimeToLive = Duration.ofSeconds(Long.parseLong(tokenSettings.get("access_token_time_to_live").toString()));
         Duration refreshTokenTimeToLive = Duration.ofSeconds(Long.parseLong(tokenSettings.get("refresh_token_time_to_live").toString()));
 
 
-        return RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId(detail.getClientId())
-                .clientSecret(detail.getClientSecret())
-                .clientName(detail.getClientId())
+        return RegisteredClient.withId(knifeClient.getId())
+                .clientId(knifeClient.getClientId())
+                .clientSecret(knifeClient.getClientSecret())
+                .clientName(knifeClient.getClientId())
                 .clientAuthenticationMethods(authenticationMethods ->
                         authenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) // Adjust based on your entity
                 .authorizationGrantTypes(grantTypes -> grantTypes.addAll(grantTypesSet))

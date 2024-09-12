@@ -99,6 +99,15 @@ public interface KnifeAuthorizationRepository extends JpaRepository<KnifeAuthori
             @Param("accessTokenAppToken") String accessTokenAppToken
     );
 
+    @Query("SELECT o FROM KnifeAuthorization o WHERE o.principalName = :principalName AND o.registeredClientId = :registeredClientId AND " +
+            "(o.accessTokenAppToken = :accessTokenAppToken OR (o.accessTokenAppToken IS NULL AND :accessTokenAppToken IS NULL)) " +
+            "AND o.accessTokenExpiresAt > CURRENT_TIMESTAMP")
+    Optional<KnifeAuthorization> findValidAuthorizationByPrincipalNameAndClientIdAndNullableAppToken(
+            @Param("principalName") String principalName,
+            @Param("registeredClientId") String registeredClientId,
+            @Param("accessTokenAppToken") String accessTokenAppToken
+    );
+
 
 
     Optional<List<KnifeAuthorization>> findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(String principalName, String registeredClientId, String accessTokenAppToken);
