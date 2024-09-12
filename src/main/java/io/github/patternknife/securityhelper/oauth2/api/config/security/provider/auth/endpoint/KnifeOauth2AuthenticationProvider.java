@@ -6,7 +6,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.CustomGrantAuthenticationToken;
@@ -31,7 +31,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public final class KnifeOauth2AuthenticationProvider implements AuthenticationProvider {
 
-    private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
+    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle;
     private final ConditionalDetailsService conditionalDetailsService;
     private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
@@ -67,7 +67,7 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
                 }
 
 
-                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
+                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
 
                 RegisteredClient registeredClient = oAuth2ClientAuthenticationToken.getRegisteredClient();
 

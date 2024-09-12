@@ -6,7 +6,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.response
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
@@ -46,7 +46,7 @@ public class TraditionalOauthService {
 
     private final ConditionalDetailsService conditionalDetailsService;
 
-    private final CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle;
+    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle;
     private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
@@ -55,7 +55,7 @@ public class TraditionalOauthService {
     public TraditionalOauthService(RegisteredClientRepositoryImpl registeredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
-                                   CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
+                                   CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle,
                                    DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
                                    ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
@@ -87,7 +87,7 @@ public class TraditionalOauthService {
             HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
+            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails,
                     new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request), null);
 
             Instant now = Instant.now();
@@ -127,7 +127,7 @@ public class TraditionalOauthService {
             Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
             modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
 
-            oAuth2Authorization = commonOAuth2AuthorizationCycle.run(userDetails,
+            oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails,
                     new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
                     basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
 

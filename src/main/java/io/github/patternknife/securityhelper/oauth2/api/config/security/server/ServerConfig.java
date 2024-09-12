@@ -11,7 +11,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.provider
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationSuccessHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationCycle;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.IOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
@@ -67,7 +67,7 @@ public class ServerConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
             HttpSecurity http,
-            CommonOAuth2AuthorizationCycle commonOAuth2AuthorizationCycle,
+            CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle,
             OAuth2AuthorizationServiceImpl authorizationService,
             ConditionalDetailsService conditionalDetailsService,
             DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,

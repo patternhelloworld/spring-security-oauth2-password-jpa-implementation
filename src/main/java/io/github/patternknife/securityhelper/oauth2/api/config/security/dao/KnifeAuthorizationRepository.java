@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,6 +91,16 @@ public interface KnifeAuthorizationRepository extends JpaRepository<KnifeAuthori
 
 
     Optional<KnifeAuthorization> findByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(String principalName, String registeredClientId, String accessTokenAppToken);
+
+    @Query("SELECT o FROM KnifeAuthorization o WHERE o.principalName = :principalName AND o.registeredClientId = :registeredClientId AND o.accessTokenAppToken = :accessTokenAppToken AND o.accessTokenExpiresAt > CURRENT_TIMESTAMP")
+    Optional<KnifeAuthorization> findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(
+            @Param("principalName") String principalName,
+            @Param("registeredClientId") String registeredClientId,
+            @Param("accessTokenAppToken") String accessTokenAppToken
+    );
+
+
+
     Optional<List<KnifeAuthorization>> findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(String principalName, String registeredClientId, String accessTokenAppToken);
     @Modifying
     @Transactional(rollbackFor=Exception.class)

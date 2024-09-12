@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2AuthorizationCycle {
+public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2AuthorizationSaver {
 
      private static final Logger logger = LoggerFactory.getLogger(KnifeSecurityLogConfig.class);
 
@@ -31,8 +31,8 @@ public class CommonOAuth2AuthorizationCycleImpl implements CommonOAuth2Authoriza
      private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
      @Override
-     public OAuth2Authorization run(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
-                                                                   Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
+     public OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
+                                     Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
 
           OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByUserNameAndClientIdAndAppToken(userDetails.getUsername(), clientId, (String) additionalParameters.get(KnifeHttpHeaders.APP_TOKEN));
           if(authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())){

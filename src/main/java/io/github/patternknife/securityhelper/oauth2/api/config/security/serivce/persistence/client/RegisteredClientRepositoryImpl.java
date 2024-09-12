@@ -130,11 +130,18 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .map(AuthorizationGrantType::new)
                 .collect(Collectors.toSet());
 
+        // Assuming getTokenSettings() returns a map-like structure for token settings.
+        Map<String, Object> tokenSettings =  parseMap(detail.getTokenSettings());
+
+        // Extract token time-to-live values from tokenSettings (assuming they are stored as strings or numbers)
+        Duration accessTokenTimeToLive = Duration.ofSeconds(Long.parseLong(tokenSettings.get("access_token_time_to_live").toString()));
+        Duration refreshTokenTimeToLive = Duration.ofSeconds(Long.parseLong(tokenSettings.get("refresh_token_time_to_live").toString()));
+
 
         return RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId(detail.getClientId())
                 .clientSecret(detail.getClientSecret())
-                .clientName(detail.getClientId()) // Adjust according to your needs.
+                .clientName(detail.getClientId())
                 .clientAuthenticationMethods(authenticationMethods ->
                         authenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) // Adjust based on your entity
                 .authorizationGrantTypes(grantTypes -> grantTypes.addAll(grantTypesSet))
@@ -142,8 +149,8 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .redirectUri("")
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
-                        .accessTokenTimeToLive(Duration.ofSeconds(3600))
-                        .refreshTokenTimeToLive(Duration.ofSeconds(9900))
+                        .accessTokenTimeToLive(accessTokenTimeToLive)
+                        .refreshTokenTimeToLive(refreshTokenTimeToLive)
                         .build())
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()) // Adjust accordingly
                 .build();

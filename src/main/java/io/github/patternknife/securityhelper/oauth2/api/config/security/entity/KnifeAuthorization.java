@@ -90,10 +90,10 @@ public class KnifeAuthorization {
     private String refreshTokenValue;
 
     @Column(name = "refresh_token_issued_at")
-    private Instant refreshTokenIssuedAt;
+    private LocalDateTime refreshTokenIssuedAt;
 
     @Column(name = "refresh_token_expires_at")
-    private Instant refreshTokenExpiresAt;
+    private LocalDateTime refreshTokenExpiresAt;
 
     @Lob
     @Column(name = "refresh_token_metadata")

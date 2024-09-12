@@ -21,6 +21,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/*
+*
+*   The term "build" means a "newly created OAuth2Authorization" (no update)
+*
+* */
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2AuthorizationBuildingService {

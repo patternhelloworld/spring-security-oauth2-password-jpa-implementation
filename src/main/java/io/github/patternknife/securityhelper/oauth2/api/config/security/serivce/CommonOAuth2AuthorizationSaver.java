@@ -10,10 +10,10 @@ import java.util.Map;
 /*
 *    Create = Build + Persist
 * */
-public interface CommonOAuth2AuthorizationCycle {
+public interface CommonOAuth2AuthorizationSaver {
 
-     OAuth2Authorization run(UserDetails userDetails, AuthorizationGrantType authorizationGrantType,
-                                                            String clientId, Map<String, Object> additionalParameters,
-                                                            @Nullable Map<String, Object> modifiableAdditionalParameters);
+     OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType,
+                              String clientId, Map<String, Object> additionalParameters,
+                              @Nullable Map<String, Object> modifiableAdditionalParameters);
 
 }

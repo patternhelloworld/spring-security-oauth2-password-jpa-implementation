@@ -42,61 +42,55 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     /*
          1) Remove previous Access & Refresh Tokens for current OAuth2Authorization from Persistence
          2) Save Access & Refresh Tokens for current OAuth2Authorization into Persistence
+         3) Only Insert (shouldBeNewAuthorization)
     */
     @Override
-    public void save(OAuth2Authorization authorization) {
-
-        String appTokenValue = authorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
-
-        if (authorization.getRefreshToken() != null) {
-            if (findByToken(authorization.getRefreshToken().getToken().getTokenValue(), OAuth2TokenType.REFRESH_TOKEN) != null) {
-                this.remove(authorization);
-            }
-        }
-        if (authorization.getAccessToken() != null) {
-            if (findByToken(authorization.getAccessToken().getToken().getTokenValue(), OAuth2TokenType.ACCESS_TOKEN) != null) {
-                this.remove(authorization);
-            }
-        }
+    public void save(OAuth2Authorization shouldBeNewAuthorization) {
 
 
         KnifeAuthorization knifeAuthorization = new KnifeAuthorization();
 
 
-        knifeAuthorization.setId(authorization.getId());
+        knifeAuthorization.setId(shouldBeNewAuthorization.getId());
 
-        knifeAuthorization.setPrincipalName(authorization.getPrincipalName());
-        knifeAuthorization.setRegisteredClientId(authorization.getAttribute("client_id"));
-        knifeAuthorization.setAccessTokenValue(authorization.getAccessToken().getToken().getTokenValue());
-        knifeAuthorization.setRefreshTokenValue(authorization.getRefreshToken().getToken().getTokenValue());
+        knifeAuthorization.setPrincipalName(shouldBeNewAuthorization.getPrincipalName());
+        knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
+        knifeAuthorization.setAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
+        knifeAuthorization.setRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
 
+        String appTokenValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
         if (appTokenValue != null) {
             knifeAuthorization.setAccessTokenAppToken(appTokenValue);
         }
 
-        String userAgentValue = authorization.getAttribute(KnifeHttpHeaders.USER_AGENT);
+        String userAgentValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.USER_AGENT);
         if (!StringUtils.isEmpty(userAgentValue)) {
             knifeAuthorization.setAccessTokenUserAgent(userAgentValue);
         }
 
-        String remoteIp = authorization.getAttribute(KnifeHttpHeaders.X_Forwarded_For);
+        String remoteIp = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.X_Forwarded_For);
         if (remoteIp != null) {
             knifeAuthorization.setAccessTokenRemoteIp(remoteIp);
         }
 
-        knifeAuthorization.setAttributes(authorization);
-        knifeAuthorization.setAccessTokenType(authorization.getAuthorizationGrantType().getValue());
-        knifeAuthorization.setAccessTokenScopes(String.join(",", authorization.getAuthorizedScopes()));
+        knifeAuthorization.setAttributes(shouldBeNewAuthorization);
+        knifeAuthorization.setAccessTokenType(shouldBeNewAuthorization.getAuthorizationGrantType().getValue());
+        knifeAuthorization.setAccessTokenScopes(String.join(",", shouldBeNewAuthorization.getAuthorizedScopes()));
 
-
+        // Token Expiration
         knifeAuthorization.setAccessTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
-
-        if (authorization.getAccessToken().getToken().getExpiresAt() != null) {
-            knifeAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(authorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
+        if (shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
+            knifeAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
         }
 
-        knifeAuthorizationRepository.save(knifeAuthorization);
+        // Token Expiration
+        knifeAuthorization.setRefreshTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
+        if (shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
+            knifeAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
+        }
 
+
+        knifeAuthorizationRepository.save(knifeAuthorization);
 
         if(securityPointCut != null){
             securityPointCut.afterTokensSaved(knifeAuthorization, null);
@@ -166,7 +160,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
      *      Same ( org.springframework.security.core.userdetails : userName + spring-authorization-server : principalName )
      * */
     public @Nullable OAuth2Authorization findByUserNameAndClientIdAndAppToken(@NotEmpty String userName, @NotEmpty String clientId, @Nullable String appToken) {
-        return findOAuth2AuthorizationByAccessTokenValueSafely(() -> knifeAuthorizationRepository.findByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken).map(KnifeAuthorization::getAttributes),
+        return findOAuth2AuthorizationByAccessTokenValueSafely(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(userName, clientId, appToken).map(KnifeAuthorization::getAttributes),
                 e -> {
                     knifeAuthorizationRepository.findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken).ifPresent(knifeAuthorizationRepository::deleteAll);
                     knifeAuthorizationRepository.deleteByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken);
