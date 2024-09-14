@@ -11,6 +11,8 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,9 +31,20 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ *   According to the 'OAuth2AuthorizationService' implementation,
+ *     When a single value is expected to be returned, there's no need to explicitly end the function name with "One".
+ *     So when multiple values are expected to be returned, I have made the function name end with "List" to distinguish them.
+ * @author Andrew Kang
+ * @since 0.0.O
+ * @see OAuth2Authorization
+ * @see KnifeAuthorization
+ */
 @Configuration
 @RequiredArgsConstructor
 public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthorizationServiceImpl.class);
 
     private final KnifeAuthorizationRepository knifeAuthorizationRepository;
     private final SecurityPointCut securityPointCut;
@@ -104,9 +117,6 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     *   2. R for Read
     * */
 
-    /*
-    *    1) AccessToken Token R + RefreshToken Token R
-    * */
     @Override
     public OAuth2Authorization findByToken(@NotEmpty String tokenValue, @Nullable OAuth2TokenType tokenType) {
 
@@ -120,10 +130,50 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
             return knifeAuthorizationRepository.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValueOrOidcIdTokenValueOrUserCodeValueOrDeviceCodeValue(hashedTokenValue).map(KnifeAuthorization::getAttributes).orElse(null);
         }
     }
+
+    @Override
+    public @Nullable OAuth2Authorization findById(String id) {
+        return knifeAuthorizationRepository.findById(id)
+                .map(KnifeAuthorization::getAttributes)
+                .orElse(null);
+    }
+
+
+    @Value("${io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token:true}")
+    private boolean noAppTokenSameAccessToken;
     /*
-    *    2) AccessToken Token R
-    * */
-    private @Nullable OAuth2Authorization findOAuth2AuthorizationByAccessTokenValueSafely(Supplier<Optional<OAuth2Authorization>> authorizationSupplier, Consumer<Exception> exceptionHandler) {
+     *   [IMPORTANT] KEY = Username (principalName) + ClientId + AppToken
+     *      Same ( org.springframework.security.core.userdetails : userName + spring-authorization-server : principalName )
+     * */
+    /**
+     * Returns the {@link OAuth2Authorization} identified by the provided {@code Username (principalName) + ClientId + AppToken}, or
+     * {@code null} if not found.
+     * @param userName org.springframework.security.core.userdetails, which is same as principalName
+     * @param clientId Oauth2 ROPC client_id
+     * @param appToken See the README
+     * @return the {@link OAuth2Authorization} if found, otherwise {@code null}
+     */
+    public @Nullable OAuth2Authorization findByUserNameAndClientIdAndAppToken(@NotEmpty String userName, @NotEmpty String clientId, @Nullable String appToken) {
+        if (noAppTokenSameAccessToken) {
+            return findSafelyByPrincipalNameAndClientIdAndAppToken(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndNullableAppToken(userName, clientId, appToken), userName, clientId, appToken);
+        } else {
+            return findSafelyByPrincipalNameAndClientIdAndAppToken(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(userName, clientId, appToken), userName, clientId, appToken);
+        }
+    }
+
+    private @Nullable OAuth2Authorization findSafelyByPrincipalNameAndClientIdAndAppToken(Supplier<Optional<KnifeAuthorization>> authorizationSupplier, String userName, String clientId, @Nullable String appToken) {
+        return findByAccessTokenValueSafely(() -> authorizationSupplier.get().map(KnifeAuthorization::getAttributes),
+                e -> {
+
+                    logger.warn("Error finding authorization for user: {}, clientId: {}, appToken: {}", userName, clientId, appToken, e);
+
+                    // If multiple results are detected or other unexpected errors occur, remove access tokens for the account to prevent login errors.
+                    knifeAuthorizationRepository.findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken).ifPresent(knifeAuthorizationRepository::deleteAll);
+                    knifeAuthorizationRepository.deleteByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken);
+                });
+    }
+
+    private @Nullable OAuth2Authorization findByAccessTokenValueSafely(Supplier<Optional<OAuth2Authorization>> authorizationSupplier, Consumer<Exception> exceptionHandler) {
 
         OAuth2Authorization oAuth2Authorization = null;
         try {
@@ -148,38 +198,6 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         return oAuth2Authorization;
     }
 
-
-    
-    @Override
-    public @Nullable OAuth2Authorization findById(String id) {
-        return knifeAuthorizationRepository.findById(id)
-                .map(KnifeAuthorization::getAttributes)
-                .orElse(null);
-
-    }
-
-
-    @Value("${io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token:true}")
-    private boolean noAppTokenSameAccessToken;
-    /*
-     *   [IMPORTANT] KEY = Username (principalName) + ClientId + AppToken
-     *      Same ( org.springframework.security.core.userdetails : userName + spring-authorization-server : principalName )
-     * */
-    public @Nullable OAuth2Authorization findByUserNameAndClientIdAndAppToken(@NotEmpty String userName, @NotEmpty String clientId, @Nullable String appToken) {
-        if (noAppTokenSameAccessToken) {
-            return findAuthorization(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndNullableAppToken(userName, clientId, appToken), userName, clientId, appToken);
-        } else {
-            return findAuthorization(() -> knifeAuthorizationRepository.findValidAuthorizationByPrincipalNameAndClientIdAndAppToken(userName, clientId, appToken), userName, clientId, appToken);
-        }
-    }
-
-    private @Nullable OAuth2Authorization findAuthorization(Supplier<Optional<KnifeAuthorization>> authorizationSupplier, String userName, String clientId, @Nullable String appToken) {
-        return findOAuth2AuthorizationByAccessTokenValueSafely(() -> authorizationSupplier.get().map(KnifeAuthorization::getAttributes),
-                e -> {
-                    knifeAuthorizationRepository.findListByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken).ifPresent(knifeAuthorizationRepository::deleteAll);
-                    knifeAuthorizationRepository.deleteByPrincipalNameAndRegisteredClientIdAndAccessTokenAppToken(userName, clientId, appToken);
-                });
-    }
 
 
 
