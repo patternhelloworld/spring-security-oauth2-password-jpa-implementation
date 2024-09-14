@@ -7,7 +7,7 @@
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.1</version>
 </dependency>
 ```
 For v2, using the database tables from Spring Security 5 (only the database tables; follow the dependencies as above):
