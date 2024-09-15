@@ -5,14 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "oauth2_registered_client")
-@Data
-@DynamicUpdate
+@Getter
+@Setter
 public class KnifeClient {
 
     // UUID.randomUUID().toString() (refer to 'Spring-Authorization-Server')
@@ -55,4 +57,23 @@ public class KnifeClient {
 
     @Column(name = "token_settings", length = 2000, nullable = false)
     private String tokenSettings;
+
+    @Override
+    public String toString() {
+        return "KnifeClient{" +
+                "id='" + id + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientIdIssuedAt=" + clientIdIssuedAt +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", clientSecretExpiresAt=" + clientSecretExpiresAt +
+                ", clientName='" + clientName + '\'' +
+                ", clientAuthenticationMethods='" + clientAuthenticationMethods + '\'' +
+                ", authorizationGrantTypes='" + authorizationGrantTypes + '\'' +
+                ", redirectUris='" + redirectUris + '\'' +
+                ", postLogoutRedirectUris='" + postLogoutRedirectUris + '\'' +
+                ", scopes='" + scopes + '\'' +
+                ", clientSettings='" + clientSettings + '\'' +
+                ", tokenSettings='" + tokenSettings + '\'' +
+                '}';
+    }
 }

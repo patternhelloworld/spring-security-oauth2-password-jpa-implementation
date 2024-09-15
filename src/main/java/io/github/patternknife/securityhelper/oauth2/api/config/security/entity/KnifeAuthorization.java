@@ -4,10 +4,9 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.token.ge
 import io.github.patternknife.securityhelper.oauth2.api.config.security.util.SerializableObjectConverter;
 import jakarta.persistence.*;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 
 import java.time.Instant;
@@ -15,8 +14,8 @@ import java.time.LocalDateTime;
 
 @Table(name="oauth2_authorization")
 @Entity
-@Data
-@DynamicUpdate
+@Getter
+@Setter
 public class KnifeAuthorization {
 
     // From Oauth2Authorization, oAuth2Authorization.getId() (refer to 'Spring-Authorization-Server')
@@ -157,5 +156,48 @@ public class KnifeAuthorization {
     }
     public void setAttributes(OAuth2Authorization authorization) {
         this.attributes = SerializableObjectConverter.serializeAuthentication(authorization);
+    }
+
+
+    @Override
+    public String toString() {
+        return "KnifeAuthorization{" +
+                "id='" + id + '\'' +
+                ", registeredClientId='" + registeredClientId + '\'' +
+                ", principalName='" + principalName + '\'' +
+                ", authorizationGrantType='" + authorizationGrantType + '\'' +
+                ", authorizedScopes='" + authorizedScopes + '\'' +
+                ", attributes='" + attributes + '\'' +
+                ", state='" + state + '\'' +
+                ", authorizationCodeValue='" + authorizationCodeValue + '\'' +
+                ", authorizationCodeIssuedAt=" + authorizationCodeIssuedAt +
+                ", authorizationCodeExpiresAt=" + authorizationCodeExpiresAt +
+                ", authorizationCodeMetadata='" + authorizationCodeMetadata + '\'' +
+                ", accessTokenValue='" + accessTokenValue + '\'' +
+                ", accessTokenIssuedAt=" + accessTokenIssuedAt +
+                ", accessTokenExpiresAt=" + accessTokenExpiresAt +
+                ", accessTokenMetadata='" + accessTokenMetadata + '\'' +
+                ", accessTokenType='" + accessTokenType + '\'' +
+                ", accessTokenScopes='" + accessTokenScopes + '\'' +
+                ", accessTokenAppToken='" + accessTokenAppToken + '\'' +
+                ", accessTokenUserAgent='" + accessTokenUserAgent + '\'' +
+                ", accessTokenRemoteIp='" + accessTokenRemoteIp + '\'' +
+                ", refreshTokenValue='" + refreshTokenValue + '\'' +
+                ", refreshTokenIssuedAt=" + refreshTokenIssuedAt +
+                ", refreshTokenExpiresAt=" + refreshTokenExpiresAt +
+                ", refreshTokenMetadata='" + refreshTokenMetadata + '\'' +
+                ", oidcIdTokenValue='" + oidcIdTokenValue + '\'' +
+                ", oidcIdTokenIssuedAt=" + oidcIdTokenIssuedAt +
+                ", oidcIdTokenExpiresAt=" + oidcIdTokenExpiresAt +
+                ", oidcIdTokenMetadata='" + oidcIdTokenMetadata + '\'' +
+                ", userCodeValue='" + userCodeValue + '\'' +
+                ", userCodeIssuedAt=" + userCodeIssuedAt +
+                ", userCodeExpiresAt=" + userCodeExpiresAt +
+                ", userCodeMetadata='" + userCodeMetadata + '\'' +
+                ", deviceCodeValue='" + deviceCodeValue + '\'' +
+                ", deviceCodeIssuedAt=" + deviceCodeIssuedAt +
+                ", deviceCodeExpiresAt=" + deviceCodeExpiresAt +
+                ", deviceCodeMetadata='" + deviceCodeMetadata + '\'' +
+                '}';
     }
 }
