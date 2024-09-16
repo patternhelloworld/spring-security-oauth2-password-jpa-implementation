@@ -15,6 +15,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.util.Req
 import io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.bo.BasicTokenResolver;
 import io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.dto.SpringSecurityTraditionalOauthDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,7 +47,7 @@ public class TraditionalOauthService {
 
     private final ConditionalDetailsService conditionalDetailsService;
 
-    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle;
+    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationSaver;
     private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
 
 
@@ -55,7 +56,7 @@ public class TraditionalOauthService {
     public TraditionalOauthService(RegisteredClientRepositoryImpl registeredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
-                                   CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle,
+                                   CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationSaver,
                                    DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
                                    ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
@@ -63,7 +64,7 @@ public class TraditionalOauthService {
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
 
-        this.commonOAuth2AuthorizationCycle = commonOAuth2AuthorizationCycle;
+        this.commonOAuth2AuthorizationSaver = commonOAuth2AuthorizationSaver;
         this.oauth2AuthenticationHashCheckService = oauth2AuthenticationHashCheckService;
 
         this.iSecurityUserExceptionMessageService = iSecurityUserExceptionMessageService;
@@ -76,18 +77,19 @@ public class TraditionalOauthService {
         try {
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
-            RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
-
-            oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
-
-            UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
-
-            oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
-
             HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-            OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails,
+            @NotNull RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+
+            oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
+
+            @NotNull UserDetails userDetails = conditionalDetailsService.loadUserByUsername(accessTokenRequest.getUsername(), basicCredentials.getClientId());
+
+            oauth2AuthenticationHashCheckService.validateUsernamePassword(accessTokenRequest.getPassword(), userDetails);
+
+
+            @NotNull OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails,
                     new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request), null);
 
             Instant now = Instant.now();
@@ -127,7 +129,7 @@ public class TraditionalOauthService {
             Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
             modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
 
-            oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails,
+            oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails,
                     new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
                     basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
 

@@ -188,3 +188,8 @@ public class CommonDataSourceConfiguration {
 * Use the following module for Blue-Green deployment:
   * https://github.com/patternknife/docker-blue-green-runner
 * The above module references this app's Dockerfile and the entrypoint script in the .docker folder.
+
+## Contribution Guide
+* You can create a pull request directly to the main branch.
+* Integration tests in the client folder are sufficient for now, but you may add more if necessary.
+* There is a lack of unit tests, so contributions to unit test code are welcome, which will help improve the overall codebase.

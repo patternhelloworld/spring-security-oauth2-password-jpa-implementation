@@ -7,6 +7,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.util.Kni
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.authentication.OAuth2AuthorizationBuildingService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,8 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
      private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
      @Override
-     public OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
-                                     Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
+     public @NotNull OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
+                                              Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
 
           OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByUserNameAndClientIdAndAppToken(userDetails.getUsername(), clientId, (String) additionalParameters.get(KnifeHttpHeaders.APP_TOKEN));
           if(authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())){

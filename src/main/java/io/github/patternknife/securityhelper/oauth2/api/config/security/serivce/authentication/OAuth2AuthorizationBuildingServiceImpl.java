@@ -42,6 +42,8 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
 
         if(AuthorizationServerContextHolder.getContext() == null){
 
+            // If you use "api/v1/traditional-oauth/token", "AuthorizationServerContextHolder.getContext()" is null,
+            // while you use "/oauth2/token", "AuthorizationServerContextHolder.getContext()" is NOT null.
             AuthorizationServerContext authorizationServerContext = new AuthorizationServerContext() {
                 @Override
                 public String getIssuer() {
