@@ -1,6 +1,11 @@
-# Spring Security Oauth2 Password JPA Implementation
+# Spring Security Oauth2 JPA Implementation
 
-> App-Token based OAuth2 ROPC POC built to grow with Spring Boot and ORM
+> App-Token based OAuth2 POC built to grow with Spring Boot and ORM
+> 
+## Supporting Oauth2 Type
+| ROPC      | Authorization Code |
+|-----------|-------------------|
+| available | in development    |
 
 ## Quick Start
 ```xml

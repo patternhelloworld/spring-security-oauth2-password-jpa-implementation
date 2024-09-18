@@ -87,31 +87,26 @@ public class RequestOAuth2Distiller {
         "client_id" -> ""
 *
 * */
-    public static Map<String, Object> getTokenUsingSecurityAdditionalParametersSocial(HttpServletRequest request, String username, String clientId){
+
+    public static MultiValueMap<String, String> getAuthorizationCodeSecurityAdditionalParameters(HttpServletRequest request) {
 
         MultiValueMap<String, String> parameters = getParameters(request);
-
-        Map<String, Object> additionalParameters = new HashMap<>();
+        MultiValueMap<String, String> additionalParameters = new LinkedMultiValueMap<>();
 
         parameters.forEach((key, value) -> {
-            if (//!OAuth2ParameterNames.GRANT_TYPE.equals(key) &&
-                //   !OAuth2ParameterNames.CLIENT_ID.equals(key) &&
-                    !OAuth2ParameterNames.CODE.equals(key) &&
-                            !OAuth2ParameterNames.CLIENT_SECRET.equals(key)) {
-                additionalParameters.put(key, value.get(0));
-            }
+            additionalParameters.add(key, value.get(0));
         });
 
-        additionalParameters.put(KnifeHttpHeaders.APP_TOKEN, request.getHeader(KnifeHttpHeaders.APP_TOKEN));
-        additionalParameters.put(KnifeHttpHeaders.USER_AGENT, request.getHeader(KnifeHttpHeaders.USER_AGENT));
-        additionalParameters.put(KnifeHttpHeaders.X_Forwarded_For, request.getHeader(KnifeHttpHeaders.X_Forwarded_For));
-        additionalParameters.put("client_id", clientId);
-        additionalParameters.put("grant_type", "password");
-        additionalParameters.put("username", username);
+        additionalParameters.add(KnifeHttpHeaders.APP_TOKEN, request.getHeader(KnifeHttpHeaders.APP_TOKEN));
+        additionalParameters.add(KnifeHttpHeaders.USER_AGENT, request.getHeader(KnifeHttpHeaders.USER_AGENT));
+        additionalParameters.add(KnifeHttpHeaders.X_Forwarded_For, request.getHeader(KnifeHttpHeaders.X_Forwarded_For));
+
+        if (!additionalParameters.containsKey("client_id") || StringUtils.isEmpty(additionalParameters.getFirst("client_id"))) {
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(request.getHeader("Authorization")).orElseThrow(KnifeOauth2AuthenticationException::new);
+            additionalParameters.add("client_id", basicCredentials.getClientId());
+        }
 
         return additionalParameters;
     }
-
-
 
 }

@@ -97,6 +97,7 @@ public class CustomerIntegrationTest {
 
     }
 
+
     @Test
     public void test_SameAppTokensUseSameAccessToken_EXPOSED() throws Exception {
 

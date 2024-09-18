@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 
 
 import java.time.Instant;
@@ -69,9 +70,21 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         knifeAuthorization.setId(shouldBeNewAuthorization.getId());
 
         knifeAuthorization.setPrincipalName(shouldBeNewAuthorization.getPrincipalName());
-        knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
-        knifeAuthorization.setAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
-        knifeAuthorization.setRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
+
+        if(shouldBeNewAuthorization.getAttribute("java.security.Principal") instanceof OAuth2ClientAuthenticationToken){
+            // Authorization Code
+            knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getRegisteredClientId());
+        }else{
+            // ROPC
+            knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
+        }
+
+        if(shouldBeNewAuthorization.getAccessToken() != null) {
+            knifeAuthorization.setAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
+        }
+        if(shouldBeNewAuthorization.getRefreshToken() != null) {
+            knifeAuthorization.setRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
+        }
 
         String appTokenValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
         if (appTokenValue != null) {
@@ -94,13 +107,13 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         // Token Expiration
         knifeAuthorization.setAccessTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
-        if (shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
+        if (shouldBeNewAuthorization.getAccessToken() != null && shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
             knifeAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
         }
 
         // Token Expiration
         knifeAuthorization.setRefreshTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
-        if (shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
+        if (shouldBeNewAuthorization.getRefreshToken() != null && shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
             knifeAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
         }
 

@@ -7,13 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
-public final class KnifeGrantAuthenticationConverter implements AuthenticationConverter {
+public final class PasswordAuthenticationConverter implements AuthenticationConverter {
     /*
     *   `
     *      CustomGrantAuthenticationToken <- OAuth2ClientAuthenticationToken

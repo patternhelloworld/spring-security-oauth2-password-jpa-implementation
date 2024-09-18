@@ -31,7 +31,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public final class KnifeOauth2AuthenticationProvider implements AuthenticationProvider {
 
-    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationCycle;
+    private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationSaver;
     private final ConditionalDetailsService conditionalDetailsService;
     private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
@@ -67,7 +67,7 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
                 }
 
 
-                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationCycle.save(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
+                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
 
                 RegisteredClient registeredClient = oAuth2ClientAuthenticationToken.getRegisteredClient();
 
