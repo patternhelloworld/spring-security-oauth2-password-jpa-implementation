@@ -16,6 +16,9 @@ public enum CustomSecurityUserExceptionMessage implements ExceptionMessageInterf
     AUTHENTICATION_WRONG_ID_PASSWORD("1User information could not be verified. Please check your ID or password. If the problem persists, please contact customer service."),
     AUTHENTICATION_PASSWORD_FAILED_EXCEEDED("1The number of password attempts has been exceeded."),
 
+    // Wrong Authorization Code
+    AUTHORIZATION_CODE_NO_EXISTS("1The specified Authorization code does not exist."),
+
     // CLIENT ID, SECRET
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("1Client information is not verified."),
 

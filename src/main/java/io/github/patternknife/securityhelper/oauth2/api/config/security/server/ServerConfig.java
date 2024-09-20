@@ -4,7 +4,9 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.server;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeRequestAuthenticationConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.PasswordAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthenticationProvider;
@@ -25,7 +27,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.internal.util.SubSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,11 +45,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
-import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
@@ -65,7 +63,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
-import java.util.function.Function;
 
 @Configuration
 @RequiredArgsConstructor
@@ -73,6 +70,8 @@ import java.util.function.Function;
 public class ServerConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerConfig.class);
+
+    private static String CUSTOM_CONSENT_PAGE_URI = "/oauth2/authorization";
 
     @Primary
     @Bean
@@ -95,6 +94,7 @@ public class ServerConfig {
             DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
             RegisteredClientRepositoryImpl registeredClientRepository,
+            KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
             AuthenticationFailureHandler iAuthenticationFailureHandler, AuthenticationSuccessHandler iAuthenticationSuccessHandler) throws Exception {
 
@@ -119,16 +119,25 @@ public class ServerConfig {
                 .registeredClientRepository(registeredClientRepository)
                 .authorizationService(authorizationService)
                 .tokenGenerator(tokenGenerator)
+                .oidc(Customizer.withDefaults())
                 /*
                  *
                  *    http://localhost:8370/oauth2/authorize?grant_type=authorization_code&response_type=code&client_id=client_customer&scope=read%20write&state=random-state&prompt=consent&access_type=offline
-                 * http://localhost:8370/oauth2/authorize?grant_type=authorization_code&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=read%20write&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256
-
+                 *    http://localhost:8370/oauth2/authorize?grant_type=authorization_code&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=read%20write&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256
+                 *
                  * */
                 //  https://medium.com/@itsinil/oauth-2-1-pkce-%EB%B0%A9%EC%8B%9D-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-14500950cdbf
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
-                                .authorizationRequestConverter(new AuthorizationCodeAuthenticationConverter(registeredClientRepository))
+
+                                .consentPage(CUSTOM_CONSENT_PAGE_URI)
+                    /*            .authorizationRequestConverter(new AuthorizationCodeRequestAuthenticationConverter(registeredClientRepository, knifeAuthorizationConsentRepository))
+                                .authorizationRequestConverters(conveterList -> {
+                                    conveterList.add(new AuthorizationCodeAuthenticationConverter(registeredClientRepository));
+                                })*/
+                                .authorizationRequestConverters(conveterList -> {
+                                    conveterList.add(new AuthorizationCodeAuthenticationConverter(registeredClientRepository));
+                                })
                                 .errorResponseHandler(iAuthenticationFailureHandler)
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
                                         commonOAuth2AuthorizationSaver,
@@ -193,11 +202,16 @@ public class ServerConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher(endpointsMatcher)
-                .formLogin(Customizer.withDefaults())
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")  // 커스터마이징된 로그인 페이지 경로
+                        .permitAll()
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated()
-                );
+                ).exceptionHandling(exceptions -> exceptions.
+                        authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));
+
 
 //        http.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));;
         return http.build();

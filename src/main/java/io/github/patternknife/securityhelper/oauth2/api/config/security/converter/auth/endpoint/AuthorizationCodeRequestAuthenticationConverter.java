@@ -1,6 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint;
 
 
+import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.util.RequestOAuth2Distiller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +9,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
+
+
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -22,7 +25,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 @RequiredArgsConstructor
-public final class AuthorizationCodeAuthenticationConverter implements AuthenticationConverter {
+public final class AuthorizationCodeRequestAuthenticationConverter implements AuthenticationConverter {
 
     /*
     *   `
@@ -30,6 +33,7 @@ public final class AuthorizationCodeAuthenticationConverter implements Authentic
     *
      * */
     private final RegisteredClientRepository registeredClientRepository;
+    private final KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository;
 
     public void setClientAuthentication(String clientId) {
 
@@ -80,11 +84,16 @@ public final class AuthorizationCodeAuthenticationConverter implements Authentic
             additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
         });
 
+  //      if(knifeAuthorizationConsentRepository.findByRegisteredClientIdAndPrincipalName())
+
         // OAuth2AuthorizationCodeRequestAuthenticationToken 생성
-        return new OAuth2AuthorizationCodeAuthenticationToken(
-                code,
+        return new OAuth2AuthorizationCodeRequestAuthenticationToken(
+                "http://localhost:8370/callback1", // authorizationUri
+                parameters.getFirst(OAuth2ParameterNames.CLIENT_ID), // clientId
                 clientPrincipal, // principal (사용자 인증 객체)
-                redirectUri, // redirectUri
+                "http://localhost:8370/callback1", // redirectUri
+                parameters.getFirst(OAuth2ParameterNames.STATE), // state
+                scopes, // 요청한 스코프
                 additionalParameters // 추가 파라미터
         );
     }

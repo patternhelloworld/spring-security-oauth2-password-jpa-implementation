@@ -24,6 +24,15 @@ public class SpringSecurityTraditionalOauthDTO {
 
     }
 
+    @Getter
+    @Setter
+    public static class AuthorizationCodeRequest {
+
+        private String username;
+        private String password;
+
+    }
+
 
     @AllArgsConstructor
     @Getter
@@ -34,6 +43,25 @@ public class SpringSecurityTraditionalOauthDTO {
         private int expires_in;
         private String scope;
     }
+
+
+    public static class AuthorizationCodeResponse {
+        private String authorization_code;
+
+        public AuthorizationCodeResponse(String authorizationCode) {
+            this.authorization_code = authorizationCode;
+        }
+
+        public String getAuthorizationCode() {
+            return authorization_code;
+        }
+
+        public void setAuthorizationCode(String authorizationCode) {
+            this.authorization_code = authorizationCode;
+        }
+
+    }
+
 
 
 }

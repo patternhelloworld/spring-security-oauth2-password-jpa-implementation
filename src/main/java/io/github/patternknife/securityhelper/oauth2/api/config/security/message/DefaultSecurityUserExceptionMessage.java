@@ -15,6 +15,9 @@ public enum DefaultSecurityUserExceptionMessage implements ExceptionMessageInter
     AUTHENTICATION_WRONG_ID_PASSWORD("User information could not be verified. Please check your ID or password. If the problem persists, please contact customer service."),
     AUTHENTICATION_PASSWORD_FAILED_EXCEEDED("The number of password attempts has been exceeded."),
 
+    // Wrong Authorization Code
+    AUTHORIZATION_CODE_NO_EXISTS("The specified Authorization code does not exist."),
+
     // CLIENT ID, SECRET
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("Client information is not verified."),
 

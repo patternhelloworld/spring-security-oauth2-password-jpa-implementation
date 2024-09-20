@@ -34,13 +34,14 @@ public class LoggingFilter implements Filter {
                 return;
             }
 
-            HttpServletRequest requestToCache = new ContentCachingRequestWrapper(request);
+          //  HttpServletRequest requestToCache = new ContentCachingRequestWrapper(request);
 //          HttpServletResponse responseToCache = new ContentCachingResponseWrapper(response);
 
-            chain.doFilter(requestToCache, servletResponse);
+           // chain.doFilter(requestToCache, servletResponse);
         } else {
-            chain.doFilter(servletRequest, servletResponse);
+            //chain.doFilter(servletRequest, servletResponse);
         }
+        chain.doFilter(servletRequest, servletResponse);
 
 
     }

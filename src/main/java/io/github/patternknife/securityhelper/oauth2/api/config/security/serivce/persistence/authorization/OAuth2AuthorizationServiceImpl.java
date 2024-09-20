@@ -16,12 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 
 
 import java.time.Instant;
@@ -71,19 +72,29 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         knifeAuthorization.setPrincipalName(shouldBeNewAuthorization.getPrincipalName());
 
-        if(shouldBeNewAuthorization.getAttribute("java.security.Principal") instanceof OAuth2ClientAuthenticationToken){
+        if(shouldBeNewAuthorization.getAttribute("grant_type").equals(new OAuth2TokenType("authorization_code").getValue())){
             // Authorization Code
             knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getRegisteredClientId());
+
+            // Authorization Code 저장
+            OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCodeToken = shouldBeNewAuthorization.getToken(OAuth2AuthorizationCode.class);
+            if (authorizationCodeToken != null) {
+                knifeAuthorization.hashSetAuthorizationCodeValue(authorizationCodeToken.getToken().getTokenValue());
+                knifeAuthorization.setAuthorizationCodeIssuedAt(LocalDateTime.ofInstant(authorizationCodeToken.getToken().getIssuedAt(), ZoneId.systemDefault()));
+                if (authorizationCodeToken.getToken().getExpiresAt() != null) {
+                    knifeAuthorization.setAuthorizationCodeExpiresAt(LocalDateTime.ofInstant(authorizationCodeToken.getToken().getExpiresAt(), ZoneId.systemDefault()));
+                }
+            }
         }else{
             // ROPC
             knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
         }
 
         if(shouldBeNewAuthorization.getAccessToken() != null) {
-            knifeAuthorization.setAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
+            knifeAuthorization.hashSetAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
         }
         if(shouldBeNewAuthorization.getRefreshToken() != null) {
-            knifeAuthorization.setRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
+            knifeAuthorization.hashSetRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
         }
 
         String appTokenValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
@@ -116,6 +127,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         if (shouldBeNewAuthorization.getRefreshToken() != null && shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
             knifeAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
         }
+        knifeAuthorization.setAuthorizationGrantType(shouldBeNewAuthorization.getAttribute("grant_type"));
 
 
         knifeAuthorizationRepository.save(knifeAuthorization);
@@ -128,6 +140,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     /*
     *   2. R for Read
+    *     : KnifeAuthorization::getAttributes
     * */
 
     @Override
@@ -139,7 +152,9 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
             return knifeAuthorizationRepository.findByAccessTokenValue(hashedTokenValue).map(KnifeAuthorization::getAttributes).orElse(null);
         } else if (tokenType != null && tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)) {
             return knifeAuthorizationRepository.findByRefreshTokenValue(hashedTokenValue).map(KnifeAuthorization::getAttributes).orElse(null);
-        } else {
+        }else if (tokenType != null && tokenType.equals(new OAuth2TokenType(AuthorizationGrantType.AUTHORIZATION_CODE.getValue()))) {
+            return knifeAuthorizationRepository.findByAuthorizationCodeValue(hashedTokenValue).map(KnifeAuthorization::getAttributes).orElse(null);
+        }  else {
             return knifeAuthorizationRepository.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValueOrOidcIdTokenValueOrUserCodeValueOrDeviceCodeValue(hashedTokenValue).map(KnifeAuthorization::getAttributes).orElse(null);
         }
     }

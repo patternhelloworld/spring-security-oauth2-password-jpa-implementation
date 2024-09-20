@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -19,7 +20,10 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.UUID;
 
 /*
 *
@@ -59,6 +63,12 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
         }
 
 
+        OAuth2AuthorizationCode authorizationCode = new OAuth2AuthorizationCode(
+                UUID.randomUUID().toString(),
+                Instant.now(), // Issued
+                Instant.now().plus(10, ChronoUnit.MINUTES) // Expired
+        );
+
         customTokenGenerator.setCustomizer(
                 CustomDelegatingOAuth2TokenGenerator.GeneratorType.ACCESS_TOKEN,
                 new CustomAccessTokenCustomizer(userDetails)
@@ -93,6 +103,7 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
                 .authorizationGrantType(customGrantAuthenticationToken.getGrantType())
                 .attribute("authorities", customGrantAuthenticationToken.getAuthorities())
                 .attributes(attrs -> attrs.putAll(customGrantAuthenticationToken.getAdditionalParameters()))
+                .token(authorizationCode)
                 .accessToken(new OAuth2AccessToken(
                         OAuth2AccessToken.TokenType.BEARER,
                         accessToken.getTokenValue(),

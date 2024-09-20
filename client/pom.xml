@@ -157,6 +157,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <!-- Follow ${spring-boot-dependencies.version} -->
         </dependency>
 
+        <!-- Login Page -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <!-- Follow ${spring-boot-dependencies.version} -->
+        </dependency>
+
+
 
 
         <!--4. TEST-->

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 
 import java.time.Instant;
@@ -142,11 +141,13 @@ public class KnifeAuthorization {
     private String deviceCodeMetadata;
 
 
-
-    public void setAccessTokenValue(String accessTokenValue) {
+    public void hashSetAuthorizationCodeValue(String authorizationCodeValue) {
+        this.authorizationCodeValue = CustomAuthenticationKeyGenerator.hashTokenValue(authorizationCodeValue);
+    }
+    public void hashSetAccessTokenValue(String accessTokenValue) {
         this.accessTokenValue = CustomAuthenticationKeyGenerator.hashTokenValue(accessTokenValue);
     }
-    public void setRefreshTokenValue(String refreshTokenValue) {
+    public void hashSetRefreshTokenValue(String refreshTokenValue) {
         this.refreshTokenValue = CustomAuthenticationKeyGenerator.hashTokenValue(refreshTokenValue);
     }
 

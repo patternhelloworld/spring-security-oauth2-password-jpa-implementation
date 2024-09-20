@@ -146,7 +146,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                         authenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) // Adjust based on your entity
                 .authorizationGrantTypes(grantTypes -> grantTypes.addAll(grantTypesSet))
                 .scopes(scopes -> scopes.addAll(scopesSet))
-                .redirectUri("")
+                .redirectUri(knifeClient.getRedirectUris())
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
                         .accessTokenTimeToLive(accessTokenTimeToLive)

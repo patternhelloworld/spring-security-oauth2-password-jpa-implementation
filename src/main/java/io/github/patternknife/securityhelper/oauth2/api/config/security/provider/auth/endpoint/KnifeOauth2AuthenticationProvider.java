@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
@@ -49,7 +50,21 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
                 String clientId = Objects.requireNonNull(oAuth2ClientAuthenticationToken.getRegisteredClient()).getClientId();
 
                 UserDetails userDetails;
-                if (((String) customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())) {
+
+                if (((String) customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
+
+                    OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken(
+                            (String) customGrantAuthenticationToken.getAdditionalParameters().get(OAuth2ParameterNames.CODE),
+                            new OAuth2TokenType(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())
+                    );
+
+                    if (oAuth2Authorization == null) {
+                        throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHORIZATION_CODE_NO_EXISTS));
+                    }
+                    // UserDetails 로드
+                    userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
+
+                } else if (((String) customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())) {
 
                     userDetails = conditionalDetailsService.loadUserByUsername((String) customGrantAuthenticationToken.getAdditionalParameters().get("username"), clientId);
 

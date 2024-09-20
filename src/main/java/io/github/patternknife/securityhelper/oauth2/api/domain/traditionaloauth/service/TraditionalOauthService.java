@@ -22,7 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.stereotype.Service;
@@ -151,5 +153,54 @@ public class TraditionalOauthService {
             throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
     }
+
+
+    public SpringSecurityTraditionalOauthDTO.AuthorizationCodeResponse createAuthorizationCode(SpringSecurityTraditionalOauthDTO.AuthorizationCodeRequest authorizationCodeRequest,
+                                                                                               String authorizationHeader) {
+        try {
+
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader)
+                    .orElseThrow(() -> new KnifeOauth2AuthenticationException(
+                            ErrorMessages.builder()
+                                    .message("Header parsing error (header : " + authorizationHeader + ")")
+                                    .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET))
+                                    .build()));
+
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
+            // Registered Client 검증
+            @NotNull RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+            oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
+
+            // UserDetails 로드 및 Username/Password 검증
+            @NotNull UserDetails userDetails = conditionalDetailsService.loadUserByUsername(authorizationCodeRequest.getUsername(), basicCredentials.getClientId());
+            oauth2AuthenticationHashCheckService.validateUsernamePassword(authorizationCodeRequest.getPassword(), userDetails);
+
+            // Authorization Code 생성 및 저장
+            Map<String, Object> additionalParameters = RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request);
+            additionalParameters.put(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.AUTHORIZATION_CODE.getValue());
+            @NotNull OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails, AuthorizationGrantType.AUTHORIZATION_CODE, basicCredentials.getClientId(), additionalParameters, null);
+
+            // Authorization Code 추출
+            String authorizationCode = oAuth2Authorization.getToken(OAuth2AuthorizationCode.class).getToken().getTokenValue();
+
+            // Authorization Code Response 반환
+            return new SpringSecurityTraditionalOauthDTO.AuthorizationCodeResponse(authorizationCode);
+
+        } catch (UsernameNotFoundException e) {
+            throw new KnifeOauth2AuthenticationException(
+                    ErrorMessages.builder().message(e.getMessage())
+                            .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE))
+                            .build());
+        } catch (KnifeOauth2AuthenticationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new KnifeOauth2AuthenticationException(
+                    ErrorMessages.builder().message(e.getMessage())
+                            .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
+                            .build());
+        }
+    }
+
 
 }
