@@ -11,7 +11,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.RequestOAuth2Distiller;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
 import io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.bo.BasicTokenResolver;
 import io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.dto.SpringSecurityTraditionalOauthDTO;
 import jakarta.servlet.http.HttpServletRequest;

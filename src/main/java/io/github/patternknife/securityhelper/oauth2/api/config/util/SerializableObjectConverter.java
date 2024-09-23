@@ -1,4 +1,4 @@
-package io.github.patternknife.securityhelper.oauth2.api.config.security.util;
+package io.github.patternknife.securityhelper.oauth2.api.config.util;
 
 
 import org.apache.tomcat.util.codec.binary.Base64;

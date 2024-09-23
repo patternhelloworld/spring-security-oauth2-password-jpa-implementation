@@ -1,7 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.RequestOAuth2Distiller;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;

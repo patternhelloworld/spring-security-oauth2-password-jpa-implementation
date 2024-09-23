@@ -5,7 +5,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.Secu
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeAuthorization;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.KnifeHttpHeaders;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;

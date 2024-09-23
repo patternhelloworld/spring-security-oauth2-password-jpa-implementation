@@ -2,7 +2,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.respons
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.OrderConstants;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.OrderConstants;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;

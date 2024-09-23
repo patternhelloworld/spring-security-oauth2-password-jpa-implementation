@@ -7,7 +7,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.response
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.OrderConstants;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.OrderConstants;
 import lombok.RequiredArgsConstructor;;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;

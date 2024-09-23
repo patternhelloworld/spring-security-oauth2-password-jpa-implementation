@@ -1,7 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.entity;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.SerializableObjectConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.SerializableObjectConverter;
 import jakarta.persistence.*;
 
 import lombok.Getter;

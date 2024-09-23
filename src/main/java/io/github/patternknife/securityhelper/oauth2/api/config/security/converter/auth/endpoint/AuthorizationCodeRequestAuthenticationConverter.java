@@ -2,7 +2,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.convert
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.RequestOAuth2Distiller;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
