@@ -2,6 +2,8 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.convert
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,8 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 
 
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -34,6 +38,7 @@ public final class AuthorizationCodeRequestAuthenticationConverter implements Au
      * */
     private final RegisteredClientRepository registeredClientRepository;
     private final KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository;
+    private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
     public void setClientAuthentication(String clientId) {
 
@@ -54,10 +59,18 @@ public final class AuthorizationCodeRequestAuthenticationConverter implements Au
         MultiValueMap<String, String> parameters = RequestOAuth2Distiller.getAuthorizationCodeSecurityAdditionalParameters(request);
 
         // grant_type (REQUIRED)
-        String grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
-        if (!AuthorizationGrantType.AUTHORIZATION_CODE.getValue().equals(grantType)) {
-         //   return null;
+
+        String authorizationCode = parameters.getFirst(OAuth2ParameterNames.CODE);
+        if (authorizationCode == null) {
+            throw new KnifeOauth2AuthenticationException("non -code");
         }
+
+
+        OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken(authorizationCode, new OAuth2TokenType("authorization_code"));
+        if(oAuth2Authorization == null){
+            throw new KnifeOauth2AuthenticationException("non -code");
+        }
+        String principalName = oAuth2Authorization.getPrincipalName();
 
         // 클라이언트 인증 설정
         setClientAuthentication(parameters.getFirst(OAuth2ParameterNames.CLIENT_ID));
