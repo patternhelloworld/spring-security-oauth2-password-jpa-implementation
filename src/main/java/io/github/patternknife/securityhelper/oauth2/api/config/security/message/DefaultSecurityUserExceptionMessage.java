@@ -16,8 +16,10 @@ public enum DefaultSecurityUserExceptionMessage implements ExceptionMessageInter
     AUTHENTICATION_PASSWORD_FAILED_EXCEEDED("The number of password attempts has been exceeded."),
 
     // Wrong Authorization Code
-    AUTHORIZATION_CODE_NO_EXISTS("The specified Authorization code does not exist."),
-
+    AUTHENTICATION_INVALID_RESPONSE_TYPE("The specified Response Type is invalid."),
+    AUTHENTICATION_INVALID_AUTHORIZATION_CODE("The specified Authorization Code is invalid."),
+    AUTHENTICATION_INVALID_REDIRECT_URI("The specified Redirect URI is invalid."),
+    AUTHENTICATION_SCOPES_NOT_APPROVED("The specified Scopes are not approved."),
     // CLIENT ID, SECRET
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("Client information is not verified."),
 

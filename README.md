@@ -193,7 +193,7 @@ public class CommonDataSourceConfiguration {
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``
 
 ## OAuth2 - Authorization Code
-* Open the web browser by connecting to ``http://localhost:8370/oauth2/authorization?code=32132&grant_type=authorization_code&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=message.read&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256``
+* Open the web browser by connecting to ``http://localhost:8370/oauth2/authorization?code=32132&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1``
 * Login with ``cicd@test.com / 1234 ``
 
 ## Running this App with Docker

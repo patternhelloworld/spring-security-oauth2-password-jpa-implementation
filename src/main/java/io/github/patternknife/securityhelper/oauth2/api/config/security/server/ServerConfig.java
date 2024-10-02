@@ -121,15 +121,16 @@ public class ServerConfig {
                 .tokenGenerator(tokenGenerator)
                 .oidc(Customizer.withDefaults())
                 /*
+                 *    https://sabarada.tistory.com/248
                  *
-                 *
-                 *    http://localhost:8370/oauth2/authorization?code=32132&grant_type=authorization_code&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=message.read&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256
+                 *    code, client_id, redirect_uri
+                 *    http://localhost:8370/oauth2/authorization?code=32132&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1
                  *
                  * */
                 //  https://medium.com/@itsinil/oauth-2-1-pkce-%EB%B0%A9%EC%8B%9D-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-14500950cdbf
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
-                                // [1] User goes to the 'consentPage' below ('http://localhost:8370/oauth2/authorization?code=32132&grant_type=authorization_code&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=message.read&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256')
+                                // [1] User goes to the 'consentPage' below ('http://localhost:8370/oauth2/authorization?code=XXXXX&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1&scope=message.read&state=random-state&prompt=consent&access_type=offline&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256')
                                 // [2] As you see 'KnifeAuthorizationCodeRequestConverterController', if the code parameter is NOT authenticated, it redirects you to the login page.
                                 // [3] If the login (/api/v1/traditional-oauth/authorization-code) in the 'src/main/resources/templates/login.html' is successful, it retries [1].
                                 // [4] Now you are on the consent page, check READ & WRITE and then press 'Submit'.

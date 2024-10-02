@@ -59,7 +59,7 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
                     );
 
                     if (oAuth2Authorization == null) {
-                        throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHORIZATION_CODE_NO_EXISTS));
+                        throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
                     }
                     // UserDetails 로드
                     userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);

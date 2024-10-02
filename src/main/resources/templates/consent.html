@@ -50,7 +50,6 @@
                 <input type="hidden" name="client_id" th:value="${clientId}">
                 <input type="hidden" name="state" th:value="${state}">
                 <input type="hidden" name="code" th:value="${code}">
-                <input th:if="${userCode}" type="hidden" name="user_code" th:value="${userCode}">
 
                 <div th:each="scope: ${scopes}" class="form-check py-1">
                     <input class="form-check-input"
