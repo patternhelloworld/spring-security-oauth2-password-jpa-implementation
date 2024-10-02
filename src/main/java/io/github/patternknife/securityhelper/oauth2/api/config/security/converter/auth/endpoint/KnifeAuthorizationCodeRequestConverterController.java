@@ -50,28 +50,28 @@ public class KnifeAuthorizationCodeRequestConverterController {
 
 
     @PostMapping("/oauth2/authorization")
-    public String authorize(@RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
-                            @RequestParam(OAuth2ParameterNames.STATE) String state,
-                            @RequestParam(OAuth2ParameterNames.SCOPE) Set<String> scopes,
-                            @RequestParam(name = OAuth2ParameterNames.CODE, required = false) String authorizationCode,
-                            @RequestParam(name = "consent_action", required = false) String consentAction,
-                            Model model) {
+    public String authorize(Model model, @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
+                            @RequestParam(OAuth2ParameterNames.REDIRECT_URI) String redirectUri,
+                            @RequestParam(name = OAuth2ParameterNames.CODE) String authorizationCode) {
         // 예시: 클라이언트의 등록된 콜백 URL 가져오기
         RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
-        String redirectUri = registeredClient.getRedirectUris().iterator().next();
-
-        // 승인된 스코프를 바탕으로 Authorization Code 생성 로직
-        // Authorization Code를 생성하여 저장하고 해당 코드를 콜백 URL로 리다이렉트합니다.
-        if ("approve".equals(consentAction)) {
-            // 실제로는 이곳에서 OAuth2Authorization 객체를 생성하고 저장하는 로직 필요
-             authorizationCode = "generated-authorization-code"; // 실제 생성된 코드로 교체
-
-            // 콜백 URL로 리다이렉트하며 Authorization Code를 전달
-            return "redirect:" + redirectUri + "?code=" + authorizationCode + "&state=" + state;
-        } else {
-            // 거부한 경우 에러 페이지 혹은 다시 로그인 페이지로 리다이렉트
-            return "redirect:/login?error=access_denied";
+        if (!registeredClient.getRedirectUris().contains(redirectUri)) {
+            logger.error("message (Invalid redirect URI when consenting): "
+                    + "authorizationCode=" + authorizationCode + ", "
+                    + "clientId=" + clientId + ", "
+                    + "redirectUri=" + redirectUri + ", "
+                    + "registeredRedirectUris=" + registeredClient.getRedirectUris().toString());
+            model.addAttribute("userMessage", iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_REDIRECT_URI));
+            return "error";
         }
+
+        OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken(authorizationCode, new OAuth2TokenType("authorization_code"));
+        if(oAuth2Authorization == null){
+            return "login";
+        }
+        String principalName = oAuth2Authorization.getPrincipalName();
+
+        return "redirect:" + redirectUri + "?code=" + authorizationCode;
     }
 
 
@@ -143,7 +143,7 @@ public class KnifeAuthorizationCodeRequestConverterController {
             return "redirect:" + redirectUri + "?code=" + authorizationCode;
         }else{
 
-            Set<String> authorizedScopes = currentAuthorizationConsent.getScopes();
+            Set<String> authorizedScopes = registeredClient.getScopes();
 
             Set<String> requestedScopes = StringUtils.commaDelimitedListToSet(scope);
 
@@ -174,7 +174,8 @@ public class KnifeAuthorizationCodeRequestConverterController {
         model.addAttribute("clientId", clientId);
         model.addAttribute("scopes", withDescription(approvedScopes));
         model.addAttribute("principalName", principalName);
-        model.addAttribute("requestURI", "/oauth2/authorization");
+        model.addAttribute("redirectUri", redirectUri);
+        model.addAttribute("consentRequestURI", "/oauth2/authorization");
 
         return "consent";
     }

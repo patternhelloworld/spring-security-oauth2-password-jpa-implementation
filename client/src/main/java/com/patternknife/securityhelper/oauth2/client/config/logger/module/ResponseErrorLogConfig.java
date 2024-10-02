@@ -21,7 +21,7 @@ public class ResponseErrorLogConfig {
     private static final Logger logger = LoggerFactory.getLogger(ResponseErrorLogConfig.class);
 
 
-    @AfterReturning(pointcut = ("within(com.patternknife.securityhelper.oauth2.client.config.response.error..*)"),
+    @AfterReturning(pointcut = ("within(com.patternknife.securityhelper.oauth2.client.config.response.error..*) || within(io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler..*)"),
             returning = "returnValue")
     public void endpointAfterExceptionReturning(JoinPoint p, Object returnValue) {
 

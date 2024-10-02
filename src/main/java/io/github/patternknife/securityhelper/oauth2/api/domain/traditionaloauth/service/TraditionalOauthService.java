@@ -75,7 +75,7 @@ public class TraditionalOauthService {
 
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse createAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest accessTokenRequest,
-                                                                             String authorizationHeader) {
+                                                                             String authorizationHeader) throws KnifeOauth2AuthenticationException {
         try {
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
@@ -113,7 +113,7 @@ public class TraditionalOauthService {
     }
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
-                                                                              String authorizationHeader) {
+                                                                              String authorizationHeader) throws KnifeOauth2AuthenticationException {
         try {
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
@@ -156,7 +156,7 @@ public class TraditionalOauthService {
 
 
     public SpringSecurityTraditionalOauthDTO.AuthorizationCodeResponse createAuthorizationCode(SpringSecurityTraditionalOauthDTO.AuthorizationCodeRequest authorizationCodeRequest,
-                                                                                               String authorizationHeader) {
+                                                                                               String authorizationHeader) throws KnifeOauth2AuthenticationException {
         try {
 
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader)

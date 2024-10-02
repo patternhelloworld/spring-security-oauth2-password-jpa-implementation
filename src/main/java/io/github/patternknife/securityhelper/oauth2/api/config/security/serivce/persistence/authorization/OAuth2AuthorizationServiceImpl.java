@@ -88,47 +88,47 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
         }else{
             // ROPC
             knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
-        }
 
-        if(shouldBeNewAuthorization.getAccessToken() != null) {
-            knifeAuthorization.hashSetAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
-        }
-        if(shouldBeNewAuthorization.getRefreshToken() != null) {
-            knifeAuthorization.hashSetRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
-        }
+            if(shouldBeNewAuthorization.getAccessToken() != null) {
+                knifeAuthorization.hashSetAccessTokenValue(shouldBeNewAuthorization.getAccessToken().getToken().getTokenValue());
+            }
+            if(shouldBeNewAuthorization.getRefreshToken() != null) {
+                knifeAuthorization.hashSetRefreshTokenValue(shouldBeNewAuthorization.getRefreshToken().getToken().getTokenValue());
+            }
 
-        String appTokenValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
-        if (appTokenValue != null) {
-            knifeAuthorization.setAccessTokenAppToken(appTokenValue);
-        }
+            String appTokenValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.APP_TOKEN);
+            if (appTokenValue != null) {
+                knifeAuthorization.setAccessTokenAppToken(appTokenValue);
+            }
 
-        String userAgentValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.USER_AGENT);
-        if (!StringUtils.isEmpty(userAgentValue)) {
-            knifeAuthorization.setAccessTokenUserAgent(userAgentValue);
-        }
+            String userAgentValue = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.USER_AGENT);
+            if (!StringUtils.isEmpty(userAgentValue)) {
+                knifeAuthorization.setAccessTokenUserAgent(userAgentValue);
+            }
 
-        String remoteIp = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.X_Forwarded_For);
-        if (remoteIp != null) {
-            knifeAuthorization.setAccessTokenRemoteIp(remoteIp);
+            String remoteIp = shouldBeNewAuthorization.getAttribute(KnifeHttpHeaders.X_Forwarded_For);
+            if (remoteIp != null) {
+                knifeAuthorization.setAccessTokenRemoteIp(remoteIp);
+            }
+
+            knifeAuthorization.setAccessTokenType(shouldBeNewAuthorization.getAuthorizationGrantType().getValue());
+            knifeAuthorization.setAccessTokenScopes(String.join(",", shouldBeNewAuthorization.getAuthorizedScopes()));
+
+            // Token Expiration
+            knifeAuthorization.setAccessTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
+            if (shouldBeNewAuthorization.getAccessToken() != null && shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
+                knifeAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
+            }
+
+            // Token Expiration
+            knifeAuthorization.setRefreshTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
+            if (shouldBeNewAuthorization.getRefreshToken() != null && shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
+                knifeAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
+            }
+            knifeAuthorization.setAuthorizationGrantType(shouldBeNewAuthorization.getAttribute("grant_type"));
         }
 
         knifeAuthorization.setAttributes(shouldBeNewAuthorization);
-        knifeAuthorization.setAccessTokenType(shouldBeNewAuthorization.getAuthorizationGrantType().getValue());
-        knifeAuthorization.setAccessTokenScopes(String.join(",", shouldBeNewAuthorization.getAuthorizedScopes()));
-
-        // Token Expiration
-        knifeAuthorization.setAccessTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
-        if (shouldBeNewAuthorization.getAccessToken() != null && shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
-            knifeAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
-        }
-
-        // Token Expiration
-        knifeAuthorization.setRefreshTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
-        if (shouldBeNewAuthorization.getRefreshToken() != null && shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
-            knifeAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
-        }
-        knifeAuthorization.setAuthorizationGrantType(shouldBeNewAuthorization.getAttribute("grant_type"));
-
 
         knifeAuthorizationRepository.save(knifeAuthorization);
 

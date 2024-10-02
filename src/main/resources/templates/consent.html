@@ -46,9 +46,9 @@
     </div>
     <div class="row">
         <div class="col text-center">
-            <form name="consent_form" method="post" th:action="${requestURI}">
+            <form name="consent_form" method="post" th:action="${consentRequestURI}">
                 <input type="hidden" name="client_id" th:value="${clientId}">
-                <input type="hidden" name="state" th:value="${state}">
+                <input type="hidden" name="redirect_uri" th:value="${redirectUri}">
                 <input type="hidden" name="code" th:value="${code}">
 
                 <div th:each="scope: ${scopes}" class="form-check py-1">
