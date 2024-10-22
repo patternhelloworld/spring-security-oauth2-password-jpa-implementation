@@ -13,12 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 
 
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -32,9 +35,9 @@ import java.util.*;
 public final class AuthorizationCodeRequestAuthenticationConverter implements AuthenticationConverter {
 
     /*
-    *   `
-    *      CustomGrantAuthenticationToken <- OAuth2ClientAuthenticationToken
-    *
+     *   `
+     *      CustomGrantAuthenticationToken <- OAuth2ClientAuthenticationToken
+     *
      * */
     private final RegisteredClientRepository registeredClientRepository;
     private final KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository;
@@ -57,8 +60,6 @@ public final class AuthorizationCodeRequestAuthenticationConverter implements Au
     @Override
     public Authentication convert(HttpServletRequest request) {
         MultiValueMap<String, String> parameters = RequestOAuth2Distiller.getAuthorizationCodeSecurityAdditionalParameters(request);
-
-        // grant_type (REQUIRED)
 
         String authorizationCode = parameters.getFirst(OAuth2ParameterNames.CODE);
         if (authorizationCode == null) {
@@ -97,18 +98,24 @@ public final class AuthorizationCodeRequestAuthenticationConverter implements Au
             additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
         });
 
-  //      if(knifeAuthorizationConsentRepository.findByRegisteredClientIdAndPrincipalName())
+        //      if(knifeAuthorizationConsentRepository.findByRegisteredClientIdAndPrincipalName())
+        OAuth2AuthorizationRequest authorizationRequest = OAuth2AuthorizationRequest.authorizationCode()
+                .clientId(parameters.getFirst(OAuth2ParameterNames.CLIENT_ID))
+                .authorizationUri(parameters.getFirst(OAuth2ParameterNames.REDIRECT_URI))
+                .redirectUri(parameters.getFirst(OAuth2ParameterNames.REDIRECT_URI))
+                .scopes(scopes) // 스코프 설정
+                .state(parameters.getFirst(OAuth2ParameterNames.STATE))
+                .build();
+        additionalParameters.put(OAuth2AuthorizationRequest.class.getName(), authorizationRequest);
+        // grant_type (REQUIRED)
 
-        // OAuth2AuthorizationCodeRequestAuthenticationToken 생성
-        return new OAuth2AuthorizationCodeRequestAuthenticationToken(
-                "http://localhost:8370/callback1", // authorizationUri
-                parameters.getFirst(OAuth2ParameterNames.CLIENT_ID), // clientId
+        return new OAuth2AuthorizationCodeAuthenticationToken(
+                code,
                 clientPrincipal, // principal (사용자 인증 객체)
-                "http://localhost:8370/callback1", // redirectUri
-                parameters.getFirst(OAuth2ParameterNames.STATE), // state
-                scopes, // 요청한 스코프
+                redirectUri, // redirectUri
                 additionalParameters // 추가 파라미터
         );
+        // OAuth2AuthorizationCodeRequestAuthenticationToken 생성
     }
 
 

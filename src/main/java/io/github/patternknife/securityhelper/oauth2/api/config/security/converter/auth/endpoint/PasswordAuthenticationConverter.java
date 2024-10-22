@@ -7,9 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -26,8 +29,20 @@ public final class PasswordAuthenticationConverter implements AuthenticationConv
 
         Map<String, Object> additionalParameters = RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request);
 
-        return new CustomGrantAuthenticationToken(new AuthorizationGrantType((String) additionalParameters.get("grant_type")),
+        OAuth2AuthorizationRequest authorizationRequest = OAuth2AuthorizationRequest.authorizationCode()
+                .clientId((String) additionalParameters.get(OAuth2ParameterNames.CLIENT_ID))
+                .authorizationUri("http://localhost:8370/callback1")
+                .redirectUri("http://localhost:8370/callback1")// 스코프 설정
+                .state("aaa")
+                .build();
+        additionalParameters.put(OAuth2AuthorizationRequest.class.getName(), authorizationRequest);
+
+
+        CustomGrantAuthenticationToken customGrantAuthenticationToken = new CustomGrantAuthenticationToken(new AuthorizationGrantType((String) additionalParameters.get("grant_type")),
                 oAuth2ClientAuthenticationToken, additionalParameters);
+        additionalParameters.put(Principal.class.getName(), customGrantAuthenticationToken);
+
+        return customGrantAuthenticationToken;
     }
 
 }

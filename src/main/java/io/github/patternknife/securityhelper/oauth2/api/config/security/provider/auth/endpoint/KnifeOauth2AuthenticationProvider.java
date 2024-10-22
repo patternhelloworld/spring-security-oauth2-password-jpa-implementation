@@ -21,8 +21,10 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
@@ -53,16 +55,23 @@ public final class KnifeOauth2AuthenticationProvider implements AuthenticationPr
 
                 if (((String) customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
 
-                    OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken(
-                            (String) customGrantAuthenticationToken.getAdditionalParameters().get(OAuth2ParameterNames.CODE),
-                            new OAuth2TokenType(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())
-                    );
+                    userDetails = conditionalDetailsService.loadUserByUsername((String) customGrantAuthenticationToken.getAdditionalParameters().get("username"), clientId);
 
-                    if (oAuth2Authorization == null) {
-                        throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
-                    }
-                    // UserDetails 로드
-                    userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
+                    oauth2AuthenticationHashCheckService.validateUsernamePassword((String) customGrantAuthenticationToken.getAdditionalParameters().get("password"), userDetails);
+
+                    OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails, ((CustomGrantAuthenticationToken) authentication).getGrantType(), clientId, ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters(), null);
+
+                    RegisteredClient registeredClient = oAuth2ClientAuthenticationToken.getRegisteredClient();
+
+                    ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters().put("authorization_code", oAuth2Authorization.getToken(OAuth2AuthorizationCode.class).getToken().getTokenValue());
+
+                    return new OAuth2AccessTokenAuthenticationToken(
+                            registeredClient,
+                            getAuthenticatedClientElseThrowInvalidClient(authentication),
+                            oAuth2Authorization.getAccessToken().getToken(),
+                            oAuth2Authorization.getRefreshToken() != null ? oAuth2Authorization.getRefreshToken().getToken() : null,
+                            ((CustomGrantAuthenticationToken) authentication).getAdditionalParameters()
+                    );
 
                 } else if (((String) customGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())) {
 

@@ -25,10 +25,12 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 
 
+import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -72,7 +74,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         knifeAuthorization.setPrincipalName(shouldBeNewAuthorization.getPrincipalName());
 
-        if(shouldBeNewAuthorization.getAttribute("grant_type").equals(new OAuth2TokenType("authorization_code").getValue())){
+        if(Objects.equals(shouldBeNewAuthorization.getAttribute("grant_type"), new OAuth2TokenType("authorization_code").getValue())){
             // Authorization Code
             knifeAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getRegisteredClientId());
 

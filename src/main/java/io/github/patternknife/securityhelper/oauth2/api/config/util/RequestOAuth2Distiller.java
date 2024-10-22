@@ -101,10 +101,10 @@ public class RequestOAuth2Distiller {
         additionalParameters.add(KnifeHttpHeaders.USER_AGENT, request.getHeader(KnifeHttpHeaders.USER_AGENT));
         additionalParameters.add(KnifeHttpHeaders.X_Forwarded_For, request.getHeader(KnifeHttpHeaders.X_Forwarded_For));
 
-        if (!additionalParameters.containsKey("client_id") || StringUtils.isEmpty(additionalParameters.getFirst("client_id"))) {
+/*        if (!additionalParameters.containsKey("client_id") || StringUtils.isEmpty(additionalParameters.getFirst("client_id"))) {
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(request.getHeader("Authorization")).orElseThrow(KnifeOauth2AuthenticationException::new);
             additionalParameters.add("client_id", basicCredentials.getClientId());
-        }
+        }*/
 
         return additionalParameters;
     }

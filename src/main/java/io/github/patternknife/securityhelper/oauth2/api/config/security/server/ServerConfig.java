@@ -63,6 +63,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Configuration
 @RequiredArgsConstructor
@@ -134,17 +135,9 @@ public class ServerConfig {
                                 // [2] As you see 'KnifeAuthorizationCodeRequestConverterController', if the code parameter is NOT authenticated, it redirects you to the login page.
                                 // [3] If the login (/api/v1/traditional-oauth/authorization-code) in the 'src/main/resources/templates/login.html' is successful, it retries [1].
                                 // [4] Now you are on the consent page, check READ & WRITE and then press 'Submit'.
-                                .consentPage(CUSTOM_CONSENT_PAGE_URI)
+                                //.consentPage(CUSTOM_CONSENT_PAGE_URI)
                                 // [5]
                                 .authorizationRequestConverter(new AuthorizationCodeRequestAuthenticationConverter(registeredClientRepository, knifeAuthorizationConsentRepository, authorizationService))
-                    /*            .authorizationRequestConverter(new AuthorizationCodeRequestAuthenticationConverter(registeredClientRepository, knifeAuthorizationConsentRepository))
-                                .authorizationRequestConverters(conveterList -> {
-                                    conveterList.add(new AuthorizationCodeAuthenticationConverter(registeredClientRepository));
-                                })*/
-                                .authorizationRequestConverters(conveterList -> {
-                                    conveterList.add(new AuthorizationCodeAuthenticationConverter(registeredClientRepository));
-                                })
-                                .errorResponseHandler(iAuthenticationFailureHandler)
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
                                         commonOAuth2AuthorizationSaver,
                                         conditionalDetailsService,
@@ -171,7 +164,7 @@ public class ServerConfig {
                                     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
                                         logger.error(exception.toString());
-                                        response.sendRedirect("login");
+                                        request.getRequestDispatcher("/login").forward(request, response);
                                     }
                                 })
 
