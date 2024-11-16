@@ -3,9 +3,9 @@
 > App-Token based OAuth2 POC built to grow with Spring Boot and ORM
 > 
 ## Supporting Oauth2 Type
-| ROPC      | Authorization Code |
-|-----------|-------------------|
-| available | in development    |
+| ROPC             | Authorization Code |
+|------------------|-------------------|
+| production-level | in development    |
 
 ## Quick Start
 ```xml
@@ -93,10 +93,14 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 ## Run the App
 
 #### Import the SQL file in the ``mysql`` folder.
+- If you don't have a MySQL instance readily available, you can clone https://github.com/patternhelloworld/docker-mysql-8 .
 
 #### Install Maven
 ```shell
+# Do NOT use your latest Maven version, but mvnw here or one with the same version.
+cd lib
 mvnw clean install
+cd ..
 cd client
 mvnw clean install # Integration tests are done here, which creates docs by Spring-Rest-Doc.
 ```
@@ -198,7 +202,7 @@ public class CommonDataSourceConfiguration {
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
-  * https://github.com/patternknife/docker-blue-green-runner
+  * https://github.com/patternhelloworld/docker-blue-green-runner
 * The above module references this app's Dockerfile and the entrypoint script in the .docker folder.
 
 ## Contribution Guide
