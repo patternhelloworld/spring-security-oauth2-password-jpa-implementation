@@ -3,9 +3,9 @@
 > App-Token based OAuth2 POC built to grow with Spring Boot and ORM
 > 
 ## Supporting Oauth2 Type
-| ROPC      | Authorization Code |
-|-----------|-------------------|
-| available | in development    |
+| ROPC             | Authorization Code                              |
+|------------------|-------------------------------------------------|
+| production-level | Beta (expected to reach production-level in v3) |
 
 ## Quick Start
 ```xml
@@ -61,7 +61,7 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 | App-Token Status       | Access Token Behavior      |
 |------------------------|----------------------------|
 | same for the same user | Access-Token is shared     |
-| different for the same user              | Access-Token is NOT shared |
+| different for the same user | Access-Token is NOT shared |
 
   * Set this in your ``application.properties``. 
     * App-Token Behavior Based on `io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token`
@@ -93,10 +93,14 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 ## Run the App
 
 #### Import the SQL file in the ``mysql`` folder.
+- If you don't have a MySQL instance readily available, you can clone https://github.com/patternhelloworld/docker-mysql-8 .
 
 #### Install Maven
 ```shell
+# Do NOT use your latest Maven version, but mvnw here or one with the same version.
+cd lib
 mvnw clean install
+cd ..
 cd client
 mvnw clean install # Integration tests are done here, which creates docs by Spring-Rest-Doc.
 ```
@@ -193,12 +197,44 @@ public class CommonDataSourceConfiguration {
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``
 
 ## OAuth2 - Authorization Code
-* Open the web browser by connecting to ``http://localhost:8370/oauth2/authorization?code=32132&response_type=code&client_id=client_customer&redirect_uri=http%3A%2F%2Flocalhost%3A8370%2Fcallback1``, using the values from the ``oauth2_registered_client``
-* Login with ``cicd@test.com / 1234 ``
+- Beta
+- How to set it up
+  1. Create your own login page with the /login route as indicated in the client project (In the future, this address will be customisable):
+  ```java
+    @Controller
+    public class LoginWeb {
+        @GetMapping("/login")
+        public String loginPage() {
+        return "login";
+        }
+    }
+  ```
+  ```properties
+    spring.mvc.view.prefix=/templates/
+    spring.mvc.view.suffix=.html
+  ```
+  2. Check the login page at the "resources/templates/login.hml"
+  3. Ensure the callback URL (http://localhost:8081/callback1) is properly set in the ``oauth2_registered_client`` table in the database.
+- How to use
+  1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1``, using the values from the ``oauth2_registered_client``  2. Now you Login with ``cicd@test.com / 1234 ``
+  2. Login with ``cicd@test.com / 1234 ``
+  3. You will be redirected to
+   ``https://localhost:8081/callback1?code=215e9539-1dcb-4843-b1ea-b2d7be0a3c44&state=xxx``
+  4. You can login with this API payload
+    ```http request
+    POST /oauth2/token HTTP/1.1
+    Host: localhost:8370
+    Accept: application/json
+    Content-Type: application/x-www-form-urlencoded
+    App-Token: aaa # You can achieve the separated and shared session using App-Token
+    Authorization: ••••••
+    Content-Length: 57
+    grant_type=code&code=ef5aaaaf-ebae-4677-aac5-abf8e8412f1e
+    ```
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
-  * https://github.com/patternknife/docker-blue-green-runner
+  * https://github.com/patternhelloworld/docker-blue-green-runner
 * The above module references this app's Dockerfile and the entrypoint script in the .docker folder.
 
 ## Contribution Guide

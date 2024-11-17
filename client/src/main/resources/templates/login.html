@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Authorization Server Sample</title>
+    <style>
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form id="loginForm" class="form-signin w-100 m-auto" method="post">
+        <!-- Error message container -->
+        <div id="error-message" class="alert alert-danger" role="alert" style="display: none;">
+            <ul id="error-list"></ul>
+        </div>
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+        <div class="form-floating">
+            <input type="text" id="username" name="username" class="form-control" required autofocus>
+            <label for="username">Username</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" id="password" name="password" class="form-control" required>
+            <label for="password">Password</label>
+        </div>
+        <div>
+            <button id="signInButton" class="w-100 btn btn-lg btn-primary btn-block" type="button">Sign in</button>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const signInButton = document.getElementById('signInButton');
+        const errorMessageContainer = document.getElementById('error-message');
+        const errorList = document.getElementById('error-list');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        // Function to parse query parameters from the current URL
+        function getQueryParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                response_type: urlParams.get('response_type'),
+                client_id: urlParams.get('client_id'),
+                state: urlParams.get('state'),
+                scope: urlParams.get('scope'),
+                redirect_uri: urlParams.get('redirect_uri')
+            };
+        }
+
+        signInButton.addEventListener('click', async function () {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            // Extract query parameters from the current URL
+            const { client_id, state, scope, redirect_uri } = getQueryParameters();
+
+            // Basic Auth header creation
+            const clientSecret = '12345'; // Enter client secret
+            const basicAuth = btoa(`${client_id}:${clientSecret}`);
+
+            try {
+                // First request to obtain the authorization code
+                const tokenResponse = await fetch('/oauth2/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Basic ${basicAuth}`
+                    },
+                    body: new URLSearchParams({
+                        'username': username,
+                        'password': password,
+                        'grant_type': "authorization_code"
+                    })
+                });
+
+                if (!tokenResponse.ok) {
+                    const errorData = await tokenResponse.json();
+                    displayErrors(errorData.errors || ["Login failed."]);
+                    throw new Error('Login failed');
+                }
+
+                const tokenResult = await tokenResponse.json();
+                const authorizationCode = tokenResult.code; // Extract authorization code
+
+                // Build the dynamic authorization URL
+                const authorizeUrl = `/oauth2/authorize?response_type=code&client_id=${client_id}&code=${authorizationCode}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect_uri)}`;
+
+                // Redirect to the authorization endpoint
+                window.location.href = authorizeUrl;
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Function to display errors dynamically
+        function displayErrors(errors) {
+            errorList.innerHTML = "";
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                errorList.appendChild(li);
+            });
+            errorMessageContainer.style.display = "block";
+        }
+    });
+</script>
+</body>
+</html>

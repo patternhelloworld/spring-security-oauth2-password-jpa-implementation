@@ -59,11 +59,11 @@ public class GlobalExceptionHandler {
     }
 
     // Unhandled
-    @ExceptionHandler(Exception.class)
+/*    @ExceptionHandler(Exception.class)
     public ResponseEntity<?> unhandledExceptionHandler(Exception ex, WebRequest request) {
         SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
                 CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    }*/
 
 }
