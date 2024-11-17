@@ -16,6 +16,8 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -32,56 +34,65 @@ public class CustomAuthenticationSuccessHandlerImpl implements AuthenticationSuc
     private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter =
             new OAuth2AccessTokenResponseHttpMessageConverter();
 
+
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     @Override
     public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) throws IOException {
 
-
-        final OAuth2AccessTokenAuthenticationToken accessTokenAuthentication=(OAuth2AccessTokenAuthenticationToken)authentication;
+        final OAuth2AccessTokenAuthenticationToken accessTokenAuthentication = (OAuth2AccessTokenAuthenticationToken) authentication;
 
         OAuth2AccessToken accessToken = accessTokenAuthentication.getAccessToken();
         OAuth2RefreshToken refreshToken = accessTokenAuthentication.getRefreshToken();
         Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
-        /*        Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
 
-        // Lookup the authorization using the access token
-        OAuth2Authorization authorization = this.authorizationService.findByToken(
-                accessToken.getTokenValue(), OAuth2TokenType.ACCESS_TOKEN);
-
-        Map<String, Object> opaqueTokenClaims = authorization.getAccessToken().getClaims();
-        Authentication userPrincipal = authorization.getAttribute(Principal.class.getName());*/
-
-        OAuth2AccessTokenResponse.Builder builder =
-                OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
-                        .tokenType(accessToken.getTokenType())
-                        .scopes(accessToken.getScopes());
-        if(((String)additionalParameters.get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())){
-            if(accessToken.getExpiresAt() != null) {
+        if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())
+          || ((String) additionalParameters.get("grant_type")).equals(OAuth2ParameterNames.CODE)) {
+            OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
+                    .tokenType(accessToken.getTokenType())
+                    .scopes(accessToken.getScopes());
+            if (accessToken.getExpiresAt() != null) {
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), accessToken.getExpiresAt()));
             }
-        }else if(((String)additionalParameters.get("grant_type")).equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())){
-            assert refreshToken != null;
-            if(refreshToken.getExpiresAt() != null) {
+            if (refreshToken != null) {
+                builder.refreshToken(refreshToken.getTokenValue());
+            }
+            OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+            ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+            this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
+
+        } else if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
+            OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
+                    .tokenType(accessToken.getTokenType())
+                    .scopes(accessToken.getScopes());
+            if (refreshToken.getExpiresAt() != null) {
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
-        }else{
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
+            if (refreshToken != null) {
+                builder.refreshToken(refreshToken.getTokenValue());
+            }
+            OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+            ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+            this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
+
+        } else if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
+            // Authorization Code만 JSON으로 응답
+            String code = (String) additionalParameters.get("authorization_code");
+
+            // JSON 응답 생성 (authorization_code만 포함)
+            String jsonResponse = String.format("{\"code\":\"%s\"}", code);
+
+            // JSON 응답 전송
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(jsonResponse);
+
+        } else {
+            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
+                    .message("Wrong grant type from Req : " + (String) additionalParameters.get("grant_type"))
+                    .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE))
+                    .build());
         }
-
-
-        if (refreshToken != null) {
-            builder.refreshToken(refreshToken.getTokenValue());
-        }
-/*        if (!CollectionUtils.isEmpty(additionalParameters)) {
-            builder.additionalParameters(additionalParameters);
-        }*/
-
-        // TODO Add custom response parameters using `opaqueTokenClaims` and/or `userPrincipal`
-
-
-        OAuth2AccessTokenResponse accessTokenResponse = builder.build();
-        ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
-        this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
     }
+
 }

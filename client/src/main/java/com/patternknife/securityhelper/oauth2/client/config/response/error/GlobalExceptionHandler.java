@@ -7,7 +7,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.response
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.OrderConstants;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.OrderConstants;
 import lombok.RequiredArgsConstructor;;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -59,11 +59,11 @@ public class GlobalExceptionHandler {
     }
 
     // Unhandled
-    @ExceptionHandler(Exception.class)
+/*    @ExceptionHandler(Exception.class)
     public ResponseEntity<?> unhandledExceptionHandler(Exception ex, WebRequest request) {
         SecurityKnifeErrorResponsePayload errorResponsePayload = new SecurityKnifeErrorResponsePayload(ex.getMessage(), request.getDescription(false), GeneralErrorMessage.UNHANDLED_ERROR.getUserMessage(),
                 CustomExceptionUtils.getAllStackTraces(ex), CustomExceptionUtils.getAllCauses(ex));
         return new ResponseEntity<>(errorResponsePayload, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    }*/
 
 }

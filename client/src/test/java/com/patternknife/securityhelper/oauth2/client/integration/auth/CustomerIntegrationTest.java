@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.integration.auth;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.util.KnifeHttpHeaders;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.KnifeHttpHeaders;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.message.CustomSecurityUserExceptionMessage;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
@@ -96,6 +96,7 @@ public class CustomerIntegrationTest {
         basicHeader = "Basic " + DatatypeConverter.printBase64Binary((appUserClientId + ":" + appUserClientSecret).getBytes("UTF-8"));
 
     }
+
 
     @Test
     public void test_SameAppTokensUseSameAccessToken_EXPOSED() throws Exception {
