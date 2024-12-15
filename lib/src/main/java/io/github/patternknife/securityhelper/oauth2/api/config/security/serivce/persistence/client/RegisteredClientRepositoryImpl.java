@@ -7,7 +7,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.Knif
 import io.github.patternknife.securityhelper.oauth2.api.config.security.entity.KnifeClient;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +86,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
         return knifeClientRepository.findById(id)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
-                        new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the ID : " + id)
+                        new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Couldn't find the ID : " + id)
                                 .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
     }
     @Override
@@ -113,7 +113,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
         return knifeClientRepository.findByClientId(clientId)
                 .map(this::mapToRegisteredClient)
                 .orElseThrow(()->
-                        new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
+                        new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Couldn't find the client ID : " + clientId)
                                 .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
 

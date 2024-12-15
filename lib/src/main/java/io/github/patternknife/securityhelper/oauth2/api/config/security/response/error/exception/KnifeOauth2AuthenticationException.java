@@ -2,29 +2,29 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.respons
 
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 
 /*
 *   Only OAuth2AuthenticationException is allowed to be tossed.
 * */
 public class KnifeOauth2AuthenticationException extends OAuth2AuthenticationException {
-    protected ErrorMessages errorMessages;
+    protected KnifeErrorMessages knifeErrorMessages;
 
     public KnifeOauth2AuthenticationException(){
         super("default");
     }
     public KnifeOauth2AuthenticationException(String message){
         super(message);
-        errorMessages = ErrorMessages.builder().userMessage(message).message(message).build();
+        knifeErrorMessages = KnifeErrorMessages.builder().userMessage(message).message(message).build();
     }
 
-    public KnifeOauth2AuthenticationException(ErrorMessages errorMessages){
-        super(errorMessages.getMessage() == null ? "default" : errorMessages.getMessage());
-        this.errorMessages = errorMessages;
+    public KnifeOauth2AuthenticationException(KnifeErrorMessages knifeErrorMessages){
+        super(knifeErrorMessages.getMessage() == null ? "default" : knifeErrorMessages.getMessage());
+        this.knifeErrorMessages = knifeErrorMessages;
     }
-    public ErrorMessages getErrorMessages() {
-        return errorMessages;
+    public KnifeErrorMessages getErrorMessages() {
+        return knifeErrorMessages;
     }
 
 }

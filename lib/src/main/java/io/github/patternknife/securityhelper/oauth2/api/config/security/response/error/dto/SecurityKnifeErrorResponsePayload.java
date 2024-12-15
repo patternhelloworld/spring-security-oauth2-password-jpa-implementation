@@ -26,13 +26,13 @@ public class SecurityKnifeErrorResponsePayload {
 	private String cause;
 
 
-	public SecurityKnifeErrorResponsePayload(ErrorMessages errorMessages, Exception e, String details, String stackTrace, String userMessage, Map<String, String> userValidationMessage) {
+	public SecurityKnifeErrorResponsePayload(KnifeErrorMessages knifeErrorMessages, Exception e, String details, String stackTrace, String userMessage, Map<String, String> userValidationMessage) {
 		this.timestamp = TimestampUtil.getPayloadTimestamp();
-		this.message = !StringUtils.isEmpty(errorMessages.getMessage()) ? errorMessages.getMessage() : e.getMessage() ;
+		this.message = !StringUtils.isEmpty(knifeErrorMessages.getMessage()) ? knifeErrorMessages.getMessage() : e.getMessage() ;
 		this.details = details;
-		this.userMessage = !StringUtils.isEmpty(errorMessages.getUserMessage()) ? errorMessages.getUserMessage() : userMessage;
+		this.userMessage = !StringUtils.isEmpty(knifeErrorMessages.getUserMessage()) ? knifeErrorMessages.getUserMessage() : userMessage;
 		this.stackTrace = stackTrace;
-		this.userValidationMessage = errorMessages.getUserValidationMessage() != null && !errorMessages.getUserValidationMessage().isEmpty() ? errorMessages.getUserValidationMessage() : userValidationMessage;
+		this.userValidationMessage = knifeErrorMessages.getUserValidationMessage() != null && !knifeErrorMessages.getUserValidationMessage().isEmpty() ? knifeErrorMessages.getUserValidationMessage() : userValidationMessage;
 	}
 
 	public SecurityKnifeErrorResponsePayload(String message, String details, String userMessage, String stackTrace) {

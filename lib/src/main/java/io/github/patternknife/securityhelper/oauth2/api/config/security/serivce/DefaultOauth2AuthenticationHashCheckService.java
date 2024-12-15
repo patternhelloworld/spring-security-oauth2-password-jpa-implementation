@@ -1,7 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 
@@ -25,7 +25,7 @@ public class DefaultOauth2AuthenticationHashCheckService implements IOauth2Authe
             throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_ID_NO_EXISTS));
         }
         if (!passwordEncoder.matches(inputPassword, userDetails.getPassword())) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder()
                     .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).message(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_ID_PASSWORD.getMessage() + " (inputPassword : " + inputPassword + ", input username : " + userDetails.getUsername() + ")").build());
         }
     }
@@ -35,7 +35,7 @@ public class DefaultOauth2AuthenticationHashCheckService implements IOauth2Authe
             throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET));
         }
         if (!passwordEncoder.matches(inputClientSecret, registeredClient.getClientSecret())) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder()
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder()
                     .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).message(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET) + " (inputClientSecret : " + inputClientSecret+ ")").build());
         }
     }

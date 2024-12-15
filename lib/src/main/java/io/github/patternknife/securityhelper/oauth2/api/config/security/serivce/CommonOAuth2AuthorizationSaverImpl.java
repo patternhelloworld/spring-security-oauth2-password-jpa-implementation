@@ -4,7 +4,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.util.KnifeHttpHeaders;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.authentication.OAuth2AuthorizationBuildingService;
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
@@ -108,7 +107,7 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
 
                     }, 5, logger, "[Refresh Token] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
                } else {
-                    throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + authorizationGrantType.getValue()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
+                    throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Wrong grant type from Req : " + authorizationGrantType.getValue()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
                }
 
                return oAuth2Authorization;

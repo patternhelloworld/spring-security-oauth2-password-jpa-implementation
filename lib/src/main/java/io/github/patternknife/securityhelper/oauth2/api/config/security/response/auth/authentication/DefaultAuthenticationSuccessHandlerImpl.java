@@ -1,7 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -64,7 +64,7 @@ public class DefaultAuthenticationSuccessHandlerImpl implements AuthenticationSu
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
         }else{
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Wrong grant type from Req : " + (String)additionalParameters.get("grant_type")).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
         }
 
 

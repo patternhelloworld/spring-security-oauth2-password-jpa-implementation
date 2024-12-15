@@ -1,7 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.domain.traditionaloauth.service;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
@@ -77,7 +77,7 @@ public class TraditionalOauthService {
     public SpringSecurityTraditionalOauthDTO.TokenResponse createAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest accessTokenRequest,
                                                                              String authorizationHeader) throws KnifeOauth2AuthenticationException {
         try {
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
             HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -104,18 +104,18 @@ public class TraditionalOauthService {
                     String.join(" ", registeredClient.getScopes()));
 
         } catch (UsernameNotFoundException e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message(e.getMessage()).userMessage(e.getMessage()).build());
         } catch (KnifeOauth2AuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
     }
 
     public SpringSecurityTraditionalOauthDTO.TokenResponse refreshAccessToken(SpringSecurityTraditionalOauthDTO.TokenRequest refreshTokenRequest,
                                                                               String authorizationHeader) throws KnifeOauth2AuthenticationException {
         try {
-            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(ErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
+            BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
             RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
 
@@ -146,11 +146,11 @@ public class TraditionalOauthService {
                     String.join(" ", registeredClient.getScopes()));
 
         }catch (UsernameNotFoundException e){
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message(e.getMessage()).userMessage(e.getMessage()).build());
         }catch (KnifeOauth2AuthenticationException e){
             throw e;
         }  catch (Exception e){
-            throw new KnifeOauth2AuthenticationException(ErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+            throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
         }
     }
 
@@ -161,7 +161,7 @@ public class TraditionalOauthService {
 
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader)
                     .orElseThrow(() -> new KnifeOauth2AuthenticationException(
-                            ErrorMessages.builder()
+                            KnifeErrorMessages.builder()
                                     .message("Header parsing error (header : " + authorizationHeader + ")")
                                     .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET))
                                     .build()));
@@ -189,14 +189,14 @@ public class TraditionalOauthService {
 
         } catch (UsernameNotFoundException e) {
             throw new KnifeOauth2AuthenticationException(
-                    ErrorMessages.builder().message(e.getMessage())
-                            .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE))
+                    KnifeErrorMessages.builder().message(e.getMessage())
+                            .userMessage(e.getMessage())
                             .build());
         } catch (KnifeOauth2AuthenticationException e) {
             throw e;
         } catch (Exception e) {
             throw new KnifeOauth2AuthenticationException(
-                    ErrorMessages.builder().message(e.getMessage())
+                    KnifeErrorMessages.builder().message(e.getMessage())
                             .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
                             .build());
         }

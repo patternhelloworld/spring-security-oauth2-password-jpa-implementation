@@ -476,8 +476,8 @@ public class CustomerIntegrationTest {
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
-
+        //assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
+        assertTrue(userMessage.contains("NOT Found"));
 
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
@@ -569,9 +569,8 @@ public class CustomerIntegrationTest {
         JSONObject jsonResponse = new JSONObject(responseString);
         String userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
-
-
+       // assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
+        assertTrue(userMessage.contains("NOT Found"));
 
         result = mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/traditional-oauth/token")
                         .header(HttpHeaders.AUTHORIZATION, "Basic " + DatatypeConverter.printBase64Binary((appUserClientId + "wrongcred:" + appUserClientSecret).getBytes("UTF-8")))

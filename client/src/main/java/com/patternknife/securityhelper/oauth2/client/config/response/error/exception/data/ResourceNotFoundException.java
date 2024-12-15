@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.ErrorMessages;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.ErrorMessagesContainedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,7 +18,7 @@ public class ResourceNotFoundException extends ErrorMessagesContainedException {
 		super(message, cause);
 	}
 
-	public ResourceNotFoundException(ErrorMessages errorMessages) {
-		super(errorMessages);
+	public ResourceNotFoundException(KnifeErrorMessages knifeErrorMessages) {
+		super(knifeErrorMessages);
 	}
 }
