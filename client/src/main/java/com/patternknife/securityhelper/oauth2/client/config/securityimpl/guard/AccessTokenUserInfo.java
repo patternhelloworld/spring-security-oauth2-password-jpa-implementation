@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 
 /*
-* 	If there are other modules, this class must also be located in com.patternknife.securityhelper.oauth2.interestedtreatmentpart.dto.security.
+* 	If you are using another Resource server, this class must also be located in com.patternknife.securityhelper.oauth2.interestedtreatmentpart.dto.security.
 * */
 public class AccessTokenUserInfo extends User implements OAuth2AuthenticatedPrincipal
 {

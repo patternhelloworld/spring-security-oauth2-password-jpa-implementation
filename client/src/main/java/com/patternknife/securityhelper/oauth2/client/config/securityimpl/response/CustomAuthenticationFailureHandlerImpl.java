@@ -1,6 +1,5 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.response;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
@@ -24,10 +23,11 @@ import java.io.IOException;
 
 /*
  *
- *   Customize the exception payload by implementing this, which replaces
- *          'io.github.patternknife.securityhelper.oauth2.api.security.response.auth.authentication.CustomAuthenticationFailureHandlerImpl'
+ * The functionality is already implemented in the library's
+ * 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationFailureHandlerImpl'.
  *
- * */
+ * Create this class only if you need a custom implementation that differs from the default.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class CustomAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {

@@ -158,7 +158,8 @@ public class CommonDataSourceConfiguration {
 }
 ```
 
-### **Implementation of...**
+### **Implementations**
+- As indicated, the ``client`` folder demonstrates how to use this library.
 
 #### "Mandatory" settings
 

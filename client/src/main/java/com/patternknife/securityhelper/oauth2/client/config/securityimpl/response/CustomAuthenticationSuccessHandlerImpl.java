@@ -26,6 +26,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
+/*
+ *
+ * The functionality is already implemented in the library's
+ * 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationSuccessHandlerImpl'.
+ *
+ * Create this class only if you need a custom implementation that differs from the default.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {

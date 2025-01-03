@@ -11,6 +11,13 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
+/*
+ *
+ * The functionality is already implemented in the library's
+ * 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint'.
+ *
+ * Create this class only if you need a custom implementation that differs from the default.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPointImpl implements AuthenticationEntryPoint {
