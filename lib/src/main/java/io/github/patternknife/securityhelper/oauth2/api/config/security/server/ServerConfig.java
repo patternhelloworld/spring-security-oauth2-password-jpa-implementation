@@ -5,6 +5,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.Defa
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeRequestAuthenticationConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeAccessTokenAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeOAuth2TokenIntrospectionAuthenticationConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -25,7 +26,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.JpaTokenStoringOauth2TokenIntrospector;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.DefaultResourceServerTokenIntrospector;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -192,15 +193,10 @@ public class ServerConfig {
 
                 ).tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
-                                .introspectionRequestConverter(httpServletRequest -> new KnifeOauth2OpaqueTokenAuthenticationProvider(
-                                        tokenIntrospector(
-                                                authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
-                                        ),authorizationService, conditionalDetailsService
+                                .introspectionRequestConverter(httpServletRequest -> new KnifeOAuth2TokenIntrospectionAuthenticationConverter(
                                 ).convert(httpServletRequest))
                                 .authenticationProvider(new KnifeOauth2OpaqueTokenAuthenticationProvider(
-                                        tokenIntrospector(
-                                                authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService
-                                        ),authorizationService, conditionalDetailsService
+                                      authorizationService, conditionalDetailsService
                                 )).errorResponseHandler(iAuthenticationFailureHandler));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
@@ -208,7 +204,7 @@ public class ServerConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher(endpointsMatcher)
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login")  // 커스터마이징된 로그인 페이지 경로
+                        .loginPage("/login")
                         .permitAll()
                 )
                 .authorizeHttpRequests(authorize -> authorize
@@ -235,18 +231,14 @@ public class ServerConfig {
         return bearerTokenResolver;
     }
 
-    @Bean
-    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
-                                                     ConditionalDetailsService conditionalDetailsService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
-        return new JpaTokenStoringOauth2TokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService);
-    }
+
 
     @Bean
     @Order(2)
     public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, OAuth2AuthorizationServiceImpl authorizationService,
                                                                  ConditionalDetailsService conditionalDetailsService,
                                                                  ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
-                                                                 AuthenticationEntryPoint iAuthenticationEntryPoint
+                                                                 AuthenticationEntryPoint iAuthenticationEntryPoint, OpaqueTokenIntrospector opaqueTokenIntrospector
     ) throws Exception {
 
         DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
@@ -256,7 +248,7 @@ public class ServerConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenResolver(resolver)
                         .authenticationEntryPoint(iAuthenticationEntryPoint)
-                        .opaqueToken(opaqueToken -> opaqueToken.introspector(tokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService))));
+                        .opaqueToken(opaqueToken -> opaqueToken.introspector(opaqueTokenIntrospector)));
 
         return http.build();
     }
@@ -305,4 +297,9 @@ public class ServerConfig {
         return new DefaultAuthenticationEntryPoint(resolver);
     }
 
+    @Bean
+    @ConditionalOnMissingBean(OpaqueTokenIntrospector.class)
+    public OpaqueTokenIntrospector tokenIntrospector() {
+        return new DefaultResourceServerTokenIntrospector();
+    }
 }

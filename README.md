@@ -27,6 +27,8 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 ## Overview
 
 * Complete separation of the library (API) and the client for testing it
+* Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
+* Token Introspector: Enable the ``/oauth2/introspect`` endpoint to allow multiple resource servers to verify the token's validity and permissions with the authorization server.
 
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
@@ -79,7 +81,7 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 * For v2, provide MySQL DDL, which consists of ``oauth_access_token, oauth_refresh_token and oauth_client_details``, which are tables in Security 5. As I meant to migrate current security system to Security 6 back then, I hadn't changed them to the ``oauth2_authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.
 
 * Application of Spring Rest Docs
- 
+
 ## Dependencies
 
 | Category          | Dependencies                                                      |
@@ -190,6 +192,9 @@ public class CommonDataSourceConfiguration {
   - **Customize the whole success payload as desired for the only "/oauth2/token"**
       - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
       - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto`` and is not yet customizable.
+
+ - **Customize the verification logic for UsernamePassword and Client as desired**
+    - ``IOauth2AuthenticationHashCheckService``
 
  - **Customize the verification logic for UsernamePassword and Client as desired**
     - ``IOauth2AuthenticationHashCheckService``

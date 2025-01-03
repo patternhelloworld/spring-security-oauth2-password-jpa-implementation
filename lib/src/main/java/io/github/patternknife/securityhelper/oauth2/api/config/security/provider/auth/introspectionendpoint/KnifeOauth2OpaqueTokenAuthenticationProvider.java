@@ -2,6 +2,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.provide
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.token.KnifeGrantAuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,10 +11,17 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenIntrospection;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2TokenIntrospectionAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
@@ -25,94 +33,74 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public final class KnifeOauth2OpaqueTokenAuthenticationProvider implements AuthenticationProvider {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    private final OpaqueTokenIntrospector introspector;
-
-    private OpaqueTokenAuthenticationConverter authenticationConverter = KnifeOauth2OpaqueTokenAuthenticationProvider::convert;
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
     private final ConditionalDetailsService conditionalDetailsService;
 
 
-    public KnifeOauth2OpaqueTokenAuthenticationProvider(OpaqueTokenIntrospector introspector, OAuth2AuthorizationServiceImpl authorizationService,
+    public KnifeOauth2OpaqueTokenAuthenticationProvider(OAuth2AuthorizationServiceImpl authorizationService,
                                                         ConditionalDetailsService conditionalDetailsService) {
-        Assert.notNull(introspector, "introspector cannot be null");
-        this.introspector = introspector;
+
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof BearerTokenAuthenticationToken bearer)) {
+        if (!(authentication instanceof OAuth2TokenIntrospectionAuthenticationToken bearer)) {
             return null;
         } else {
-            OAuth2AuthenticatedPrincipal principal = this.getOAuth2AuthenticatedPrincipal(bearer);
+
+            String bearerAccessToken = ((OAuth2TokenIntrospectionAuthenticationToken) authentication).getToken();
+
+            OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(bearerAccessToken, OAuth2TokenType.ACCESS_TOKEN);
 
 
-            Authentication result = this.authenticationConverter.convert(bearer.getToken(), principal);
-            if (result == null) {
-                return null;
-            } else {
-                if (AbstractAuthenticationToken.class.isAssignableFrom(result.getClass())) {
-                    AbstractAuthenticationToken auth = (AbstractAuthenticationToken)result;
-                    if (auth.getDetails() == null) {
-                        auth.setDetails(bearer.getDetails());
-                    }
-                }
+            OAuth2ClientAuthenticationToken oAuth2ClientAuthenticationToken = (OAuth2ClientAuthenticationToken)authentication.getPrincipal();
 
-                return result;
-            }
-        }
-    }
+            RegisteredClient registeredClient = oAuth2ClientAuthenticationToken.getRegisteredClient();
 
-    private OAuth2AuthenticatedPrincipal getOAuth2AuthenticatedPrincipal(BearerTokenAuthenticationToken bearer) {
-        try {
-            return this.introspector.introspect(bearer.getToken());
-        } catch (BadOpaqueTokenException var3) {
-            this.logger.debug("Failed to authenticate since token was invalid");
-            throw new InvalidBearerTokenException(var3.getMessage(), var3);
-        } catch (OAuth2IntrospectionException var4) {
-            throw new AuthenticationServiceException(var4.getMessage(), var4);
+            UserDetails userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientName());
+
+
+            Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
+            assert oAuth2Authorization != null;
+            assert registeredClient != null;
+            return new OAuth2TokenIntrospectionAuthenticationToken(
+                    bearerAccessToken,
+                    clientPrincipal,
+                    OAuth2TokenIntrospection.builder()
+                            .active(true)
+                            .tokenType(OAuth2TokenType.ACCESS_TOKEN.getValue())
+                            .username(oAuth2Authorization.getPrincipalName())
+                            .clientId(registeredClient.getClientId())
+                            .claim("App-Token", Objects.requireNonNull(oAuth2Authorization.getAttribute("App-Token") != null ? oAuth2Authorization.getAttribute("App-Token") : ""))
+                            .claims(claims -> {
+                                List<String> authorities = userDetails.getAuthorities().stream()
+                                        .map(GrantedAuthority::getAuthority)
+                                        .collect(Collectors.toList());
+                                claims.put("authorities", authorities);
+                            })
+                            .build()
+            );
+
         }
     }
 
     public boolean supports(Class<?> authentication) {
-        return BearerTokenAuthenticationToken.class.isAssignableFrom(authentication);
-    }
-
-    static BearerTokenAuthentication convert(String introspectedToken, OAuth2AuthenticatedPrincipal authenticatedPrincipal) {
-        Instant iat = (Instant) authenticatedPrincipal.getAttribute("iat");
-        Instant exp = (Instant) authenticatedPrincipal.getAttribute("exp");
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, introspectedToken, iat, exp);
-        return new BearerTokenAuthentication(authenticatedPrincipal, accessToken, authenticatedPrincipal.getAuthorities());
-    }
-
-    public void setAuthenticationConverter(OpaqueTokenAuthenticationConverter authenticationConverter) {
-        Assert.notNull(authenticationConverter, "authenticationConverter cannot be null");
-        this.authenticationConverter = authenticationConverter;
+        return OAuth2TokenIntrospectionAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 
-    public BearerTokenAuthentication convert(HttpServletRequest httpServletRequest) {
-
-        String token = httpServletRequest.getParameter("token");
-
-        OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);
-
-        if(oAuth2Authorization == null || oAuth2Authorization.getAccessToken() == null || oAuth2Authorization.getAccessToken().isExpired()
-                || oAuth2Authorization.getRefreshToken() == null || oAuth2Authorization.getRefreshToken().isExpired()){
-            return null;
-        }
-
-        OAuth2AuthenticatedPrincipal oAuth2AuthenticatedPrincipal = (OAuth2AuthenticatedPrincipal) conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), (String)oAuth2Authorization.getAttributes().get("client_id"));
-
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, token, oAuth2Authorization.getAccessToken().getToken().getIssuedAt(), oAuth2Authorization.getAccessToken().getToken().getExpiresAt());
-        return new BearerTokenAuthentication(oAuth2AuthenticatedPrincipal, accessToken, oAuth2AuthenticatedPrincipal.getAuthorities());
-    }
 }
