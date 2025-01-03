@@ -630,6 +630,12 @@ public class CustomerIntegrationTest {
         assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE.getMessage());
     }
 
+    /*
+    *   [IMPORTANT] To test this, as '/oauth2/introspect' has been introduced, this can't connect to itself at this point. Check 'CustomDefaultResourceServerTokenIntrospector'.
+    *
+    * */
+
+
     @Test
     public void testFetchResourceWithInvalidCredentialsAndValidCredentialsButWithNoPermission() throws Exception {
 
@@ -715,6 +721,7 @@ public class CustomerIntegrationTest {
 
                         )));
     }
+
 
 
 

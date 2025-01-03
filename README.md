@@ -1,7 +1,9 @@
 # Spring Security Oauth2 JPA Implementation
 
 > App-Token based OAuth2 POC built to grow with Spring Boot and ORM
-> 
+
+- [NOTICE] Test codes will be temporarily non-functional due to the introduction of the Introspector, until the next version.
+
 ## Supporting Oauth2 Type
 | ROPC             | Authorization Code                              |
 |------------------|-------------------------------------------------|
@@ -27,6 +29,8 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 ## Overview
 
 * Complete separation of the library (API) and the client for testing it
+* Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
+* Token Introspector: Enable the ``/oauth2/introspect`` endpoint to allow multiple resource servers to verify the token's validity and permissions with the authorization server.
 
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
@@ -79,7 +83,7 @@ For v2, using the database tables from Spring Security 5 (only the database tabl
 * For v2, provide MySQL DDL, which consists of ``oauth_access_token, oauth_refresh_token and oauth_client_details``, which are tables in Security 5. As I meant to migrate current security system to Security 6 back then, I hadn't changed them to the ``oauth2_authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.
 
 * Application of Spring Rest Docs
- 
+
 ## Dependencies
 
 | Category          | Dependencies                                                      |
@@ -193,6 +197,9 @@ public class CommonDataSourceConfiguration {
 
  - **Customize the verification logic for UsernamePassword and Client as desired**
     - ``IOauth2AuthenticationHashCheckService``
+
+ - **Customize OpaqueTokenIntrospector as desired (!Set this to your Resource Servers)**
+    - ``client.config.securityimpl.introspector.CustomResourceServerTokenIntrospector``
 
 ## OAuth2 - ROPC
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``

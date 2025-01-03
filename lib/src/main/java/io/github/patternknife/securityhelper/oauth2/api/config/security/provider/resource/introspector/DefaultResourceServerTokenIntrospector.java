@@ -11,28 +11,21 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
+import org.springframework.stereotype.Component;
 
 
-public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntrospector {
-
+public class DefaultResourceServerTokenIntrospector implements OpaqueTokenIntrospector {
 
     private OpaqueTokenIntrospector delegate =
-            new NimbusOpaqueTokenIntrospector(
-                    "http://localhost:8300/oauth2/introspect",
+            new SpringOpaqueTokenIntrospector(
+                    "http://localhost:8370/oauth2/introspect",
                     "barClient",
                     "barClientSecret"
             );
 
-    private final OAuth2AuthorizationServiceImpl authorizationService;
-    private final ConditionalDetailsService conditionalDetailsService;
-    private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
+    public DefaultResourceServerTokenIntrospector() {
 
-    public JpaTokenStoringOauth2TokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
-                                                  ConditionalDetailsService conditionalDetailsService,
-                                                  ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
-        this.authorizationService = authorizationService;
-        this.conditionalDetailsService = conditionalDetailsService;
-        this.iSecurityUserExceptionMessageService = iSecurityUserExceptionMessageService;
     }
 
     @Override
@@ -45,8 +38,9 @@ public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntros
             //throw e;
             throw new KnifeOauth2AuthenticationException(e.getMessage());
         }*/
+        return null;
 
-        OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);
+        /*OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);
 
         if(oAuth2Authorization == null || oAuth2Authorization.getAccessToken() == null || oAuth2Authorization.getAccessToken().isExpired()
                 || oAuth2Authorization.getRefreshToken() == null || oAuth2Authorization.getRefreshToken().isExpired()){
@@ -54,6 +48,6 @@ public class JpaTokenStoringOauth2TokenIntrospector implements OpaqueTokenIntros
             //return null;
         }
 
-        return (OAuth2AuthenticatedPrincipal) conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), (String) oAuth2Authorization.getAttributes().get("client_id"));
+        return (OAuth2AuthenticatedPrincipal) conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), (String) oAuth2Authorization.getAttributes().get("client_id"));*/
     }
 }
