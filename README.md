@@ -1,7 +1,9 @@
 # Spring Security Oauth2 JPA Implementation
 
 > App-Token based OAuth2 POC built to grow with Spring Boot and ORM
-> 
+
+- [NOTICE] Test codes will be temporarily non-functional due to the introduction of the Introspector, until the next version.
+
 ## Supporting Oauth2 Type
 | ROPC             | Authorization Code                              |
 |------------------|-------------------------------------------------|
@@ -196,8 +198,8 @@ public class CommonDataSourceConfiguration {
  - **Customize the verification logic for UsernamePassword and Client as desired**
     - ``IOauth2AuthenticationHashCheckService``
 
- - **Customize the verification logic for UsernamePassword and Client as desired**
-    - ``IOauth2AuthenticationHashCheckService``
+ - **Customize OpaqueTokenIntrospector as desired (!Set this to your Resource Servers)**
+    - ``client.config.securityimpl.introspector.CustomResourceServerTokenIntrospector``
 
 ## OAuth2 - ROPC
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``

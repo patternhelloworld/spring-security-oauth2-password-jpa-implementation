@@ -39,7 +39,7 @@ public class CustomerApi {
     @UserCustomerOnly
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/customers/me")
-    public CustomerResDTO.IdNameWithAccessTokenRemainingSeconds getCustomerSelf(@AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo,
+    public CustomerResDTO.IdNameWithAccessTokenRemainingSeconds getCustomerSelf(
                                                                                                       @RequestHeader("Authorization") String authorizationHeader) throws ResourceNotFoundException {
         String token = authorizationHeader.substring("Bearer ".length());
 
@@ -58,8 +58,8 @@ public class CustomerApi {
             }
         }
 
-        return new CustomerResDTO.IdNameWithAccessTokenRemainingSeconds(customerRepository.findByIdName(accessTokenUserInfo.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Couldn't find the user (username : " + accessTokenUserInfo.getUsername() + ")")), accessTokenRemainingSeconds);
+        return new CustomerResDTO.IdNameWithAccessTokenRemainingSeconds(customerRepository.findByIdName(oAuth2Authorization.getPrincipalName())
+                .orElseThrow(() -> new ResourceNotFoundException("Couldn't find the user (username : " + oAuth2Authorization.getPrincipalName() + ")")), accessTokenRemainingSeconds);
 
     }
 
