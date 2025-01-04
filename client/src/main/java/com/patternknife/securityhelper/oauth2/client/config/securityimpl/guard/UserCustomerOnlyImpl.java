@@ -28,18 +28,21 @@ public class UserCustomerOnlyImpl {
     public Object check(ProceedingJoinPoint joinPoint) throws Throwable {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        AccessTokenUserInfo accessTokenUserInfo;
+        if (principal instanceof AccessTokenUserInfo) {
+            accessTokenUserInfo = ((AccessTokenUserInfo) principal);
+        }else {
+            String userName = ((OAuth2IntrospectionAuthenticatedPrincipal) principal).getUsername();
+            String clientId = ((OAuth2IntrospectionAuthenticatedPrincipal) principal).getClientId();
+            String appToken = ((OAuth2IntrospectionAuthenticatedPrincipal) principal).getAttribute("App-Token");
 
-        String userName =((OAuth2IntrospectionAuthenticatedPrincipal)principal).getUsername();
-        String clientId  =((OAuth2IntrospectionAuthenticatedPrincipal)principal).getClientId();
-        String appToken =  ((OAuth2IntrospectionAuthenticatedPrincipal)principal).getAttribute("App-Token");
 
+            OAuth2Authorization oAuth2Authorization = authorizationService.findByUserNameAndClientIdAndAppToken(userName, clientId, appToken);
 
-        OAuth2Authorization oAuth2Authorization = authorizationService.findByUserNameAndClientIdAndAppToken(userName, clientId, appToken);
+            UserDetails userDetails = conditionalDetailsService.loadUserByUsername(userName, clientId);
 
-        UserDetails userDetails = conditionalDetailsService.loadUserByUsername(userName, clientId);
-
-        AccessTokenUserInfo accessTokenUserInfo = ((AccessTokenUserInfo)userDetails);
-
+            accessTokenUserInfo = ((AccessTokenUserInfo) userDetails);
+        }
 
         if(accessTokenUserInfo != null && (accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getUserType() != AdditionalAccessTokenUserInfo.UserType.CUSTOMER)){
             throw new CustomAuthGuardException("ID \"" + accessTokenUserInfo.getUsername() + "\" : Not in Customer Group");

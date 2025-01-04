@@ -119,9 +119,9 @@ public class CustomerApiTest {
                 .setControllerAdvice(new GlobalExceptionHandler(iSecurityUserExceptionMessageService))
                 .setCustomArgumentResolvers(putAuthenticationPrincipal)
                 .apply(documentationConfiguration(restDocumentationContextProvider).uris()
-                        .withScheme("https")
-                        .withHost("vholic.com")
-                        .withPort(443))
+                        .withScheme("http")
+                        .withHost("localhost")
+                        .withPort(8370))
                 .addFilters(new CharacterEncodingFilter("UTF-8", true))
                 .alwaysDo(document)
                 .build();

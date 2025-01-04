@@ -8,7 +8,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.3.0</version>
+    <version>3.4.0</version>
     <name>spring-security-oauth2-password-jpa-implementation</name>
     <description>The implementation of Spring Security 6 Spring Authorization Server for stateful OAuth2 Password Grant</description>
     <packaging>jar</packaging>

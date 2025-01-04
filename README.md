@@ -2,8 +2,6 @@
 
 > App-Token based OAuth2 POC built to grow with Spring Boot and ORM
 
-- [NOTICE] Test codes will be temporarily non-functional due to the introduction of the Introspector, until the next version.
-
 ## Supporting Oauth2 Type
 | ROPC             | Authorization Code                              |
 |------------------|-------------------------------------------------|
@@ -14,7 +12,7 @@
 <dependency>
     <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
     <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.3.0</version>
+    <version>3.4.0</version>
 </dependency>
 ```
 For v2, using the database tables from Spring Security 5 (only the database tables; follow the dependencies as above):

@@ -26,7 +26,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.resource.introspector.DefaultResourceServerTokenIntrospector;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.introspector.DefaultResourceServerTokenIntrospector;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -299,7 +300,12 @@ public class ServerConfig {
 
     @Bean
     @ConditionalOnMissingBean(OpaqueTokenIntrospector.class)
-    public OpaqueTokenIntrospector tokenIntrospector() {
-        return new DefaultResourceServerTokenIntrospector();
+    public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
+                                                     ConditionalDetailsService conditionalDetailsService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.type:database}") String introspectionType,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.uri}") String introspectionUri,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-id}") String clientId,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-secret}") String clientSecret) {
+        return new DefaultResourceServerTokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService, introspectionType, introspectionUri, clientId, clientSecret);
     }
 }
