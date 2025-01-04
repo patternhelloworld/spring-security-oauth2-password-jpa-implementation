@@ -198,7 +198,7 @@ public class CommonDataSourceConfiguration {
 
  - **Customize OpaqueTokenIntrospector as desired (!Set this to your Resource Servers)**
     - ``client.config.securityimpl.introspector.CustomResourceServerTokenIntrospector``
-
+    - ![img3.png](reference/docs/img3.png)
 ## OAuth2 - ROPC
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``
 
