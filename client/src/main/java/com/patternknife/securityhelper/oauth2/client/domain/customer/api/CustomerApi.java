@@ -2,6 +2,7 @@ package com.patternknife.securityhelper.oauth2.client.domain.customer.api;
 
 
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.ResourceNotFoundException;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomAuthenticationPrincipal;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.UserCustomerOnly;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepository;
@@ -9,12 +10,10 @@ import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.Custome
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerResDTO;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.service.CustomerService;
 import com.patternknife.securityhelper.oauth2.client.util.CustomUtils;
-import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
@@ -67,7 +66,7 @@ public class CustomerApi {
     @UserCustomerOnly
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/customers/me/delete")
-    public CustomerResDTO.Id deleteMe(@AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.Id deleteMe(@CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
 
         customerService.deleteCustomer(accessTokenUserInfo);
 
@@ -103,7 +102,7 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @GetMapping("/customers/{id}")
-    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id)
+    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo)
             throws ResourceNotFoundException {
         return new CustomerResDTO.Id(id);
     }
@@ -117,7 +116,7 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PatchMapping("/customers/{id}/delete")
-    public CustomerResDTO.IdAdminId deleteCustomer(@PathVariable final long id, @AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.IdAdminId deleteCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
 
         customerService.deleteCustomer(id, accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
 
@@ -126,7 +125,7 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PatchMapping("/customers/{id}/restore")
-    public CustomerResDTO.IdAdminId restoreCustomer(@PathVariable final long id, @AuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.IdAdminId restoreCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
 
         customerService.restoreCustomer(id);
 

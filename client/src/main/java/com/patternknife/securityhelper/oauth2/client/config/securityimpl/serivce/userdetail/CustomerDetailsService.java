@@ -51,6 +51,10 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
         this.entityManager = entityManager;
     }
 
+    /*
+    *   Here, I return an instance of AccessTokenUserInfo, which implements both UserDetails and OAuth2AuthenticatedPrincipal.
+    *   You can understand the reasoning behind this by reviewing AccessTokenUserInfoResolver and CustomResourceServerTokenIntrospector.
+    * */
     @Override
     public UserDetails loadUserByUsername(String username) {
 
