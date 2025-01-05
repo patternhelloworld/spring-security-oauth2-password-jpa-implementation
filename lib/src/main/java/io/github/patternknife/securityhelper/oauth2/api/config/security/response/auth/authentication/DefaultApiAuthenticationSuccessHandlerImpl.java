@@ -1,14 +1,13 @@
-package com.patternknife.securityhelper.oauth2.client.config.securityimpl.response;
+package io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication;
 
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.core.Authentication;
@@ -26,20 +25,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-/*
- *
- * The functionality is already implemented in the library's
- * 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationSuccessHandlerImpl'.
- *
- * Create this class only if you need a custom implementation that differs from the default.
- */
-@Configuration
 @RequiredArgsConstructor
-public class CustomAuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
+public class DefaultApiAuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
 
     private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter =
             new OAuth2AccessTokenResponseHttpMessageConverter();
-
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
@@ -53,7 +43,7 @@ public class CustomAuthenticationSuccessHandlerImpl implements AuthenticationSuc
         Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
 
         if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())
-          || ((String) additionalParameters.get("grant_type")).equals(OAuth2ParameterNames.CODE)) {
+                || ((String) additionalParameters.get("grant_type")).equals(OAuth2ParameterNames.CODE)) {
             OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
                     .tokenType(accessToken.getTokenType())
                     .scopes(accessToken.getScopes());
@@ -100,5 +90,4 @@ public class CustomAuthenticationSuccessHandlerImpl implements AuthenticationSuc
                     .build());
         }
     }
-
 }

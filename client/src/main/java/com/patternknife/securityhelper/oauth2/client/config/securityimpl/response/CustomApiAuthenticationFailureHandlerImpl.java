@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -28,9 +30,11 @@ import java.io.IOException;
  *
  * Create this class only if you need a custom implementation that differs from the default.
  */
+@Primary
+@Qualifier("apiAuthenticationFailureHandler")
 @Configuration
 @RequiredArgsConstructor
-public class CustomAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
+public class CustomApiAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KnifeSecurityLogConfig.class);
 

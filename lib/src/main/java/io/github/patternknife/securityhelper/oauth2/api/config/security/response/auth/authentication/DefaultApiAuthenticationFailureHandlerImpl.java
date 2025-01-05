@@ -22,7 +22,7 @@ import java.io.IOException;
 
 
 @RequiredArgsConstructor
-public class DefaultAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
+public class DefaultApiAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KnifeSecurityLogConfig.class);
 

@@ -13,8 +13,10 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.provider
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthorizationCodeAuthenticationProvider;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.KnifeOauth2OpaqueTokenAuthenticationProvider;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationFailureHandlerImpl;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultAuthenticationSuccessHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationFailureHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationSuccessHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultWebAuthenticationFailureHandlerImpl;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultWebAuthenticationSuccessHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
@@ -105,7 +107,10 @@ public class ServerConfig {
             KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
             OAuth2AuthorizationConsentServiceImpl oAuth2AuthorizationConsentService,
-            AuthenticationFailureHandler iAuthenticationFailureHandler, AuthenticationSuccessHandler iAuthenticationSuccessHandler) throws Exception {
+            @Qualifier("apiAuthenticationFailureHandler") AuthenticationFailureHandler iApiAuthenticationFailureHandler,
+            @Qualifier("apiAuthenticationSuccessHandler") AuthenticationSuccessHandler iApiAuthenticationSuccessHandler,
+            @Qualifier("webAuthenticationFailureHandler") AuthenticationFailureHandler iWebAuthenticationFailureHandler,
+            @Qualifier("webAuthenticationSuccessHandler") AuthenticationSuccessHandler iWebAuthenticationSuccessHandler) throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
@@ -115,7 +120,7 @@ public class ServerConfig {
         authorizationServerConfigurer
                 .clientAuthentication(clientAuthentication ->
                         clientAuthentication
-                                .errorResponseHandler(iAuthenticationFailureHandler)
+                                .errorResponseHandler(iApiAuthenticationFailureHandler)
                 )
                 .registeredClientRepository(registeredClientRepository)
                 .authorizationService(authorizationService)
@@ -134,45 +139,8 @@ public class ServerConfig {
                                 .authorizationRequestConverter(new AuthorizationCodeRequestAuthenticationConverter(registeredClientRepository, knifeAuthorizationConsentRepository, authorizationService))
                                 .authenticationProvider(new KnifeOauth2AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator, conditionalDetailsService, commonOAuth2AuthorizationSaver
-                                )).authorizationResponseHandler(new AuthenticationSuccessHandler() {
-                                    @Override
-                                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                                        OAuth2AuthorizationCodeAuthenticationToken oAuth2AuthorizationCodeAuthenticationToken = (OAuth2AuthorizationCodeAuthenticationToken) authentication;
-
-                                        String redirectUri = oAuth2AuthorizationCodeAuthenticationToken.getRedirectUri();
-                                        String authorizationCode = oAuth2AuthorizationCodeAuthenticationToken.getCode();
-                                        String state = oAuth2AuthorizationCodeAuthenticationToken.getAdditionalParameters().get("state").toString();
-
-                                        response.sendRedirect(redirectUri+"?code="+authorizationCode+"&state="+state);
-                                    }
-                                }
-                                )
-                                .errorResponseHandler(new AuthenticationFailureHandler() {
-                                    @Override
-                                    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-                                        // SecurityKnifeExceptionHandler does NOT handle this error.
-                                        logger.error("Authentication failed: ", exception);
-
-                                        String errorMessage = "An unexpected error occurred.";
-                                        List<String> errorDetails = new ArrayList<>();
-                                        // Extract error messages if the exception is of type KnifeOauth2AuthenticationException
-                                        if (exception instanceof KnifeOauth2AuthenticationException) {
-                                            KnifeOauth2AuthenticationException oauth2Exception = (KnifeOauth2AuthenticationException) exception;
-                                            errorMessage = oauth2Exception.getErrorMessages().getUserMessage();
-                                        }
-
-                                        if(errorMessage.equals("Authorization code missing in GET request")){
-                                            request.getRequestDispatcher("/login").forward(request, response);
-                                        }else {
-
-                                            // Redirect to /error with query parameters
-                                            request.setAttribute("errorMessage", errorMessage);
-                                            request.setAttribute("errorDetails", errorDetails);
-
-                                            request.getRequestDispatcher("/error").forward(request, response);
-                                        }
-                                    }
-                                })
+                                )).authorizationResponseHandler(iWebAuthenticationSuccessHandler)
+                                .errorResponseHandler(iWebAuthenticationFailureHandler)
 
                 )
                 /*
@@ -183,10 +151,10 @@ public class ServerConfig {
                  * */
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
-                                .accessTokenResponseHandler(iAuthenticationSuccessHandler)
+                                .accessTokenResponseHandler(iApiAuthenticationSuccessHandler)
                                 .accessTokenRequestConverter(new KnifeAccessTokenAuthenticationConverter())
                                 // found only Oauth2AuthenticationException is tossed.
-                                .errorResponseHandler(iAuthenticationFailureHandler)
+                                .errorResponseHandler(iApiAuthenticationFailureHandler)
                                 .authenticationProvider(new KnifeOauth2AuthenticationProvider(
                                         commonOAuth2AuthorizationSaver, conditionalDetailsService, oauth2AuthenticationHashCheckService,
                                         authorizationService, iSecurityUserExceptionMessageService
@@ -198,7 +166,7 @@ public class ServerConfig {
                                 ).convert(httpServletRequest))
                                 .authenticationProvider(new KnifeOauth2OpaqueTokenAuthenticationProvider(
                                       authorizationService, conditionalDetailsService
-                                )).errorResponseHandler(iAuthenticationFailureHandler));
+                                )).errorResponseHandler(iApiAuthenticationFailureHandler));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
@@ -271,22 +239,35 @@ public class ServerConfig {
     /*
      *    Auth
      * */
-    @Bean
-    @ConditionalOnMissingBean(AuthenticationFailureHandler.class)
-    public AuthenticationFailureHandler iAuthenticationFailureHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
-        return new DefaultAuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService);
+
+
+    // API : Generally for ROPC
+
+    @Bean(name = "apiAuthenticationFailureHandler")
+    @ConditionalOnMissingBean(name = "apiAuthenticationFailureHandler")
+    public AuthenticationFailureHandler iApiAuthenticationFailureHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultApiAuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService);
+    }
+    @Bean(name = "apiAuthenticationSuccessHandler")
+    @ConditionalOnMissingBean(name = "apiAuthenticationSuccessHandler")
+    public AuthenticationSuccessHandler iApiAuthenticationSuccessHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultApiAuthenticationSuccessHandlerImpl(iSecurityUserExceptionMessageService);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(AuthenticationSuccessHandler.class)
-    public AuthenticationSuccessHandler iAuthenticationSuccessHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
-        return new DefaultAuthenticationSuccessHandlerImpl(iSecurityUserExceptionMessageService);
+
+    // WEB : Generally for Authorization Code
+
+    @Bean(name = "webAuthenticationFailureHandler")
+    @ConditionalOnMissingBean(name = "webAuthenticationFailureHandler")
+    public AuthenticationFailureHandler iWebAuthenticationFailureHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultWebAuthenticationFailureHandlerImpl(iSecurityUserExceptionMessageService);
     }
-    @Bean
-    @ConditionalOnMissingBean(IOauth2AuthenticationHashCheckService.class)
-    public IOauth2AuthenticationHashCheckService iOauth2AuthenticationHashCheckService(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
-        return new DefaultOauth2AuthenticationHashCheckService(passwordEncoder(), iSecurityUserExceptionMessageService);
+    @Bean(name = "webAuthenticationSuccessHandler")
+    @ConditionalOnMissingBean(name = "webAuthenticationSuccessHandler")
+    public AuthenticationSuccessHandler iWebAuthenticationSuccessHandler(ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+        return new DefaultWebAuthenticationSuccessHandlerImpl(iSecurityUserExceptionMessageService);
     }
+
 
 
     /*
