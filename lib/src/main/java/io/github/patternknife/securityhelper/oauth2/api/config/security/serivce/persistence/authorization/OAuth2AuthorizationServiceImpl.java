@@ -25,7 +25,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 
 
-import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -259,19 +258,22 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
     }
 
     /*
-        Remove Access Token From Persistence
+        Remove Access & Refresh Token From Persistence
      */
     private void removeAccessToken(OAuth2AccessToken oAuth2AccessToken) {
         Optional<KnifeAuthorization> knifeAuthorization = knifeAuthorizationRepository.findByAccessTokenValue(CustomAuthenticationKeyGenerator.hashTokenValue(oAuth2AccessToken.getTokenValue()));
         knifeAuthorization.ifPresent(knifeAuthorizationRepository::delete);
     }
-
     private void removeRefreshToken(OAuth2RefreshToken oAuth2RefreshToken) {
         Optional<KnifeAuthorization> knifeAuthorization = knifeAuthorizationRepository.findByRefreshTokenValue(CustomAuthenticationKeyGenerator.hashTokenValue(oAuth2RefreshToken.getTokenValue()));
         knifeAuthorization.ifPresent(knifeAuthorizationRepository::delete);
     }
 
 
-
-
+    /*
+        Once an access token is generated from an authorization code, the code should be removed for security reasons.
+    * */
+    public void remove(String authorizationCode) {
+        knifeAuthorizationRepository.deleteByAuthorizationCodeValue(CustomAuthenticationKeyGenerator.hashTokenValue(authorizationCode));
+    }
 }

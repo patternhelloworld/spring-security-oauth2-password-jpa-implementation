@@ -86,23 +86,37 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
                OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByUserNameAndClientIdAndAppToken(
                        userDetails.getUsername(), clientId, (String) additionalParameters.get(KnifeHttpHeaders.APP_TOKEN));
 
-               if (authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())
-                    || authorizationGrantType.getValue().equals(OAuth2ParameterNames.CODE)) {
+               if (authorizationGrantType.getValue().equals(OAuth2ParameterNames.CODE)) {
 
-                    if(authorizationGrantType.getValue().equals(OAuth2ParameterNames.CODE)){
-                         OAuth2Authorization oAuth2AuthorizationForCodeVerification = oAuth2AuthorizationService.findByAuthorizationCode(additionalParameters.get(OAuth2ParameterNames.CODE).toString());
-                         if(oAuth2AuthorizationForCodeVerification == null) {
+                    OAuth2Authorization oAuth2AuthorizationForCodeVerification = oAuth2AuthorizationService.findByAuthorizationCode(additionalParameters.get(OAuth2ParameterNames.CODE).toString());
+                    if(oAuth2AuthorizationForCodeVerification == null) {
+                         throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
+                    }else{
+                         OAuth2Authorization.Token<OAuth2AuthorizationCode> oAuth2Token =oAuth2AuthorizationForCodeVerification.getToken(OAuth2AuthorizationCode.class);
+                         if(oAuth2Token == null){
                               throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
-                         }else{
-                              OAuth2Authorization.Token<OAuth2AuthorizationCode> oAuth2Token =oAuth2AuthorizationForCodeVerification.getToken(OAuth2AuthorizationCode.class);
-                              if(oAuth2Token == null){
-                                   throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
-                              }
-                              if(oAuth2Token.isExpired()){
-                                   throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_EXPIRED_AUTHORIZATION_CODE));
-                              }
+                         }
+                         if(oAuth2Token.isExpired()){
+                              throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_EXPIRED_AUTHORIZATION_CODE));
                          }
                     }
+
+                    if (oAuth2Authorization == null) {
+                         return SecurityExceptionUtils.retryOnDuplicateException(() -> {
+                              // In-memory build
+                              OAuth2Authorization authorization = oAuth2AuthorizationBuildingService.build(
+                                      userDetails, authorizationGrantType, clientId, additionalParameters, null);
+                              // Persist
+                              oAuth2AuthorizationService.save(authorization);
+
+                              // Once an access token is generated from an authorization code, the code should be removed for security reasons.
+                              oAuth2AuthorizationService.remove(additionalParameters.get(OAuth2ParameterNames.CODE).toString());
+
+                              return authorization;
+                         }, 5, logger, "[Access Token] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
+                    }
+
+               }else if (authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())) {
 
                     if (oAuth2Authorization == null || oAuth2Authorization.getAccessToken().isExpired()) {
                          return SecurityExceptionUtils.retryOnDuplicateException(() -> {
@@ -111,9 +125,11 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
                                       userDetails, authorizationGrantType, clientId, additionalParameters, null);
                               // Persist
                               oAuth2AuthorizationService.save(authorization);
+
                               return authorization;
                          }, 5, logger, "[Access Token] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
                     }
+
                } else if (authorizationGrantType.getValue().equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
                     return SecurityExceptionUtils.retryOnDuplicateException(() -> {
                          String refreshTokenValue = (String) (additionalParameters.containsKey("refresh_token") ? additionalParameters.get("refresh_token")

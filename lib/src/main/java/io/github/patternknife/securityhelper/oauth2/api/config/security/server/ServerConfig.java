@@ -5,7 +5,7 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.Defa
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.PasswordAccessTokenRequestConverter;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeOAuth2TokenIntrospectionAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.IntrospectionRequestConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -172,7 +172,7 @@ public class ServerConfig {
                 .tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
                                 // Converter
-                                .introspectionRequestConverter(httpServletRequest -> new KnifeOAuth2TokenIntrospectionAuthenticationConverter(
+                                .introspectionRequestConverter(httpServletRequest -> new IntrospectionRequestConverter(
                                 ).convert(httpServletRequest))
                                 // Provider
                                 .authenticationProvider(new IntrospectOpaqueTokenAuthenticationProvider(

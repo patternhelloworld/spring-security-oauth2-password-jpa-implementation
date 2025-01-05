@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  * @see OAuth2TokenIntrospectionAuthenticationToken
  * @see OAuth2TokenIntrospectionEndpointFilter
  */
-public final class KnifeOAuth2TokenIntrospectionAuthenticationConverter implements AuthenticationConverter {
+public final class IntrospectionRequestConverter implements AuthenticationConverter {
 
     /*
     * Now, this only takes "access_token".

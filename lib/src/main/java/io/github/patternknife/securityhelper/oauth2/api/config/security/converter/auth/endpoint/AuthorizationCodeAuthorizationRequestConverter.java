@@ -28,7 +28,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
     private final KnifeAuthorizationConsentRepository knifeAuthorizationConsentRepository;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
-    public void setClientAuthentication(String clientId) {
+    public void setClientAuthenticationContext(String clientId) {
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
         if (registeredClient == null) {
             throw new IllegalArgumentException("Invalid client ID");
@@ -50,26 +50,21 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
             // TODO:  Authorization Consent
         } else if ("GET".equalsIgnoreCase(request.getMethod())) {
             MultiValueMap<String, String> parameters = RequestOAuth2Distiller.getAuthorizationCodeSecurityAdditionalParameters(request);
-            String code = parameters.getFirst(OAuth2ParameterNames.CODE);
 
-            if (!StringUtils.hasText(code)) {
-                throw new KnifeOauth2AuthenticationException("Authorization code missing in GET request");
-            }
 
-            // 클라이언트 ID와 기타 필수 파라미터 처리
+
             String clientId = parameters.getFirst(OAuth2ParameterNames.CLIENT_ID);
             if (!StringUtils.hasText(clientId)) {
                 throw new KnifeOauth2AuthenticationException("client_id missing");
             }
-
-            // 클라이언트 인증 설정
-            setClientAuthentication(clientId);
-            Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
-
             String redirectUri = parameters.getFirst(OAuth2ParameterNames.REDIRECT_URI);
             if (!StringUtils.hasText(redirectUri)) {
                 throw new KnifeOauth2AuthenticationException("redirect_uri missing");
             }
+
+            // setClientAuthenticationContext from the client_id param
+            setClientAuthenticationContext(clientId);
+            Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
 
 
             RegisteredClient registeredClient = ((OAuth2ClientAuthenticationToken) clientPrincipal).getRegisteredClient();
@@ -97,6 +92,11 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
             parameters.forEach((key, value) -> {
                 additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
             });
+
+            String code = parameters.getFirst(OAuth2ParameterNames.CODE);
+            if (!StringUtils.hasText(code)) {
+                throw new KnifeOauth2AuthenticationException("Authorization code missing in GET request");
+            }
 
             return new OAuth2AuthorizationCodeAuthenticationToken(
                     code,
