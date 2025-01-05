@@ -17,8 +17,11 @@ public enum CustomSecurityUserExceptionMessage implements ExceptionMessageInterf
     AUTHENTICATION_PASSWORD_FAILED_EXCEEDED("1The number of password attempts has been exceeded."),
 
     // Wrong Authorization Code
-    AUTHORIZATION_CODE_NO_EXISTS("1The specified Authorization code does not exist."),
-
+    AUTHENTICATION_INVALID_RESPONSE_TYPE("1The specified Response Type is invalid."),
+    AUTHENTICATION_INVALID_AUTHORIZATION_CODE("1The specified Authorization Code is invalid."),
+    AUTHENTICATION_EXPIRED_AUTHORIZATION_CODE("1The specified Authorization Code has been expired."),
+    AUTHENTICATION_INVALID_REDIRECT_URI("1The specified Redirect URI is invalid."),
+    AUTHENTICATION_SCOPES_NOT_APPROVED("1The specified Scopes are not approved."),
     // CLIENT ID, SECRET
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("1Client information is not verified."),
 

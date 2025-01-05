@@ -18,6 +18,7 @@ public enum DefaultSecurityUserExceptionMessage implements ExceptionMessageInter
     // Wrong Authorization Code
     AUTHENTICATION_INVALID_RESPONSE_TYPE("The specified Response Type is invalid."),
     AUTHENTICATION_INVALID_AUTHORIZATION_CODE("The specified Authorization Code is invalid."),
+    AUTHENTICATION_EXPIRED_AUTHORIZATION_CODE("The specified Authorization Code has been expired."),
     AUTHENTICATION_INVALID_REDIRECT_URI("The specified Redirect URI is invalid."),
     AUTHENTICATION_SCOPES_NOT_APPROVED("The specified Scopes are not approved."),
     // CLIENT ID, SECRET

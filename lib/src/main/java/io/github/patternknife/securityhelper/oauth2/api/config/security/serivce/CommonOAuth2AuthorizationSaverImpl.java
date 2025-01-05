@@ -1,6 +1,5 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.serivce;
 
-
 import io.github.patternknife.securityhelper.oauth2.api.config.logger.KnifeSecurityLogConfig;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
@@ -27,7 +26,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-
+/*
+*    Saver : Persist
+*         Implements the logic for persisting OAuth2Authorization based on the provided grant type.
+*         Supports various grant types and handles duplicate exceptions gracefully.
+* */
 @Service
 @RequiredArgsConstructor
 public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2AuthorizationSaver {
@@ -38,9 +41,31 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
      private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
      private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
-     /*
-      *  While the Spring Authorization Server is generally not expected to cause duplicate exceptions,
-      *  I have observed such errors in the past. This is a preventive measure to handle potential issues gracefully.
+     /**
+      * Handles OAuth2Authorization persistence based on the grant type.
+      *
+      * <p><b>Grant Types:</b></p>
+      * <ul>
+      *     <li><b>AUTHORIZATION_CODE</b>: Generates a "code" using "username" and "password".</li>
+      *     <li><b>CODE</b>: Generates an "access_token" using the "code".</li>
+      *     <li><b>PASSWORD</b>: Generates an "access_token" using "username" and "password".</li>
+      *     <li><b>REFRESH_TOKEN</b>: Generates a "refresh_token" using the "access_token".</li>
+      * </ul>
+      *
+      * <p><b>retryOnDuplicateException:</b></p>
+      * <p>
+      * While the Spring Authorization Server is generally not expected to cause duplicate exceptions,
+      * such errors have been observed in the past. This method includes preventive measures to handle
+      * potential issues gracefully by retrying the operation.
+      * </p>
+      *
+      * @param userDetails the details of the authenticated user.
+      * @param authorizationGrantType the type of authorization grant.
+      * @param clientId the client ID.
+      * @param additionalParameters additional parameters for the OAuth2 flow.
+      * @param modifiableAdditionalParameters additional parameters that may be modified during the flow.
+      * @return the persisted {@link OAuth2Authorization} object.
+      * @throws KnifeOauth2AuthenticationException if an authentication error occurs.
       */
      @Override
      public @NotNull OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
@@ -48,8 +73,10 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
 
           if (authorizationGrantType.getValue().equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
                return SecurityExceptionUtils.retryOnDuplicateException(() -> {
+                    // In-memory build
                     OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationBuildingService.build(
                             userDetails, authorizationGrantType, clientId, additionalParameters, null);
+                    // Persist
                     oAuth2AuthorizationService.save(oAuth2Authorization);
                     return oAuth2Authorization;
                }, 5, logger, "[Authorization Code] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
@@ -65,22 +92,24 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
                     if(authorizationGrantType.getValue().equals(OAuth2ParameterNames.CODE)){
                          OAuth2Authorization oAuth2AuthorizationForCodeVerification = oAuth2AuthorizationService.findByAuthorizationCode(additionalParameters.get(OAuth2ParameterNames.CODE).toString());
                          if(oAuth2AuthorizationForCodeVerification == null) {
-                              throw new KnifeOauth2AuthenticationException("No authorization code found");
+                              throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
                          }else{
-                              OAuth2Authorization.Token oAuth2Token =oAuth2AuthorizationForCodeVerification.getToken(OAuth2AuthorizationCode.class);
+                              OAuth2Authorization.Token<OAuth2AuthorizationCode> oAuth2Token =oAuth2AuthorizationForCodeVerification.getToken(OAuth2AuthorizationCode.class);
                               if(oAuth2Token == null){
-                                   throw new KnifeOauth2AuthenticationException("No authorization code found2");
+                                   throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_AUTHORIZATION_CODE));
                               }
                               if(oAuth2Token.isExpired()){
-                                   throw new KnifeOauth2AuthenticationException("authorization code expired");
+                                   throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_EXPIRED_AUTHORIZATION_CODE));
                               }
                          }
                     }
 
                     if (oAuth2Authorization == null || oAuth2Authorization.getAccessToken().isExpired()) {
                          return SecurityExceptionUtils.retryOnDuplicateException(() -> {
+                              // In-memory build
                               OAuth2Authorization authorization = oAuth2AuthorizationBuildingService.build(
                                       userDetails, authorizationGrantType, clientId, additionalParameters, null);
+                              // Persist
                               oAuth2AuthorizationService.save(authorization);
                               return authorization;
                          }, 5, logger, "[Access Token] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
@@ -100,8 +129,10 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
                          OAuth2RefreshToken shouldBePreservedRefreshToken = oAuth2AuthorizationFromRefreshToken.getRefreshToken().getToken();
                          oAuth2AuthorizationService.remove(oAuth2AuthorizationFromRefreshToken);
 
+                         // In-memory build
                          OAuth2Authorization authorization = oAuth2AuthorizationBuildingService.build(
                                  userDetails, authorizationGrantType, clientId, additionalParameters, shouldBePreservedRefreshToken);
+                         // Persist
                          oAuth2AuthorizationService.save(authorization);
                          return authorization;
 
