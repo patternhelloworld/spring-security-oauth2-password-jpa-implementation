@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patternknife.securityhelper.oauth2.client.config.database.CommonQuerydslRepositorySupport;
 import com.patternknife.securityhelper.oauth2.client.config.database.SelectablePersistenceConst;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.ResourceNotFoundException;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.admin.dto.QAdminDTO_OneWithRoleIdsRes;
 import com.patternknife.securityhelper.oauth2.client.domain.admin.entity.*;
 import com.patternknife.securityhelper.oauth2.client.domain.common.dto.DateRangeFilter;
@@ -97,11 +97,11 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                 .where(qAdmin.idName.eq(idName)).fetchOne();
 
     }
-    public Boolean checkSuperAdminFromAccessTokeAdminInfo(AccessTokenUserInfo accessTokenUserInfo) throws ResourceNotFoundException {
+    public Boolean checkSuperAdminFromAccessTokeAdminInfo(KnifeUserInfo knifeUserInfo) throws ResourceNotFoundException {
 
         Boolean superAdmin = false;
 
-        Set<String> adminRoles = AuthorityUtils.authorityListToSet(accessTokenUserInfo.getAuthorities());
+        Set<String> adminRoles = AuthorityUtils.authorityListToSet(knifeUserInfo.getAuthorities());
 
         if (adminRoles != null && adminRoles.size() > 0) {
             for (String role : adminRoles) {
@@ -149,7 +149,7 @@ public class AdminService extends CommonQuerydslRepositorySupport {
                                                                     String adminSearchFilter,
                                                                     String sorterValueFilter,
                                                                     String dateRangeFilter,
-                                                                    AccessTokenUserInfo accessTokenUserInfo) throws JsonProcessingException, ResourceNotFoundException {
+                                                                    KnifeUserInfo knifeUserInfo) throws JsonProcessingException, ResourceNotFoundException {
 
         final QAdmin qAdmin = QAdmin.admin;
 

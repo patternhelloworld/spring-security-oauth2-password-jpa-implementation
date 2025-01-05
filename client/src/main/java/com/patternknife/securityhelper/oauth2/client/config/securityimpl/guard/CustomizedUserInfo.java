@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class AdditionalAccessTokenUserInfo implements Serializable {
+public class CustomizedUserInfo implements Serializable {
 
     public enum UserType {
         ADMIN("client_admin"),
@@ -35,7 +35,7 @@ public class AdditionalAccessTokenUserInfo implements Serializable {
 
     private LocalDateTime deletedAt;
 
-    public AdditionalAccessTokenUserInfo(Customer customer) {
+    public CustomizedUserInfo(Customer customer) {
 
         this.userType = UserType.CUSTOMER;
 
@@ -47,7 +47,7 @@ public class AdditionalAccessTokenUserInfo implements Serializable {
 
     }
 
-    public AdditionalAccessTokenUserInfo(Admin admin) {
+    public CustomizedUserInfo(Admin admin) {
 
         this.userType = UserType.ADMIN;
 

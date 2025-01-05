@@ -1,6 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.util.auth;
 
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 
 public interface MockAuth {
@@ -8,7 +8,7 @@ public interface MockAuth {
     /**
      * Mock @AuthenticationPrincipal
      */
-    AccessTokenUserInfo mockAuthenticationPrincipal(Customer customer);
+    KnifeUserInfo mockAuthenticationPrincipal(Customer customer);
 
     /**
      * Mock Customer

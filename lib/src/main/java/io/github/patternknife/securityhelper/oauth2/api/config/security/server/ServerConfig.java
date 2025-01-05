@@ -303,9 +303,9 @@ public class ServerConfig {
     public OpaqueTokenIntrospector tokenIntrospector(OAuth2AuthorizationServiceImpl authorizationService,
                                                      ConditionalDetailsService conditionalDetailsService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
                                                      @Value("${patternknife.securityhelper.oauth2.introspection.type:database}") String introspectionType,
-                                                     @Value("${patternknife.securityhelper.oauth2.introspection.uri}") String introspectionUri,
-                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-id}") String clientId,
-                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-secret}") String clientSecret) {
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.uri:default-introspect-uri}") String introspectionUri,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-id:default-client-id}") String clientId,
+                                                     @Value("${patternknife.securityhelper.oauth2.introspection.client-secret:default-client-secret}") String clientSecret) {
         return new DefaultResourceServerTokenIntrospector(authorizationService, conditionalDetailsService, iSecurityUserExceptionMessageService, introspectionType, introspectionUri, clientId, clientSecret);
     }
 }

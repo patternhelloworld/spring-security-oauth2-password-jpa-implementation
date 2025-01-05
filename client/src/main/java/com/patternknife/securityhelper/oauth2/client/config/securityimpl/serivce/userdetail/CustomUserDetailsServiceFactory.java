@@ -2,7 +2,7 @@ package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivc
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.UserDetailsServiceFactory;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,9 @@ public class CustomUserDetailsServiceFactory implements UserDetailsServiceFactor
         userDetailsServiceMap = new HashMap<>();
         for (UserDetailsService userDetailsService : userDetailsServices) {
             if (userDetailsService instanceof AdminDetailsService) {
-                userDetailsServiceMap.put(AdditionalAccessTokenUserInfo.UserType.ADMIN.getValue(), userDetailsService);
+                userDetailsServiceMap.put(CustomizedUserInfo.UserType.ADMIN.getValue(), userDetailsService);
             } else if (userDetailsService instanceof CustomerDetailsService) {
-                userDetailsServiceMap.put(AdditionalAccessTokenUserInfo.UserType.CUSTOMER.getValue(), userDetailsService);
+                userDetailsServiceMap.put(CustomizedUserInfo.UserType.CUSTOMER.getValue(), userDetailsService);
             }
         }
     }

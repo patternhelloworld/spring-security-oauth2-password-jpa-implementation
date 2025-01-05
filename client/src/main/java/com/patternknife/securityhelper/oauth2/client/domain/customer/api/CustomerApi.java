@@ -2,9 +2,10 @@ package com.patternknife.securityhelper.oauth2.client.domain.customer.api;
 
 
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.ResourceNotFoundException;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomAuthenticationPrincipal;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.UserCustomerOnly;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepository;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerReqDTO;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dto.CustomerResDTO;
@@ -66,11 +67,11 @@ public class CustomerApi {
     @UserCustomerOnly
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/customers/me/delete")
-    public CustomerResDTO.Id deleteMe(@CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.Id deleteMe(@CustomAuthenticationPrincipal KnifeUserInfo<CustomizedUserInfo> knifeUserInfo) {
 
-        customerService.deleteCustomer(accessTokenUserInfo);
+        customerService.deleteCustomer(knifeUserInfo);
 
-        return new CustomerResDTO.Id(accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
+        return new CustomerResDTO.Id(knifeUserInfo.getCustomizedUserInfo().getId());
     }
 
     @UserCustomerOnly
@@ -102,7 +103,7 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @GetMapping("/customers/{id}")
-    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo)
+    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id, @CustomAuthenticationPrincipal KnifeUserInfo knifeUserInfo)
             throws ResourceNotFoundException {
         return new CustomerResDTO.Id(id);
     }
@@ -116,20 +117,20 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PatchMapping("/customers/{id}/delete")
-    public CustomerResDTO.IdAdminId deleteCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.IdAdminId deleteCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal KnifeUserInfo<CustomizedUserInfo> knifeUserInfo) {
 
-        customerService.deleteCustomer(id, accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
+        customerService.deleteCustomer(id, knifeUserInfo.getCustomizedUserInfo().getId());
 
-        return new CustomerResDTO.IdAdminId(id, accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
+        return new CustomerResDTO.IdAdminId(id, knifeUserInfo.getCustomizedUserInfo().getId());
     }
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @PatchMapping("/customers/{id}/restore")
-    public CustomerResDTO.IdAdminId restoreCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo) {
+    public CustomerResDTO.IdAdminId restoreCustomer(@PathVariable final long id, @CustomAuthenticationPrincipal KnifeUserInfo<CustomizedUserInfo> knifeUserInfo) {
 
         customerService.restoreCustomer(id);
 
-        return new CustomerResDTO.IdAdminId(id, accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
+        return new CustomerResDTO.IdAdminId(id, knifeUserInfo.getCustomizedUserInfo().getId());
     }
 
 

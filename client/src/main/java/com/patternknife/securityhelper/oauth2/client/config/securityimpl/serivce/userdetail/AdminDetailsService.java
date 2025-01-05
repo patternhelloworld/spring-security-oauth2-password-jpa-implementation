@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 
 import com.patternknife.securityhelper.oauth2.client.domain.admin.dao.AdminRepository;
 import com.patternknife.securityhelper.oauth2.client.domain.admin.entity.Admin;
@@ -81,7 +81,7 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
     }
 
 
-    private AccessTokenUserInfo buildAdminForAuthentication(Admin admin, Collection<? extends GrantedAuthority> authorities) {
+    private KnifeUserInfo<CustomizedUserInfo> buildAdminForAuthentication(Admin admin, Collection<? extends GrantedAuthority> authorities) {
 
         String username = admin.getIdName();
         String password = admin.getPassword().getValue();
@@ -91,10 +91,10 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
 
-        AccessTokenUserInfo authUser = new AccessTokenUserInfo(username, password, enabled, accountNonExpired, credentialsNonExpired,
+        KnifeUserInfo<CustomizedUserInfo> authUser = new KnifeUserInfo<>(username, password, enabled, accountNonExpired, credentialsNonExpired,
                 accountNonLocked, authorities);
 
-        authUser.setAdditionalAccessTokenUserInfo(new AdditionalAccessTokenUserInfo(admin));
+        authUser.setCustomizedUserInfo(new CustomizedUserInfo(admin));
 
         return authUser;
     }
@@ -108,7 +108,6 @@ public class AdminDetailsService extends QuerydslRepositorySupport implements Us
             // Return an empty authority collection if customer roles are null
             return new ArrayList<GrantedAuthority>();
         }
-
 
         String[] adminRoles = admin.getAdminRoles().stream().map((adminRole) -> adminRole.getRole().getName()).toArray(String[]::new);
         Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(adminRoles);

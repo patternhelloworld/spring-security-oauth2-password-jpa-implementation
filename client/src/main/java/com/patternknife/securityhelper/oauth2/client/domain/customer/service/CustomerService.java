@@ -1,7 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.domain.customer.service;
 
 
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepository;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepositorySupport;
@@ -57,9 +58,9 @@ public class CustomerService  {
     *   The member has withdrawn
     * */
     @Transactional(value = "commonTransactionManager", rollbackFor=Exception.class)
-    public void deleteCustomer(AccessTokenUserInfo accessTokenUserInfo){
+    public void deleteCustomer(KnifeUserInfo<CustomizedUserInfo> knifeUserInfo){
 
-        Customer customer = customerRepositorySupport.findById(accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId());
+        Customer customer = customerRepositorySupport.findById(knifeUserInfo.getCustomizedUserInfo().getId());
 
 
         List<KnifeAuthorization> knifeAuthorizations = knifeAuthorizationRepository.findByRegisteredClientIdAndPrincipalName(appUserClientId, customer.getIdName());

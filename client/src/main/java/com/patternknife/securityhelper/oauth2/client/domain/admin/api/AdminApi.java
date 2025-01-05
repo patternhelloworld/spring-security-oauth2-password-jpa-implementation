@@ -1,9 +1,10 @@
 package com.patternknife.securityhelper.oauth2.client.domain.admin.api;
 
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomAuthenticationPrincipal;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.data.ResourceNotFoundException;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 
 import com.patternknife.securityhelper.oauth2.client.domain.admin.dto.AdminDTO;
 import com.patternknife.securityhelper.oauth2.client.domain.admin.entity.Admin;
@@ -41,7 +42,7 @@ public class AdminApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasAnyAdminRole()")
     @GetMapping("/admins/me")
-    public AdminDTO.CurrentOneWithSessionRemainingSecondsRes getAdminSelf(@CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo,
+    public AdminDTO.CurrentOneWithSessionRemainingSecondsRes getAdminSelf(@CustomAuthenticationPrincipal KnifeUserInfo<CustomizedUserInfo> knifeUserInfo,
                                                 @RequestHeader("Authorization") String authorizationHeader) throws ResourceNotFoundException {
 
         String token = authorizationHeader.substring("Bearer ".length());
@@ -63,7 +64,7 @@ public class AdminApi {
         }
 
         return new AdminDTO.CurrentOneWithSessionRemainingSecondsRes(
-                adminService.findAdminWithRoleIdsByAdminId(accessTokenUserInfo.getAdditionalAccessTokenUserInfo().getId()),
+                adminService.findAdminWithRoleIdsByAdminId(knifeUserInfo.getCustomizedUserInfo().getId()),
                 accessTokenRemainingSeconds);
 
     }
@@ -103,17 +104,17 @@ public class AdminApi {
                                                          @RequestParam(value = "adminSearchFilter", required = false) String adminSearchFilter,
                                                          @RequestParam(value = "sorterValueFilter", required = false) String sorterValueFilter,
                                                          @RequestParam(value = "dateRangeFilter", required = false) String dateRangeFilter,
-                                                         @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo)
+                                                         @CustomAuthenticationPrincipal KnifeUserInfo knifeUserInfo)
             throws JsonProcessingException, ResourceNotFoundException {
 
-        return adminService.findAdminsByPageRequest(skipPagination, pageNum, pageSize, adminSearchFilter, sorterValueFilter, dateRangeFilter, accessTokenUserInfo);
+        return adminService.findAdminsByPageRequest(skipPagination, pageNum, pageSize, adminSearchFilter, sorterValueFilter, dateRangeFilter, knifeUserInfo);
     }
 
 
 
     @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @GetMapping("/admins/{id}")
-    public ResponseEntity<Admin> getAdminById(@PathVariable(value = "id") Long adminId, @CustomAuthenticationPrincipal AccessTokenUserInfo accessTokenUserInfo)
+    public ResponseEntity<Admin> getAdminById(@PathVariable(value = "id") Long adminId, @CustomAuthenticationPrincipal KnifeUserInfo knifeUserInfo)
             throws ResourceNotFoundException {
 
         Admin adminDTO = adminService.findById(adminId);

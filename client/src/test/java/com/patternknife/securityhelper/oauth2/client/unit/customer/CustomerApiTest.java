@@ -3,7 +3,7 @@ package com.patternknife.securityhelper.oauth2.client.unit.customer;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.GlobalExceptionHandler;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 import com.patternknife.securityhelper.oauth2.client.util.auth.MockAuth;
 import com.patternknife.securityhelper.oauth2.client.util.auth.UnitMockAuth;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.api.CustomerApi;
@@ -73,7 +73,7 @@ public class CustomerApiTest {
 
 
     private MockMvc mockMvc;
-    private AccessTokenUserInfo accessTokenUserInfo;
+    private KnifeUserInfo knifeUserInfo;
 
     private RestDocumentationResultHandler document;
 
@@ -81,13 +81,13 @@ public class CustomerApiTest {
     private HandlerMethodArgumentResolver putAuthenticationPrincipal = new HandlerMethodArgumentResolver() {
         @Override
         public boolean supportsParameter(MethodParameter parameter) {
-            return parameter.getParameterType().isAssignableFrom(AccessTokenUserInfo.class);
+            return parameter.getParameterType().isAssignableFrom(KnifeUserInfo.class);
         }
 
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-            return accessTokenUserInfo;
+            return knifeUserInfo;
         }
     };
 
@@ -106,7 +106,7 @@ public class CustomerApiTest {
 
         Customer u = customerUtils.mockCustomerObject();
 
-        accessTokenUserInfo = customerUtils.mockAuthenticationPrincipal(u);
+        knifeUserInfo = customerUtils.mockAuthenticationPrincipal(u);
 
         this.document = document(
                 "{class-name}/{method-name}",

@@ -1,5 +1,6 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard;
 
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.KnifeErrorMessages;
@@ -13,13 +14,13 @@ import org.springframework.security.oauth2.server.resource.introspection.OAuth2I
 
 public class AccessTokenUserInfoConverter {
 
-    public static AccessTokenUserInfo from(Object principal,
-                                           ConditionalDetailsService conditionalDetailsService,
-                                           OAuth2AuthorizationServiceImpl authorizationService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
+    public static KnifeUserInfo<?> from(Object principal,
+                                        ConditionalDetailsService conditionalDetailsService,
+                                        OAuth2AuthorizationServiceImpl authorizationService, ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
-        AccessTokenUserInfo accessTokenUserInfo;
-        if (principal instanceof AccessTokenUserInfo) {
-            return ((AccessTokenUserInfo) principal);
+        KnifeUserInfo<?> knifeUserInfo;
+        if (principal instanceof KnifeUserInfo) {
+            return ((KnifeUserInfo<?>) principal);
         } else if (principal instanceof OAuth2IntrospectionAuthenticatedPrincipal) {
             String userName = ((OAuth2IntrospectionAuthenticatedPrincipal) principal).getUsername();
             String clientId = ((OAuth2IntrospectionAuthenticatedPrincipal) principal).getClientId();
@@ -30,7 +31,7 @@ public class AccessTokenUserInfoConverter {
                 throw new KnifeOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE));
             }
 
-            return (AccessTokenUserInfo) conditionalDetailsService.loadUserByUsername(userName, clientId);
+            return (KnifeUserInfo<?>) conditionalDetailsService.loadUserByUsername(userName, clientId);
         }else {
             throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message("Wrong principal : " +  principal.toString()).userMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR.getMessage()).build());
         }

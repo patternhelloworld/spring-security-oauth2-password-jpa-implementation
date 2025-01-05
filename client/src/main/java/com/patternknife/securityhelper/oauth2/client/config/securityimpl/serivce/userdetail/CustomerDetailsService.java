@@ -1,8 +1,8 @@
 package com.patternknife.securityhelper.oauth2.client.config.securityimpl.serivce.userdetail;
 
 
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import com.patternknife.securityhelper.oauth2.client.config.response.error.exception.auth.UserDeletedException;
 
 import com.patternknife.securityhelper.oauth2.client.domain.customer.dao.CustomerRepository;
@@ -12,7 +12,6 @@ import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.QCus
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.QCustomerRole;
 import com.patternknife.securityhelper.oauth2.client.domain.role.entity.QRole;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeClientRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,7 +87,7 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
     }
 
 
-    private AccessTokenUserInfo buildCustomerForAuthentication(Customer customer, Collection<? extends GrantedAuthority> authorities) {
+    private KnifeUserInfo<CustomizedUserInfo> buildCustomerForAuthentication(Customer customer, Collection<? extends GrantedAuthority> authorities) {
         String customername = customer.getIdName();
         String password = customer.getPassword() != null ? customer.getPassword().getValue() : "";
         boolean enabled = true;
@@ -96,10 +95,10 @@ public class CustomerDetailsService extends QuerydslRepositorySupport implements
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
 
-        AccessTokenUserInfo authCustomer = new AccessTokenUserInfo(customername, password, enabled, accountNonExpired, credentialsNonExpired,
+        KnifeUserInfo<CustomizedUserInfo> authCustomer = new KnifeUserInfo<>(customername, password, enabled, accountNonExpired, credentialsNonExpired,
                 accountNonLocked, authorities);
 
-        authCustomer.setAdditionalAccessTokenUserInfo(new AdditionalAccessTokenUserInfo(customer));
+        authCustomer.setCustomizedUserInfo(new CustomizedUserInfo(customer));
 
         return authCustomer;
     }

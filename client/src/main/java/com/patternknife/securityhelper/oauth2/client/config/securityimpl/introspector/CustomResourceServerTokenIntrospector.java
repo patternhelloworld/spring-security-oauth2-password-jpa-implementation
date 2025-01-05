@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 *   Set this to your resource servers
 * */
 @Component
-public class CustomDefaultResourceServerTokenIntrospector implements OpaqueTokenIntrospector {
+public class CustomResourceServerTokenIntrospector implements OpaqueTokenIntrospector {
 
     private final OpaqueTokenIntrospector delegate;
 
@@ -25,29 +25,29 @@ public class CustomDefaultResourceServerTokenIntrospector implements OpaqueToken
     *   api : resource servers call the authorization server
     *   database : the database is shared with the authorization server and resource servers
     * */
-    @Value("${patternknife.securityhelper.oauth2.introspection.type}") String introspectionType;
-    @Value("${patternknife.securityhelper.oauth2.introspection.uri}") String introspectionUri;
-    @Value("${patternknife.securityhelper.oauth2.introspection.client-id}") String clientId;
-    @Value("${patternknife.securityhelper.oauth2.introspection.client-secret}") String clientSecret;
-
+    String introspectionType;
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
     private final ConditionalDetailsService conditionalDetailsService;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
 
-    public CustomDefaultResourceServerTokenIntrospector(
+    public CustomResourceServerTokenIntrospector(
             OAuth2AuthorizationServiceImpl authorizationService,
             ConditionalDetailsService conditionalDetailsService,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
-            @Value("${patternknife.securityhelper.oauth2.introspection.type}") String introspectionType,
-            @Value("${patternknife.securityhelper.oauth2.introspection.uri}") String introspectionUri,
-            @Value("${patternknife.securityhelper.oauth2.introspection.client-id}") String clientId,
-            @Value("${patternknife.securityhelper.oauth2.introspection.client-secret}") String clientSecret) {
-        this.delegate = new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
+            @Value("${patternknife.securityhelper.oauth2.introspection.type:database}") String introspectionType,
+            @Value("${patternknife.securityhelper.oauth2.introspection.uri:default-introspect-uri}") String introspectionUri,
+            @Value("${patternknife.securityhelper.oauth2.introspection.client-id:default-client-id}") String clientId,
+            @Value("${patternknife.securityhelper.oauth2.introspection.client-secret:default-client-secret}") String clientSecret) {
+
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
         this.iSecurityUserExceptionMessageService = iSecurityUserExceptionMessageService;
+
+        this.introspectionType = introspectionType;
+
+        this.delegate = new SpringOpaqueTokenIntrospector(introspectionUri, clientId, clientSecret);
     }
 
     @Override

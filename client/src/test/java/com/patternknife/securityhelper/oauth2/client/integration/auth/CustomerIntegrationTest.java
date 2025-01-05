@@ -631,7 +631,7 @@ public class CustomerIntegrationTest {
     }
 
     /*
-    *   [IMPORTANT] To test this, as '/oauth2/introspect' has been introduced, this can't connect to itself at this point. Check 'CustomDefaultResourceServerTokenIntrospector'.
+    *   [IMPORTANT] To test this, as '/oauth2/introspect' has been introduced, this can't connect to itself at this point. Check 'CustomResourceServerTokenIntrospector'.
     *
     * */
 

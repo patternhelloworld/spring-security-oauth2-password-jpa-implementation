@@ -1,7 +1,7 @@
 package com.patternknife.securityhelper.oauth2.client.util.auth;
 
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AccessTokenUserInfo;
-import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.AdditionalAccessTokenUserInfo;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.core.KnifeUserInfo;
+import com.patternknife.securityhelper.oauth2.client.config.securityimpl.guard.CustomizedUserInfo;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Customer;
 import com.patternknife.securityhelper.oauth2.client.domain.customer.entity.Password;
 import org.junit.jupiter.api.Assertions;
@@ -30,7 +30,7 @@ public abstract class AbstractMockAuth implements MockAuth {
     public static final Long MOCKED_CUSTOMER_ACCESS_TOKEN_CUSTOMER_ID = 1L;
 
     @Override
-    public AccessTokenUserInfo mockAuthenticationPrincipal(Customer customer) {
+    public KnifeUserInfo mockAuthenticationPrincipal(Customer customer) {
 
         String username= customer.getEmail();
         String password = customer.getPassword().getValue();
@@ -40,10 +40,10 @@ public abstract class AbstractMockAuth implements MockAuth {
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
 
-        AccessTokenUserInfo authCustomer = new AccessTokenUserInfo(username, password, enabled, accountNonExpired, credentialsNonExpired,
+        KnifeUserInfo authCustomer = new KnifeUserInfo(username, password, enabled, accountNonExpired, credentialsNonExpired,
                 accountNonLocked, getAuthorities(customer));
 
-        authCustomer.setAdditionalAccessTokenUserInfo(new AdditionalAccessTokenUserInfo(customer));
+        authCustomer.setCustomizedUserInfo(new CustomizedUserInfo(customer));
 
         return authCustomer;
     }
