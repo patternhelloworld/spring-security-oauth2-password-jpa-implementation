@@ -204,6 +204,100 @@
 					"response": []
 				},
 				{
+					"name": "oauth2/token (Authorization code)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept-encoding": true,
+							"content-type": true,
+							"accept": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "12345",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "client_customer",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Requested-With",
+								"value": "XMLHttpRequest",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "App-Token",
+								"value": "aaa",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "cicd@test.com",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "grant_type",
+									"value": "code",
+									"type": "text"
+								},
+								{
+									"key": "otp_value",
+									"value": "555555",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "code",
+									"value": "dab73d72-e27d-4018-88f2-36e4f342221d",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}/oauth2/token",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "oauth2/introspect (Access Token Check)",
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {
@@ -469,7 +563,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "rVI-3U176t2RfP5U0fqmJrCjaWPYg1loD25rKsrcT2rfG2cpfhJYjloapw9MGVbGNTYWN_U_8uPG9nlFrt_96DFb2SKhRIzxTQqieh7xQxNzs1SkBLZuxZ4YlobASwfC",
+									"value": "1yOkXG2h9u_5vvXg_42mVBFsG9I4edKFnxRFg7agjggGGxSR8PkMHvda9cTM3e_7OwLMkYKJOpgmnjuHBTWPk3A-2tYpdIqfM2V3R0Vvoz0G33TBM1fXC1loc-7kAc-q",
 									"type": "string"
 								}
 							]

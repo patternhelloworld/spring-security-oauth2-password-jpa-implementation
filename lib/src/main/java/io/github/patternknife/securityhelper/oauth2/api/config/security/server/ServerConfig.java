@@ -3,25 +3,23 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.server;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeRequestAuthenticationConverter;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeAccessTokenAuthenticationConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.PasswordAccessTokenRequestConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.KnifeOAuth2TokenIntrospectionAuthenticationConverter;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.dao.KnifeAuthorizationConsentRepository;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthenticationProvider;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.PasswordAuthenticationProvider;
 
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.KnifeOauth2AuthorizationCodeAuthenticationProvider;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.KnifeOauth2OpaqueTokenAuthenticationProvider;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.endpoint.AuthorizationCodeAuthenticationProvider;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.IntrospectOpaqueTokenAuthenticationProvider;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationFailureHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationSuccessHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultWebAuthenticationFailureHandlerImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultWebAuthenticationSuccessHandlerImpl;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.resource.authentication.DefaultAuthenticationEntryPoint;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
-import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.IOauth2AuthenticationHashCheckService;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationConsentServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
@@ -29,9 +27,6 @@ import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.
 import io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.introspector.DefaultResourceServerTokenIntrospector;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,43 +121,63 @@ public class ServerConfig {
                  *
                  *    Authorization Code
                  *
+                 *    : /oauth2/authorize
+                 *
                  *    TO DO. //  https://medium.com/@itsinil/oauth-2-1-pkce-%EB%B0%A9%EC%8B%9D-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-14500950cdbf
                  *
                  *    http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1
                  * */
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
-                                .authorizationRequestConverter(new AuthorizationCodeRequestAuthenticationConverter(registeredClientRepository, knifeAuthorizationConsentRepository, authorizationService))
-                                .authenticationProvider(new KnifeOauth2AuthorizationCodeAuthenticationProvider(
+                                // Converter
+                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, knifeAuthorizationConsentRepository, authorizationService))
+                                // Provider
+                                .authenticationProvider(new AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator, conditionalDetailsService, commonOAuth2AuthorizationSaver
-                                )).authorizationResponseHandler(iWebAuthenticationSuccessHandler)
+                                ))
+                                // Response (Success)
+                                .authorizationResponseHandler(iWebAuthenticationSuccessHandler)
+                                // Response (Failure)
                                 .errorResponseHandler(iWebAuthenticationFailureHandler)
 
                 )
                 /*
+                 *
                  *    1) ROPC (grant_type=password, grant_type=refresh_token)
                  *    2) Authorization Code flow
                  *      - Get an authorization_code with username and password (grant_type=authorization_code)
                  *      - Login with code received from the authorization code flow instead of username & password (grant_type=code)
-                 * */
+                 *
+                 *    : /oauth2/authorize
+                 *
+                 * * */
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
-                                .accessTokenResponseHandler(iApiAuthenticationSuccessHandler)
-                                .accessTokenRequestConverter(new KnifeAccessTokenAuthenticationConverter())
-                                // found only Oauth2AuthenticationException is tossed.
-                                .errorResponseHandler(iApiAuthenticationFailureHandler)
-                                .authenticationProvider(new KnifeOauth2AuthenticationProvider(
+                                // Converter
+                                .accessTokenRequestConverter(new PasswordAccessTokenRequestConverter())
+                                // Provider
+                                .authenticationProvider(new PasswordAuthenticationProvider(
                                         commonOAuth2AuthorizationSaver, conditionalDetailsService, oauth2AuthenticationHashCheckService,
                                         authorizationService, iSecurityUserExceptionMessageService
                                 ))
+                                // Response (Success)
+                                .accessTokenResponseHandler(iApiAuthenticationSuccessHandler)
+                                // Response (Failure)
+                                .errorResponseHandler(iApiAuthenticationFailureHandler)
 
-                ).tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
+                )
+                /*
+                *   : /oauth2/introspect
+                * */
+                .tokenIntrospectionEndpoint(tokenIntrospectEndpoint ->
                         tokenIntrospectEndpoint
+                                // Converter
                                 .introspectionRequestConverter(httpServletRequest -> new KnifeOAuth2TokenIntrospectionAuthenticationConverter(
                                 ).convert(httpServletRequest))
-                                .authenticationProvider(new KnifeOauth2OpaqueTokenAuthenticationProvider(
+                                // Provider
+                                .authenticationProvider(new IntrospectOpaqueTokenAuthenticationProvider(
                                       authorizationService, conditionalDetailsService
-                                )).errorResponseHandler(iApiAuthenticationFailureHandler));
+                                )));
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
@@ -177,7 +192,7 @@ public class ServerConfig {
                         .anyRequest().authenticated()
                 ).exceptionHandling(exceptions -> exceptions.
                         authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));
-        
+
         return http.build();
     }
 
