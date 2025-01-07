@@ -103,7 +103,7 @@ public class CustomerApi {
 
     @PreAuthorize("@resourceServerAuthorityChecker.hasRole('CUSTOMER_ADMIN')")
     @GetMapping("/customers/{id}")
-    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id, @CustomAuthenticationPrincipal KnifeUserInfo knifeUserInfo)
+    public CustomerResDTO.Id getCustomerForAuthorizationTest(@PathVariable("id") final long id, @CustomAuthenticationPrincipal KnifeUserInfo<CustomizedUserInfo> knifeUserInfo)
             throws ResourceNotFoundException {
         return new CustomerResDTO.Id(id);
     }

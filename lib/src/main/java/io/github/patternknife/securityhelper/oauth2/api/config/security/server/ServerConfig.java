@@ -1,6 +1,11 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.server;
 
 
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
@@ -47,7 +52,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
@@ -63,6 +71,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 
 @Configuration
@@ -74,14 +85,33 @@ public class ServerConfig {
 
     private static String CUSTOM_CONSENT_PAGE_URI = "/oauth2/authorization";
 
+
     @Primary
     @Bean
     public OAuth2TokenGenerator<OAuth2Token> tokenGenerator() {
-        OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
-        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        // Base64-encoded secret key (HS256)
+        String secretKey = "U29tZVZhbGlkU2VjcmV0S2V5IQ=="; // Replace with your Base64-encoded secret key
+        byte[] decodedKey = Base64.getDecoder().decode(secretKey);
+
+        // Create JWK from the secret key
+        JWK jwk = new OctetSequenceKey.Builder(decodedKey).build();
+
+        // Create JWKSource
+        JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(decodedKey);
+
+        // Create JwtEncoder with the JWKSource
+        JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
+
+        // Create JwtGenerator with the JwtEncoder
+        JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
+
+        // Combine JwtGenerator with a RefreshTokenGenerator
         return new CustomDelegatingOAuth2TokenGenerator(
-                accessTokenGenerator, refreshTokenGenerator);
+                jwtGenerator,
+                new OAuth2RefreshTokenGenerator()
+        );
     }
+
 
 
 

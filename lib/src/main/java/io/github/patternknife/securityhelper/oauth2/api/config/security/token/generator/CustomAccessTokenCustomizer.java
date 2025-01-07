@@ -1,6 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.token.generator;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenClaimsContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenClaimsSet;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -8,7 +9,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomAccessTokenCustomizer implements OAuth2TokenCustomizer<OAuth2TokenClaimsContext> {
+public class CustomAccessTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
 
     private final UserDetails userDetails;
 
@@ -16,7 +17,9 @@ public class CustomAccessTokenCustomizer implements OAuth2TokenCustomizer<OAuth2
         this.userDetails = userDetails;
     }
 
-    @Override
+
+
+/*    @Override
     public void customize(OAuth2TokenClaimsContext context) {
         if (context != null) {
             OAuth2TokenClaimsSet.Builder claimsSetBuilder = context.getClaims();
@@ -32,7 +35,7 @@ public class CustomAccessTokenCustomizer implements OAuth2TokenCustomizer<OAuth2
         }
 
 
-    }
+    }*/
     private Map<String, Object> serializeCustomerToMap(UserDetails userDetails) {
         // Implement the logic to transform the Customer object into a Map or another format suitable for JWT claims
         Map<String, Object> customerInfo = new HashMap<>();
@@ -40,5 +43,10 @@ public class CustomAccessTokenCustomizer implements OAuth2TokenCustomizer<OAuth2
         customerInfo.put("name", userDetails.getUsername());
         // Add other customer attributes as needed
         return customerInfo;
+    }
+
+    @Override
+    public void customize(JwtEncodingContext context) {
+
     }
 }

@@ -32,7 +32,7 @@ public class CustomDelegatingOAuth2TokenGenerator implements OAuth2TokenGenerato
                 boolean b = tokenGenerators.get(0) instanceof CustomDelegatingOAuth2TokenGenerator;
                 if(b){
                     CustomDelegatingOAuth2TokenGenerator c = (CustomDelegatingOAuth2TokenGenerator) tokenGenerators.get(0);
-                    boolean d = c.tokenGenerators.get(0) instanceof OAuth2AccessTokenGenerator;
+                    boolean d = c.tokenGenerators.get(0) instanceof JwtGenerator;
                     boolean e = c.tokenGenerators.get(1) instanceof OAuth2RefreshTokenGenerator;
                     if(d && context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)){
                       return  ((OAuth2AccessTokenGenerator) c.tokenGenerators.get(0)).generate(context);
@@ -47,7 +47,7 @@ public class CustomDelegatingOAuth2TokenGenerator implements OAuth2TokenGenerato
         return null;
     }
 
-    public void setCustomizer(GeneratorType type, OAuth2TokenCustomizer<OAuth2TokenClaimsContext> customizer) {
+    public void setCustomizer(GeneratorType type, OAuth2TokenCustomizer<JwtEncodingContext> customizer) {
         switch (type) {
             case ACCESS_TOKEN:
                 for (OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator : this.tokenGenerators) {
@@ -55,9 +55,9 @@ public class CustomDelegatingOAuth2TokenGenerator implements OAuth2TokenGenerato
                         boolean b = tokenGenerators.get(0) instanceof CustomDelegatingOAuth2TokenGenerator;
                         if(b){
                             CustomDelegatingOAuth2TokenGenerator c = (CustomDelegatingOAuth2TokenGenerator) tokenGenerators.get(0);
-                           boolean d = c.tokenGenerators.get(0) instanceof OAuth2AccessTokenGenerator;
+                           boolean d = c.tokenGenerators.get(0) instanceof JwtGenerator;
                             if(d){
-                                ((OAuth2AccessTokenGenerator) c.tokenGenerators.get(0)).setAccessTokenCustomizer(customizer);
+                                ((JwtGenerator) c.tokenGenerators.get(0)).setJwtCustomizer(customizer);
                             }
                         }
                     }
