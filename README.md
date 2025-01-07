@@ -83,11 +83,9 @@
 | `-`                                                        | App-Token is NOT shared for the same user | Each unique App-Token generates a new access token for the same user.                                              |
 
 
-* Separated UserDetails implementation for Admin and Customer roles as an example. (This can be extended as desired by implementing ``UserDetailsServiceFactory``)
+* Separated UserDetails implementation for Admin and Customer roles as an example. (This can be extended such as Admin, Customer, Seller and Buyer... by implementing ``UserDetailsServiceFactory``)
 * For versions greater than or equal to v3, including the latest version (Spring Security 6), provide MySQL DDL, which consists of ``oauth2_authorization`` and ``oauth2_registered_client``.
-* For v2, provide MySQL DDL, which consists of ``oauth_access_token, oauth_refresh_token and oauth_client_details``, which are tables in Security 5. As I meant to migrate current security system to Security 6 back then, I hadn't changed them to the ``oauth2_authorization`` table indicated in https://github.com/spring-projects/spring-authorization-server.
-
-* Application of Spring Rest Docs
+* Application of Spring Rest Docs, Postman payloads provided
 
 ## Dependencies
 
@@ -124,7 +122,8 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 ## API Guide
 
 ### **Registration**
-  - See the `client` folder. As the Api module consumes JPA, adding it to Beans is required.
+  - See the `client` folder. 
+  - As the Api module consumes JPA, adding it to Beans is required.
 
 ```java
 
