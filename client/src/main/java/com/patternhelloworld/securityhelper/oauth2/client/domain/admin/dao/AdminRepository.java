@@ -1,0 +1,12 @@
+package com.patternhelloworld.securityhelper.oauth2.client.domain.admin.dao;
+
+import com.patternhelloworld.securityhelper.oauth2.client.domain.admin.entity.Admin;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+
+import java.util.Optional;
+
+
+public interface AdminRepository extends JpaRepository<Admin, Long>, QuerydslPredicateExecutor<Admin> {
+    Optional<Admin> findByIdName(String idName);
+}

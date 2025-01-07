@@ -6,14 +6,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
-    <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.5.0</version>
-    <name>spring-security-oauth2-password-jpa-implementation</name>
-    <description>App-Token based OAuth2 implementation built to grow with Spring Boot and JPA</description>
+    <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
+    <artifactId>spring-oauth2-easyplus</artifactId>
+    <version>4.0.0</version>
+    <name>spring-oauth2-easyplus</name>
+    <description>App-Token based easy OAuth2 implementation built to grow with Spring Boot</description>
     <packaging>jar</packaging>
 
-    <url>https://github.com/patternknife/spring-security-oauth2-password-jpa-implementation</url>
+    <url>https://github.com/patternhelloworld/spring-oauth2-easyplus</url>
 
     <licenses>
         <license>
@@ -24,15 +24,15 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/patternknife/spring-security-oauth2-password-jpa-implementation.git</connection>
-        <developerConnection>scm:git:git://github.com/patternknife/spring-security-oauth2-password-jpa-implementation.git</developerConnection>
-        <url>https://github.com/patternknife/spring-security-oauth2-password-jpa-implementation.git</url>
+        <connection>scm:git:git://github.com/patternhelloworld/spring-oauth2-easyplus.git</connection>
+        <developerConnection>scm:git:git://github.com/patternhelloworld/spring-oauth2-easyplus.git</developerConnection>
+        <url>https://github.com/patternhelloworld/spring-oauth2-easyplus.git</url>
         <tag>HEAD</tag>
     </scm>
 
     <developers>
         <developer>
-            <id>patternknife</id>
+            <id>patternhelloworld</id>
             <name>Andrew Kang</name>
             <email>studypurpose@naver.com</email>
             <roles>

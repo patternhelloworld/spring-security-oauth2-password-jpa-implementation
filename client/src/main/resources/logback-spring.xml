@@ -187,24 +187,24 @@
         <!--<appender-ref ref="Console" />-->
     </logger>
 
-    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseSuccessLogConfig" level="TRACE">
+    <logger name="com.patternhelloworld.securityhelper.oauth2.client.config.logger.module.ResponseSuccessLogConfig" level="TRACE">
         <appender-ref ref="SuccessResponse" />
         <!--<appender-ref ref="Console" />-->
     </logger>
-    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ResponseErrorLogConfig" level="TRACE">
+    <logger name="com.patternhelloworld.securityhelper.oauth2.client.config.logger.module.ResponseErrorLogConfig" level="TRACE">
         <appender-ref ref="ErrorResponse" />
         <!--<appender-ref ref="Console" />-->
     </logger>
-    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.ExcelAsyncUploadErrorLogConfig" level="TRACE">
+    <logger name="com.patternhelloworld.securityhelper.oauth2.client.config.logger.module.ExcelAsyncUploadErrorLogConfig" level="TRACE">
         <appender-ref ref="ExcelAsyncUploadError" />
         <!--<appender-ref ref="Console" />-->
     </logger>
-    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.NonStopErrorLogConfig" level="TRACE">
+    <logger name="com.patternhelloworld.securityhelper.oauth2.client.config.logger.module.NonStopErrorLogConfig" level="TRACE">
         <appender-ref ref="NonStopError" />
         <!--<appender-ref ref="Console" />-->
     </logger>
 
-    <logger name="com.patternknife.securityhelper.oauth2.client.config.logger.module.RestTemplateClientLogConfig" level="TRACE">
+    <logger name="com.patternhelloworld.securityhelper.oauth2.client.config.logger.module.RestTemplateClientLogConfig" level="TRACE">
         <appender-ref ref="RestTemplate" />
         <!--<appender-ref ref="Console" />-->
     </logger>

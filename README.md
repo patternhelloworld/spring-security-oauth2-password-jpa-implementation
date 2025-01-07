@@ -1,6 +1,6 @@
-# Spring Security Oauth2 JPA Implementation
+# Spring Oauth2 EasyPlus 
 
-> App-Token based OAuth2 implementation built to grow with Spring Boot and JPA
+> App-Token based easy OAuth2 implementation built to grow with Spring Boot
 
 ## Table of Contents
 
@@ -22,9 +22,9 @@
 ## Quick Start
 ```xml
 <dependency>
-    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
-    <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>3.5.0</version>
+    <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
+    <artifactId>spring-oauth2-easyplus</artifactId>
+    <version>4.0.0</version>
 </dependency>
 ```
 
@@ -36,6 +36,7 @@
   * Client : DOC, Integration tester
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
 * Token Introspector: Enable the ``/oauth2/introspect`` endpoint to allow multiple resource servers to verify the token's validity and permissions with the authorization server.
+* Hybrid Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
     * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
@@ -72,7 +73,7 @@
 | different for the same user | Access-Token is NOT shared |
 
   * Set this in your ``application.properties``. 
-    * App-Token Behavior Based on `io.github.patternknife.securityhelper.oauth2.no-app-token-same-access-token`
+    * App-Token Behavior Based on `io.github.patternhelloworld.securityhelper.oauth2.no-app-token-same-access-token`
 
 | `no-app-token-same-access-token` Value | App-Token Status                          | Access Token Sharing Behavior                                                                                     |
 |------------------------------------------------------------|-------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
@@ -127,8 +128,8 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 
 ```java
 
-// ADD 'io.github.patternknife.securityhelper.oauth2.api'
-@SpringBootApplication(scanBasePackages =  {"com.patternknife.securityhelper.oauth2.client", "io.github.patternknife.securityhelper.oauth2.api"})
+// ADD 'io.github.patternhelloworld.securityhelper.oauth2.api'
+@SpringBootApplication(scanBasePackages =  {"com.patternhelloworld.securityhelper.oauth2.client", "io.github.patternhelloworld.securityhelper.oauth2.api"})
 public class SpringSecurityOauth2PasswordJpaImplApplication {
 
     public static void main(String[] args) {
@@ -140,25 +141,25 @@ public class SpringSecurityOauth2PasswordJpaImplApplication {
 
 ```java
 @Configuration
-// ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
+// ADD 'io.github.patternhelloworld.securityhelper.oauth2.api.config.security'
 @EnableJpaRepositories(
-        basePackages = {"com.patternknife.securityhelper.oauth2.client.domain",
-                "com.patternknife.securityhelper.oauth2.client.config.securityimpl",
-                "io.github.patternknife.securityhelper.oauth2.api.config.security"},
+        basePackages = {"com.patternhelloworld.securityhelper.oauth2.client.domain",
+                "com.patternhelloworld.securityhelper.oauth2.client.config.securityimpl",
+                "io.github.patternhelloworld.securityhelper.oauth2.api.config.security"},
         entityManagerFactoryRef = "commonEntityManagerFactory",
         transactionManagerRef= "commonTransactionManager"
 )
 public class CommonDataSourceConfiguration {
     
 
-   // ADD 'io.github.patternknife.securityhelper.oauth2.api.config.security'
+   // ADD 'io.github.patternhelloworld.securityhelper.oauth2.api.config.security'
     @Primary
     @Bean(name = "commonEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean commonEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(commonDataSource())
-                .packages("com.patternknife.securityhelper.oauth2.client.domain",
-                        "io.github.patternknife.securityhelper.oauth2.api.config.security")
+                .packages("com.patternhelloworld.securityhelper.oauth2.client.domain",
+                        "io.github.patternhelloworld.securityhelper.oauth2.api.config.security")
                 .persistenceUnit("commonEntityManager")
                 .build();
     }
@@ -187,13 +188,12 @@ public class CommonDataSourceConfiguration {
 
   - **Customize the whole error payload as desired for all cases**
     - What is "all cases"?
-      - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token inspection : 401, Permission : 403)
+      - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token authentication : 401, authorization (permission) : 403)
     - Customize errors of the following cases
       - Login (/oauth2/token) : ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl``
       - Login (/api/v1/traditional-oauth/token) : ``client.config.response.error.GlobalExceptionHandler.authenticationException`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
       - Resource Server (Bearer token expired or with a wrong value, 401) :``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl`` 
       - Resource Server (Permission, 403, @PreAuthorized on your APIs) ``client.config.response.error.GlobalExceptionHandler.authorizationException``
-      
 
   - **Customize the whole success payload as desired for the only "/oauth2/token"**
       - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
@@ -202,9 +202,28 @@ public class CommonDataSourceConfiguration {
  - **Customize the verification logic for UsernamePassword and Client as desired**
     - ``IOauth2AuthenticationHashCheckService``
 
- - **Customize OpaqueTokenIntrospector as desired (!Set this to your Resource Servers)**
+ - **Customize OpaqueTokenIntrospector as desired (!This is for Resource Servers)**
     - ``client.config.securityimpl.introspector.CustomResourceServerTokenIntrospector``
-    - ![img3.png](reference/docs/img3.png)
+    - ```properties
+          # Introspection type configuration:
+          # - api: The Resource Server sends introspection requests to the Authorization Server.
+          #        Benefits: High scalability and real-time authorization checks.
+          #        Drawbacks: Increased traffic due to frequent API calls.
+          # 
+          # - database: The Resource Server and Authorization Server share the same database.
+          #             Benefits: Minimal traffic and real-time authorization checks.
+          #             Drawbacks: Limited scalability due to direct database dependency.
+          # 
+          # - decode: The Resource Server decodes the Access Token locally using the JWT algorithm.
+          #           Benefits: No traffic and high scalability.
+          #           Drawbacks: Lacks real-time authorization updates.
+          #
+          # [WARNING] api: Certain test cases are currently failing due to issues with the specified introspection URI calls.
+          patternhelloworld.securityhelper.oauth2.introspection.type=database
+          patternhelloworld.securityhelper.oauth2.introspection.uri=http://localhost:8370/oauth2/introspect
+          patternhelloworld.securityhelper.oauth2.introspection.client-id=client_customer
+          patternhelloworld.securityhelper.oauth2.introspection.client-secret=12345
+        ```
 ## OAuth2 - ROPC
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``
 

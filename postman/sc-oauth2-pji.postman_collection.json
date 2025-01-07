@@ -402,13 +402,13 @@
 							"type": "basic",
 							"basic": [
 								{
-									"key": "username",
-									"value": "merz_pms_admin",
+									"key": "password",
+									"value": "12345",
 									"type": "string"
 								},
 								{
-									"key": "password",
-									"value": "5b22fcb8b72ceebd611e61126c0b2030",
+									"key": "username",
+									"value": "client_customer",
 									"type": "string"
 								}
 							]

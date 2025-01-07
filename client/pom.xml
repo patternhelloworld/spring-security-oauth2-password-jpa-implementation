@@ -5,9 +5,9 @@
 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.patternknife.securityhelper.oauth2.client</groupId>
-    <artifactId>spring-security-oauth2-password-jpa-implementation-client</artifactId>
-    <version>3.5.0</version>
+    <groupId>com.patternhelloworld.securityhelper.oauth2.client</groupId>
+    <artifactId>spring-oauth2-easyplus-client</artifactId>
+    <version>4.0.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -46,9 +46,9 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <dependencies>
 
         <dependency>
-            <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
-            <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-            <version>3.5.0</version>
+            <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
+            <artifactId>spring-oauth2-easyplus</artifactId>
+            <version>4.0.0</version>
         </dependency>
 
         <!-- DB -->
