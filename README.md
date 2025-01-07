@@ -34,36 +34,10 @@
 * Complete separation of the library and the client
   * Library : API
   * Client : DOC, Integration tester
+* Extensible: Supports multiple authorization servers and resource servers with this library.
+* Hybrid Resource Servers Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
-* Token Introspector: Enable the ``/oauth2/introspect`` endpoint to allow multiple resource servers to verify the token's validity and permissions with the authorization server.
-* Hybrid Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
-* Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
-  * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
-    * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
-        * Success Payload
-         ```json
-          {
-              "access_token" : "Vd4x8D4lDg7VBFh...",
-              "token_type" : "Bearer",
-              "refresh_token" : "m3UgLrvPtXKdy7jiD...",
-              "expires_in" : 3469,
-              "scope" : "read write"
-           }
-        ```
-      
-        * Error Payload (Customizable) 
-        ```json
-          {
-              "timestamp": 1719470948370,
-              "message": "Couldn't find the client ID : client_admin", // Sensitive info such as being thrown from StackTraces
-              "details": "uri=/oauth2/token",
-              "userMessage": "Authentication failed. Please check your credentials.",
-              "userValidationMessage": null
-          }
-        ```
-
-        * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
-      
+ 
 * Authentication management based on a combination of username, client ID, and App-Token
   * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
 
@@ -84,7 +58,33 @@
 
 
 * Separated UserDetails implementation for Admin and Customer roles as an example. (This can be extended such as Admin, Customer, Seller and Buyer... by implementing ``UserDetailsServiceFactory``)
-* For versions greater than or equal to v3, including the latest version (Spring Security 6), provide MySQL DDL, which consists of ``oauth2_authorization`` and ``oauth2_registered_client``.
+* Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
+    * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
+        * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
+            * Success Payload
+             ```json
+              {
+                  "access_token" : "Vd4x8D4lDg7VBFh...",
+                  "token_type" : "Bearer",
+                  "refresh_token" : "m3UgLrvPtXKdy7jiD...",
+                  "expires_in" : 3469,
+                  "scope" : "read write"
+               }
+            ```
+
+            * Error Payload (Customizable)
+            ```json
+              {
+                  "timestamp": 1719470948370,
+                  "message": "Couldn't find the client ID : client_admin", // Sensitive info such as being thrown from StackTraces
+                  "details": "uri=/oauth2/token",
+                  "userMessage": "Authentication failed. Please check your credentials.",
+                  "userValidationMessage": null
+              }
+            ```
+
+            * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
+
 * Application of Spring Rest Docs, Postman payloads provided
 
 ## Dependencies
