@@ -1,5 +1,7 @@
 package io.github.patternknife.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint;
 
+import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
+import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import org.apache.commons.logging.Log;
@@ -41,13 +43,16 @@ public final class IntrospectOpaqueTokenAuthenticationProvider implements Authen
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof OAuth2TokenIntrospectionAuthenticationToken bearer)) {
+        if (!(authentication instanceof OAuth2TokenIntrospectionAuthenticationToken)) {
             return null;
         } else {
 
             String bearerAccessToken = ((OAuth2TokenIntrospectionAuthenticationToken) authentication).getToken();
 
             OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(bearerAccessToken, OAuth2TokenType.ACCESS_TOKEN);
+            if(oAuth2Authorization == null) {
+                throw new KnifeOauth2AuthenticationException();
+            }
 
 
             OAuth2ClientAuthenticationToken oAuth2ClientAuthenticationToken = (OAuth2ClientAuthenticationToken)authentication.getPrincipal();
@@ -58,8 +63,10 @@ public final class IntrospectOpaqueTokenAuthenticationProvider implements Authen
 
 
             Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
+
             assert oAuth2Authorization != null;
             assert registeredClient != null;
+
             return new OAuth2TokenIntrospectionAuthenticationToken(
                     bearerAccessToken,
                     clientPrincipal,

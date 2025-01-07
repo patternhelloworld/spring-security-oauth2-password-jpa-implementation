@@ -1,13 +1,12 @@
 package com.patternknife.securityhelper.oauth2.client.config.response.error;
 
 
-import com.patternknife.securityhelper.oauth2.client.config.response.error.message.GeneralErrorMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.util.ExceptionKnifeUtils;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternknife.securityhelper.oauth2.api.config.util.OrderConstants;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.KnifeOrderConstants;
 import lombok.RequiredArgsConstructor;;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ import org.springframework.web.context.request.WebRequest;
  *   Once you create 'GlobalExceptionHandler', you should insert the following two (authenticationException, authorizationException)  as default. Otherwise, 'unhandledExceptionHandler' is prior to 'io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.handler.SecurityKnifeExceptionHandler'.
  *   "OrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER - 1" means this is prior to "SecurityKnifeExceptionHandler"
  * */
-@Order(OrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER - 1)
+@Order(KnifeOrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER - 1)
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {

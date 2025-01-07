@@ -30,7 +30,7 @@ public final class PasswordAccessTokenRequestConverter implements Authentication
 
         KnifeGrantAuthenticationToken knifeGrantAuthenticationToken = new KnifeGrantAuthenticationToken(new AuthorizationGrantType((String) additionalParameters.get("grant_type")),
                 oAuth2ClientAuthenticationToken, additionalParameters);
-        additionalParameters.put(Principal.class.getName(), knifeGrantAuthenticationToken);
+      //  additionalParameters.put(Principal.class.getName(), knifeGrantAuthenticationToken);
 
         return knifeGrantAuthenticationToken;
     }
