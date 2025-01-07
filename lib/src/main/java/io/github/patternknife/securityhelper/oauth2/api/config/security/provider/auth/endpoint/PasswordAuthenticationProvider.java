@@ -131,7 +131,7 @@ public final class PasswordAuthenticationProvider implements AuthenticationProvi
                         getAuthenticatedClientElseThrowInvalidClient(authentication),
                         oAuth2Authorization.getAccessToken().getToken(),
                         oAuth2Authorization.getRefreshToken() != null ? oAuth2Authorization.getRefreshToken().getToken() : null,
-                        ((KnifeGrantAuthenticationToken) authentication).getAdditionalParameters()
+                        knifeGrantAuthenticationToken.getAdditionalParameters()
                 );
             } else {
                 throw new KnifeOauth2AuthenticationException();
@@ -141,7 +141,7 @@ public final class PasswordAuthenticationProvider implements AuthenticationProvi
         }catch (KnifeOauth2AuthenticationException e){
             throw e;
         }  catch (Exception e){
-           throw new KnifeOauth2AuthenticationException(KnifeErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+           throw e;
         }
 
     }

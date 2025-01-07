@@ -71,7 +71,7 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
 
         customTokenGenerator.setCustomizer(
                 CustomDelegatingOAuth2TokenGenerator.GeneratorType.ACCESS_TOKEN,
-                new CustomAccessTokenCustomizer(userDetails)
+                new CustomAccessTokenCustomizer(clientId,userDetails)
         );
 
 

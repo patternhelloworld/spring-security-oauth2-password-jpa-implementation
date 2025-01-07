@@ -2,7 +2,7 @@ package io.github.patternknife.securityhelper.oauth2.api.config.security.respons
 
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.exception.KnifeOauth2AuthenticationException;
-import io.github.patternknife.securityhelper.oauth2.api.config.util.OrderConstants;
+import io.github.patternknife.securityhelper.oauth2.api.config.util.KnifeOrderConstants;
 import io.github.patternknife.securityhelper.oauth2.api.config.security.response.error.dto.SecurityKnifeErrorResponsePayload;
 
 import io.github.patternknife.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.web.context.request.WebRequest;
 
-@Order(OrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER)
+@Order(KnifeOrderConstants.SECURITY_KNIFE_EXCEPTION_HANDLER_ORDER)
 @ControllerAdvice
 @RequiredArgsConstructor
 public class SecurityKnifeExceptionHandler {

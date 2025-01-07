@@ -1,11 +1,23 @@
 # Spring Security Oauth2 JPA Implementation
 
-> App-Token based OAuth2 POC built to grow with Spring Boot and ORM
+> App-Token based OAuth2 implementation built to grow with Spring Boot and JPA
 
-## Supporting Oauth2 Type
-| ROPC             | Authorization Code                              |
-|------------------|-------------------------------------------------|
-| production-level | Beta (expected to reach production-level in v3) |
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Features](#features)
+- [Dependencies](#dependencies)
+- [Run the App](#run-the-app)
+- [API Guide](#api-guide)
+    - [Registration](#registration)
+    - [Implementations](#implementations)
+        - [Mandatory Settings](#mandatory-settings)
+        - [Customizable Settings](#customizable-settings)
+- [OAuth2 - ROPC](#oauth2---ropc)
+- [OAuth2 - Authorization Code](#oauth2---authorization-code)
+- [Running this App with Docker](#running-this-app-with-docker)
+- [Contribution Guide](#contribution-guide)
+
 
 ## Quick Start
 ```xml
@@ -15,21 +27,15 @@
     <version>3.5.0</version>
 </dependency>
 ```
-For v2, using the database tables from Spring Security 5 (only the database tables; follow the dependencies as above):
-```xml
-<dependency>
-    <groupId>io.github.patternknife.securityhelper.oauth2.api</groupId>
-    <artifactId>spring-security-oauth2-password-jpa-implementation</artifactId>
-    <version>2.8.2</version>
-</dependency>
-```
 
-## Overview
 
-* Complete separation of the library (API) and the client for testing it
+## Features
+
+* Complete separation of the library and the client
+  * Library : API
+  * Client : DOC, Integration tester
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
 * Token Introspector: Enable the ``/oauth2/introspect`` endpoint to allow multiple resource servers to verify the token's validity and permissions with the authorization server.
-
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
   * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
     * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.

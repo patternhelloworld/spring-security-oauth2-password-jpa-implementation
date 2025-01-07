@@ -148,7 +148,7 @@ public class RegisteredClientRepositoryImpl implements RegisteredClientRepositor
                 .scopes(scopes -> scopes.addAll(scopesSet))
                 .redirectUri(knifeClient.getRedirectUris())
                 .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(accessTokenTimeToLive)
                         .refreshTokenTimeToLive(refreshTokenTimeToLive)
                         .build())
