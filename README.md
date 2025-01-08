@@ -1,4 +1,4 @@
-# Spring Oauth2 EasyPlus 
+# Spring Oauth2 EasyPlus
 
 > App-Token based easy OAuth2 implementation built to grow with Spring Boot
 
@@ -32,21 +32,21 @@
 ## Features
 
 * Complete separation of the library and the client
-  * Library : API
-  * Client : DOC, Integration tester
+    * Library : API
+    * Client : DOC, Integration tester
 * Extensible: Supports multiple authorization servers and resource servers with this library.
 * Hybrid Resource Servers Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
- 
+
 * Authentication management based on a combination of username, client ID, and App-Token
-  * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
+    * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
 
 | App-Token Status       | Access Token Behavior      |
 |------------------------|----------------------------|
 | same for the same user | Access-Token is shared     |
 | different for the same user | Access-Token is NOT shared |
 
-  * Set this in your ``application.properties``. 
+* Set this in your ``application.properties``.
     * App-Token Behavior Based on `io.github.patternhelloworld.securityhelper.oauth2.no-app-token-same-access-token`
 
 | `no-app-token-same-access-token` Value | App-Token Status                          | Access Token Sharing Behavior                                                                                     |
@@ -89,13 +89,13 @@
 
 ## Dependencies
 
-| Category          | Dependencies                                                      |
-|-------------------|-------------------------------------------------------------------|
-| Backend-Language  | Java 17                                                           |
-| Backend-Framework | Spring Boot 3.3.2 (the latest version)                            |
-| Main Libraries    | Spring Security 6.3.1, Spring Security Authorization Server 1.3.1 |
-| Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                    |
-| RDBMS             | Mysql 8.0.17                                                      |
+| Category          | Dependencies                                                           |
+|-------------------|------------------------------------------------------------------------|
+| Backend-Language  | Java 17                                                                |
+| Backend-Framework | Spring Boot 3.3.2 (the latest version)                                 |
+| Main Libraries    | Spring Security 6.3.1, Spring Security Authorization Server 1.3.1, JPA |
+| Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                         |
+| RDBMS             | Mysql 8.0.17                                                           |
 
 ## Run the App
 
@@ -122,12 +122,12 @@ mvnw clean install # Integration tests are done here, which creates docs by Spri
 ## API Guide
 
 ### **Registration**
-  - See the `client` folder. 
-  - As the Api module consumes JPA, adding it to Beans is required.
+- See the `client` folder.
+- As the Api module consumes JPA, adding it to Beans is required.
 
 ```java
 
-// ADD 'io.github.patternhelloworld.securityhelper.oauth2.api'
+// Add 'io.github.patternhelloworld.securityhelper.oauth2.api'
 @SpringBootApplication(scanBasePackages =  {"com.patternhelloworld.securityhelper.oauth2.client", "io.github.patternhelloworld.securityhelper.oauth2.api"})
 public class SpringSecurityOauth2PasswordJpaImplApplication {
 
@@ -171,37 +171,37 @@ public class CommonDataSourceConfiguration {
 
 #### "Mandatory" settings
 
-  - The only mandatory setting is ``client.config.securityimpl.service.userdetail.CustomUserDetailsServiceFactory``. The rest depend on your specific situation.
+- The only mandatory setting is ``client.config.securityimpl.service.userdetail.CustomUserDetailsServiceFactory``. The rest depend on your specific situation.
 
 #### "Customizable" settings
 
-  - **Insert your code when events happen such as tokens created**
+- **Insert your code when events happen such as tokens created**
     - ``SecurityPointCut``
     - See the source code in ``client.config.securityimpl.aop``
-    
 
-  - **Register error user messages as desired**
+
+- **Register error user messages as desired**
     - ``ISecurityUserExceptionMessageService``
     - See the source code in ``client.config.securityimpl.message``
-    
 
-  - **Customize the whole error payload as desired for all cases**
+
+- **Customize the whole error payload as desired for all cases**
     - What is "all cases"?
-      - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token authentication : 401, authorization (permission) : 403)
+        - Authorization Server ("/oauth2/token", "/api/v1/traditional-oauth/token") and Resource Server (Bearer token authentication : 401, authorization (permission) : 403)
     - Customize errors of the following cases
-      - Login (/oauth2/token) : ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl``
-      - Login (/api/v1/traditional-oauth/token) : ``client.config.response.error.GlobalExceptionHandler.authenticationException`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
-      - Resource Server (Bearer token expired or with a wrong value, 401) :``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl`` 
-      - Resource Server (Permission, 403, @PreAuthorized on your APIs) ``client.config.response.error.GlobalExceptionHandler.authorizationException``
+        - Login (/oauth2/token) : ``client.config.securityimpl.response.CustomAuthenticationFailureHandlerImpl``
+        - Login (/api/v1/traditional-oauth/token) : ``client.config.response.error.GlobalExceptionHandler.authenticationException`` ("/api/v1/traditional-oauth/token", Resource Server (Bearer token inspection))
+        - Resource Server (Bearer token expired or with a wrong value, 401) :``client.config.securityimpl.response.CustomAuthenticationEntryPointImpl``
+        - Resource Server (Permission, 403, @PreAuthorized on your APIs) ``client.config.response.error.GlobalExceptionHandler.authorizationException``
 
-  - **Customize the whole success payload as desired for the only "/oauth2/token"**
-      - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
-      - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto`` and is not yet customizable.
+- **Customize the whole success payload as desired for the only "/oauth2/token"**
+    - ``client.config.securityimpl.response.CustomAuthenticationSuccessHandlerImpl``
+    - The success response payload of "/api/v1/traditional-oauth/token" is in ``api.domain.traditionaloauth.dto`` and is not yet customizable.
 
- - **Customize the verification logic for UsernamePassword and Client as desired**
+- **Customize the verification logic for UsernamePassword and Client as desired**
     - ``IOauth2AuthenticationHashCheckService``
 
- - **Customize OpaqueTokenIntrospector as desired (!This is for Resource Servers)**
+- **Customize OpaqueTokenIntrospector as desired (!This is for Resource Servers)**
     - ``client.config.securityimpl.introspector.CustomResourceServerTokenIntrospector``
     - ```properties
           # Introspection type configuration:
@@ -229,7 +229,7 @@ public class CommonDataSourceConfiguration {
 ## OAuth2 - Authorization Code
 - Beta
 - How to set it up
-  1. Create your own login page with the /login route as indicated in the client project (In the future, this address will be customisable):
+    1. Create your own login page with the /login route as indicated in the client project (In the future, this address will be customisable):
   ```java
     @Controller
     public class LoginWeb {
@@ -243,14 +243,14 @@ public class CommonDataSourceConfiguration {
     spring.mvc.view.prefix=/templates/
     spring.mvc.view.suffix=.html
   ```
-  2. Check the login page at the "resources/templates/login.hml"
-  3. Ensure the callback URL (http://localhost:8081/callback1) is properly set in the ``oauth2_registered_client`` table in the database.
+    2. Check the login page at the "resources/templates/login.hml"
+    3. Ensure the callback URL (http://localhost:8081/callback1) is properly set in the ``oauth2_registered_client`` table in the database.
 - How to use
-  1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1``, using the values from the ``oauth2_registered_client``  2. Now you Login with ``cicd@test.com / 1234 ``
-  2. Login with ``cicd@test.com / 1234 ``
-  3. You will be redirected to
-   ``https://localhost:8081/callback1?code=215e9539-1dcb-4843-b1ea-b2d7be0a3c44&state=xxx``
-  4. You can login with this API payload
+    1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1``, using the values from the ``oauth2_registered_client``  2. Now you Login with ``cicd@test.com / 1234 ``
+    2. Login with ``cicd@test.com / 1234 ``
+    3. You will be redirected to
+       ``https://localhost:8081/callback1?code=215e9539-1dcb-4843-b1ea-b2d7be0a3c44&state=xxx``
+    4. You can login with this API payload
     ```http request
     POST /oauth2/token HTTP/1.1
     Host: localhost:8370
@@ -264,7 +264,7 @@ public class CommonDataSourceConfiguration {
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
-  * https://github.com/patternhelloworld/docker-blue-green-runner
+    * https://github.com/patternhelloworld/docker-blue-green-runner
 * The above module references this app's Dockerfile and the entrypoint script in the .docker folder.
 
 ## Contribution Guide
