@@ -10,7 +10,8 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.ser
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
+
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusOAuth2EndpointUtils;
 import io.github.patternhelloworld.securityhelper.oauth2.api.domain.traditionaloauth.bo.BasicTokenResolver;
 import io.github.patternhelloworld.securityhelper.oauth2.api.domain.traditionaloauth.dto.SpringSecurityTraditionalOauthDTO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,7 +90,7 @@ public class TraditionalOauthService {
 
 
             @NotNull OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails,
-                    new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request), null);
+                    new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), EasyPlusOAuth2EndpointUtils.getApiParameters(request), null);
 
             Instant now = Instant.now();
             Instant expiresAt = oAuth2Authorization.getAccessToken().getToken().getExpiresAt();

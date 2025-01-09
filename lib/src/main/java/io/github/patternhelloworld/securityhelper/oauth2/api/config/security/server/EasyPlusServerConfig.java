@@ -125,7 +125,7 @@ public class EasyPlusServerConfig {
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
                                 // Converter
-                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService))
+                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService,  iSecurityUserExceptionMessageService))
                                 // Provider
                                 .authenticationProvider(new AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator, conditionalDetailsService, commonOAuth2AuthorizationSaver

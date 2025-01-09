@@ -25,7 +25,15 @@ public enum DefaultSecurityUserExceptionMessage implements ExceptionMessageInter
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("Client information is not verified."),
 
     // GRANT TYPE
-    AUTHENTICATION_WRONG_GRANT_TYPE("Wrong Grant Type detected.");
+    AUTHENTICATION_WRONG_GRANT_TYPE("Wrong Grant Type detected."),
+
+    // OAuth2 : Authorization Code
+    AUTHENTICATION_AUTHORIZATION_CODE_REQUEST_WRONG_METHOD("Wrong Authorization Code request."),
+    AUTHENTICATION_CLIENT_ID_MISSING("Client ID is missing."),
+    AUTHENTICATION_REDIRECT_URI_MISSING("Redirect URI is missing."),
+    AUTHENTICATION_STATE_MISSING("State is missing."),
+    AUTHENTICATION_REGISTERED_CLIENT_NOT_FOUND("Registered client is missing or invalid"),
+    AUTHENTICATION_AUTHORIZATION_CODE_MISSING("Authorization Code is missing.");
 
     private String message;
 

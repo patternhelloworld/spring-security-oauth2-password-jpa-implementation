@@ -1,8 +1,8 @@
 package com.patternhelloworld.securityhelper.oauth2.client.config.securityimpl.response;
 
-
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.exception.EasyPlusOauth2AuthenticationException;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.ErrorCodeConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,21 +36,22 @@ public class CustomWebAuthenticationFailureHandlerImpl implements Authentication
 
         String errorMessage = "An unexpected error occurred.";
         List<String> errorDetails = new ArrayList<>();
+
+        EasyPlusOauth2AuthenticationException oauth2Exception;
         // Extract error messages if the exception is of type EasyPlusOauth2AuthenticationException
         if (exception instanceof EasyPlusOauth2AuthenticationException) {
-            EasyPlusOauth2AuthenticationException oauth2Exception = (EasyPlusOauth2AuthenticationException) exception;
+            oauth2Exception = (EasyPlusOauth2AuthenticationException) exception;
             errorMessage = oauth2Exception.getErrorMessages().getUserMessage();
+
+            if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_LOGIN)){
+                request.getRequestDispatcher("/login").forward(request, response);
+                return;
+            }
         }
+        request.setAttribute("errorMessage", errorMessage);
+        request.setAttribute("errorDetails", errorDetails);
 
-        if(errorMessage.equals("Authorization code missing in GET request")){
-            request.getRequestDispatcher("/login").forward(request, response);
-        }else {
+        request.getRequestDispatcher("/error").forward(request, response);
 
-            // Redirect to /error with query parameters
-            request.setAttribute("errorMessage", errorMessage);
-            request.setAttribute("errorDetails", errorDetails);
-
-            request.getRequestDispatcher("/error").forward(request, response);
-        }
     }
 }

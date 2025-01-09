@@ -26,7 +26,15 @@ public enum CustomSecurityUserExceptionMessage implements ExceptionMessageInterf
     AUTHENTICATION_WRONG_CLIENT_ID_SECRET("1Client information is not verified."),
 
     // GRANT TYPE
-    AUTHENTICATION_WRONG_GRANT_TYPE("1Wrong Grant Type detected.");
+    AUTHENTICATION_WRONG_GRANT_TYPE("1Wrong Grant Type detected."),
+
+    // OAuth2 : Authorization Code
+    AUTHENTICATION_AUTHORIZATION_CODE_REQUEST_WRONG_METHOD("1Wrong Authorization Code request."),
+    AUTHENTICATION_CLIENT_ID_MISSING("1Client ID is missing."),
+    AUTHENTICATION_REDIRECT_URI_MISSING("1Redirect URI is missing."),
+    AUTHENTICATION_STATE_MISSING("1State is missing."),
+    AUTHENTICATION_REGISTERED_CLIENT_NOT_FOUND("1Registered client is missing or invalid"),
+    AUTHENTICATION_AUTHORIZATION_CODE_MISSING("1Authorization Code is missing.");
 
     private String message;
 

@@ -1,7 +1,7 @@
 package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint;
 
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.RequestOAuth2Distiller;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.EasyPlusGrantAuthenticationToken;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusOAuth2EndpointUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -16,7 +16,7 @@ import java.util.Map;
 public final class PasswordAccessTokenRequestConverter implements AuthenticationConverter {
     /*
     *   `
-    *      CustomGrantAuthenticationToken <- OAuth2ClientAuthenticationToken
+    *      EasyPlusGrantAuthenticationToken <- OAuth2ClientAuthenticationToken
     *
     * */
     @Override
@@ -24,14 +24,12 @@ public final class PasswordAccessTokenRequestConverter implements Authentication
 
         OAuth2ClientAuthenticationToken oAuth2ClientAuthenticationToken = (OAuth2ClientAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        Map<String, Object> additionalParameters = RequestOAuth2Distiller.getTokenUsingSecurityAdditionalParameters(request);
+        Map<String, Object> additionalParameters = EasyPlusOAuth2EndpointUtils.getApiParameters(request);
 
+        //  additionalParameters.put(Principal.class.getName(), easyPlusGrantAuthenticationToken);
 
-        EasyPlusGrantAuthenticationToken easyPlusGrantAuthenticationToken = new EasyPlusGrantAuthenticationToken(new AuthorizationGrantType((String) additionalParameters.get("grant_type")),
+        return new EasyPlusGrantAuthenticationToken(new AuthorizationGrantType((String) additionalParameters.get("grant_type")),
                 oAuth2ClientAuthenticationToken, additionalParameters);
-      //  additionalParameters.put(Principal.class.getName(), easyPlusGrantAuthenticationToken);
-
-        return easyPlusGrantAuthenticationToken;
     }
 
 }

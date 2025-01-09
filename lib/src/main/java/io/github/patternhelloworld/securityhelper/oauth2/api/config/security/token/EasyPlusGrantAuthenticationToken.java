@@ -9,6 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+/*
+*   EasyPlusGrantAuthenticationToken instead of OAuth2ClientAuthenticationToken
+* */
 public class EasyPlusGrantAuthenticationToken extends AbstractAuthenticationToken {
 
     private final Object principal;
@@ -43,9 +46,6 @@ public class EasyPlusGrantAuthenticationToken extends AbstractAuthenticationToke
                 return Collections.emptyList();
             }
         }
-
-
-
 
     }
 
