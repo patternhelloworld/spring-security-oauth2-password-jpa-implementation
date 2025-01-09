@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /*
@@ -70,7 +69,7 @@ public class CustomResourceServerTokenIntrospector implements OpaqueTokenIntrosp
                 try {
                     return delegate.introspect(token);
                 } catch (Exception e) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE)).message(e.getMessage() + Arrays.toString(e.getStackTrace())).build());
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE)).message(e.getMessage()).build(), e);
                 }
             }
             case "database" -> {
@@ -92,7 +91,7 @@ public class CustomResourceServerTokenIntrospector implements OpaqueTokenIntrosp
 
                     return (OAuth2AuthenticatedPrincipal) conditionalDetailsService.loadUserByUsername(username, clientId);
                 }catch (Exception e) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE)).message(e.getMessage() + Arrays.toString(e.getStackTrace())).build());
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_FAILURE)).message(e.getMessage()).build(), e);
                 }
             }
             default -> throw new EasyPlusOauth2AuthenticationException("Wrong introspection type : " + introspectionType);

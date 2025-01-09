@@ -62,7 +62,7 @@ public class DefaultResourceServerTokenIntrospector implements OpaqueTokenIntros
                 try {
                     return delegate.introspect(token);
                 } catch (Exception e) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR)).message(e.getMessage() + Arrays.toString(e.getStackTrace())).build());
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR)).message(e.getMessage()).build(), e);
                 }
             }
             case "database" -> {
@@ -84,7 +84,7 @@ public class DefaultResourceServerTokenIntrospector implements OpaqueTokenIntros
 
                     return (OAuth2AuthenticatedPrincipal) conditionalDetailsService.loadUserByUsername(username, clientId);
                 }catch (Exception e) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR)).message(e.getMessage() + Arrays.toString(e.getStackTrace())).build());
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_TOKEN_ERROR)).message(e.getMessage()).build(), e);
                 }
             }
             default -> throw new EasyPlusOauth2AuthenticationException("Wrong introspection type : " + introspectionType);

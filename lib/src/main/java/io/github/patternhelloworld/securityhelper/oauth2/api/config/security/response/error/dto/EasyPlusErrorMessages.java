@@ -17,5 +17,6 @@ public class EasyPlusErrorMessages {
 	private String userMessage;
 	private Map<String, String> userValidationMessage;
 	private UserDetails userDetails;
+	private String errorCode;
 
 }

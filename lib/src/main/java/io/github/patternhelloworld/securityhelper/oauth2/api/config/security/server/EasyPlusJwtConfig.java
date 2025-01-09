@@ -32,7 +32,7 @@ public class EasyPlusJwtConfig {
     private String algorithm;
 
     @Bean
-    JwtDecoder jwtDecoder() {
+    public JwtDecoder jwtDecoder() {
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
         SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, algorithm);
         return NimbusJwtDecoder.withSecretKey(secretKeySpec).build();

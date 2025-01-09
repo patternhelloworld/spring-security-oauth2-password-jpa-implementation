@@ -59,8 +59,8 @@ public final class PasswordAuthenticationProvider implements AuthenticationProvi
                 UserDetails userDetails;
 
                 /*
-                *   To only get authorization_code, NOT access_token or refresh_token
-                * */
+                 *   To only get authorization_code, NOT access_token or refresh_token
+                 * */
                 if (((String) easyPlusGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
 
                     userDetails = conditionalDetailsService.loadUserByUsername((String) easyPlusGrantAuthenticationToken.getAdditionalParameters().get("username"), clientId);
@@ -88,7 +88,7 @@ public final class PasswordAuthenticationProvider implements AuthenticationProvi
                 else if (((String) easyPlusGrantAuthenticationToken.getAdditionalParameters().get("grant_type")).equals(OAuth2ParameterNames.CODE)) {
 
                     OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByAuthorizationCode((String) easyPlusGrantAuthenticationToken.getAdditionalParameters().get("code"));
-                    if(oAuth2Authorization == null){
+                    if (oAuth2Authorization == null) {
                         throw new EasyPlusOauth2AuthenticationException("authorization code not found");
                     }
 
@@ -136,12 +136,12 @@ public final class PasswordAuthenticationProvider implements AuthenticationProvi
             } else {
                 throw new EasyPlusOauth2AuthenticationException();
             }
-        }catch (UsernameNotFoundException e){
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message(e.getMessage()).userMessage(e.getMessage()).build());
-        }catch (EasyPlusOauth2AuthenticationException e){
+        } catch (UsernameNotFoundException e) {
+            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message(e.getMessage()).userMessage(e.getMessage()).build(), e);
+        } catch (EasyPlusOauth2AuthenticationException e) {
             throw e;
-        }  catch (Exception e){
-           throw e;
+        } catch (Exception e) {
+            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message(e.getMessage()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build(), e);
         }
 
     }
