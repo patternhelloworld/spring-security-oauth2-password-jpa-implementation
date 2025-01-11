@@ -12,13 +12,14 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public final class OpaqueGrantTypeAccessTokenRequestConverter implements AuthenticationConverter {
+public final class OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter implements AuthenticationConverter {
 
     @Override
     public Authentication convert(HttpServletRequest request) {
 
         Map<String, Object> allParameters = EasyPlusOAuth2EndpointUtils.getApiParametersContainingEasyPlusHeaders(request);
 
+        // ClientId is a must
         String clientId = allParameters.get("client_id").toString();
 
         // All token requests are "CLIENT_SECRET_BASIC"
@@ -34,11 +35,11 @@ public final class OpaqueGrantTypeAccessTokenRequestConverter implements Authent
         allParameters.put(OAuth2AuthorizationRequest.class.getName(), authorizationRequest);
 
         return new OAuth2ClientAuthenticationToken(
-                clientId,
-                clientAuthenticationMethod,
-                credentials,
-                allParameters
-        );
+                 clientId,
+                 clientAuthenticationMethod,
+                 credentials,
+                 allParameters
+         );
     }
 
 

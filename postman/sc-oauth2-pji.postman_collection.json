@@ -175,17 +175,6 @@
 									"key": "grant_type",
 									"value": "password",
 									"type": "text"
-								},
-								{
-									"key": "otp_value",
-									"value": "555555",
-									"type": "text"
-								},
-								{
-									"key": "",
-									"value": "aaab",
-									"type": "text",
-									"disabled": true
 								}
 							]
 						},
@@ -204,7 +193,7 @@
 					"response": []
 				},
 				{
-					"name": "oauth2/token (Authorization code)",
+					"name": "oauth2/token (Access Token, Response Type = code)",
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {
 							"accept-encoding": true,
@@ -256,29 +245,97 @@
 								{
 									"key": "username",
 									"value": "cicd@test.com",
-									"type": "text",
-									"disabled": true
+									"type": "text"
 								},
 								{
 									"key": "password",
 									"value": "1234",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "grant_type",
-									"value": "code",
 									"type": "text"
 								},
 								{
-									"key": "otp_value",
-									"value": "555555",
-									"type": "text",
-									"disabled": true
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "response_type",
+									"value": "code",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}/oauth2/token",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "oauth2/token (Authorization code)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept-encoding": true,
+							"content-type": true,
+							"accept": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "client_customer",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Requested-With",
+								"value": "XMLHttpRequest",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "App-Token",
+								"value": "aaa",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
 								},
 								{
 									"key": "code",
-									"value": "dab73d72-e27d-4018-88f2-36e4f342221d",
+									"value": "692b2017-d14a-4279-b673-371c24fb18951",
 									"type": "text"
 								}
 							]
@@ -343,32 +400,8 @@
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
-									"key": "username",
-									"value": "john.doe@example.com",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "password",
-									"value": "ged22sgesA",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "grant_type",
-									"value": "password",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "otp_value",
-									"value": "555555",
-									"type": "text",
-									"disabled": true
-								},
-								{
 									"key": "token",
-									"value": "rVI-3U176t2RfP5U0fqmJrCjaWPYg1loD25rKsrcT2rfG2cpfhJYjloapw9MGVbGNTYWN_U_8uPG9nlFrt_96DFb2SKhRIzxTQqieh7xQxNzs1SkBLZuxZ4YlobASwfC",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaWNkQHRlc3QuY29tIiwiYXVkIjoiY2xpZW50X2N1c3RvbWVyIiwibmJmIjoxNzM2NTY3NjI4LCJzY29wZSI6WyJyZWFkIiwib3BlbmlkIiwicHJvZmlsZSIsIndyaXRlIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODM3MCIsImV4cCI6MTczNjU2ODIyOCwiaWF0IjoxNzM2NTY3NjI4LCJqdGkiOiJiZTg1MmVmNi00OWU1LTQ1NDMtYjMyOC00MDQ2OWI2MzVmZTUiLCJjbGllbnRfaWQiOiJjbGllbnRfY3VzdG9tZXIiLCJ1c2VybmFtZSI6ImNpY2RAdGVzdC5jb20ifQ.D2NfJuDDcBqP_zp7AbYdwxdP033h18Pu-oVm72RR8to1",
 									"type": "text"
 								}
 							]
@@ -438,21 +471,9 @@
 									"type": "text"
 								},
 								{
-									"key": "password",
-									"value": "#ys350791A",
-									"type": "text",
-									"disabled": true
-								},
-								{
 									"key": "grant_type",
 									"value": "refresh_token",
 									"type": "text"
-								},
-								{
-									"key": "otp_value",
-									"value": "555555",
-									"type": "text",
-									"disabled": true
 								}
 							]
 						},
@@ -503,11 +524,6 @@
 								"value": "application/json"
 							},
 							{
-								"key": "X-Requested-With",
-								"value": "XMLHttpRequest",
-								"disabled": true
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/x-www-form-urlencoded"
 							}
@@ -521,21 +537,9 @@
 									"type": "text"
 								},
 								{
-									"key": "password",
-									"value": "#ys350791A",
-									"type": "text",
-									"disabled": true
-								},
-								{
 									"key": "grant_type",
 									"value": "refresh_token",
 									"type": "text"
-								},
-								{
-									"key": "otp_value",
-									"value": "555555",
-									"type": "text",
-									"disabled": true
 								}
 							]
 						},

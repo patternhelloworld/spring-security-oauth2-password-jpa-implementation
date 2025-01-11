@@ -4,7 +4,7 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.se
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.OpaqueGrantTypeAccessTokenRequestConverter;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.IntrospectionRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationConsentRepository;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.introspector.DefaultResourceServerTokenIntrospector;
@@ -145,7 +145,7 @@ public class EasyPlusServerConfig {
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
                                 // Converter
-                                .accessTokenRequestConverter(new OpaqueGrantTypeAccessTokenRequestConverter())
+                                .accessTokenRequestConverter(new OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter())
                                 // Provider
                                 .authenticationProvider(new OpaqueGrantTypeAuthenticationProvider(
                                         commonOAuth2AuthorizationSaver, conditionalDetailsService, oauth2AuthenticationHashCheckService,

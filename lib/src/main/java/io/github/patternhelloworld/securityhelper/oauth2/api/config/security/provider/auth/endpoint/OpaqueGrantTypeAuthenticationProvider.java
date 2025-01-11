@@ -53,18 +53,16 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
         try {
             if (authentication instanceof OAuth2ClientAuthenticationToken token) {
 
-                // [NOTICE] If an incorrect client ID or Secret is detected, the OpaqueGrantTypeAccessTokenRequestConverter is not be invoked, which means there is NO additional parameters.
+                // [NOTICE] If an incorrect client ID or Secret is detected, the OpaqueGrantTypeAccessTokenRequestConverter is not be invoked, which means there is NO mandatory client_id header parameter.
                 // For reference, if an incorrect Basic header, such as base64(client_id:<--no secret here-->), is detected, the ClientSecretBasicAuthenticationConverter handles it directly and passes it to the AuthenticationFailureHandler.
-                if (token.getAdditionalParameters() == null || token.getAdditionalParameters().isEmpty()) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("No additional parameters found. OpaqueGrantTypeAccessTokenRequestConverter was not invoked. This may indicate an incorrect client_id.").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+                String clientId = token.getAdditionalParameters().getOrDefault("client_id", "").toString();
+                if (clientId.isEmpty()) {
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Invalid Request. OpaqueGrantTypeAccessTokenRequestConverter was not invoked. This may indicate incorrect payloads.").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
                 }
 
                 Map<String, Object> modifiableAdditionalParameters = new HashMap<>(token.getAdditionalParameters());
 
-                String clientId = modifiableAdditionalParameters.getOrDefault("client_id", "").toString();
-                if (clientId.isEmpty()) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("No client_id key found").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-                }
+
                 UserDetails userDetails;
 
                 String grantType = modifiableAdditionalParameters.getOrDefault("grant_type", "").toString();
