@@ -62,7 +62,9 @@
                 client_id: urlParams.get('client_id'),
                 state: urlParams.get('state'),
                 scope: urlParams.get('scope'),
-                redirect_uri: urlParams.get('redirect_uri')
+                redirect_uri: urlParams.get('redirect_uri'),
+                code_challenge: urlParams.get('code_challenge'),
+                code_challenge_method: urlParams.get('code_challenge_method')
             };
         }
 
@@ -71,11 +73,23 @@
             const password = passwordInput.value;
 
             // Extract query parameters from the current URL
-            const {client_id, state, scope, redirect_uri} = getQueryParameters();
+            const {client_id, state, scope, redirect_uri, code_challenge, code_challenge_method} = getQueryParameters();
 
             // Basic Auth header creation
             const clientSecret = '12345'; // Enter client secret
             const basicAuth = btoa(`${client_id}:${clientSecret}`);
+
+            const bodyParams = {
+                'username': username,
+                'password': password,
+                'grant_type': "password",
+                'response_type': "code"
+            };
+
+            if (code_challenge && code_challenge_method) {
+                bodyParams['code_challenge'] = code_challenge;
+                bodyParams['code_challenge_method'] = code_challenge_method;
+            }
 
             try {
                 // First request to obtain the authorization code
@@ -85,12 +99,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'Authorization': `Basic ${basicAuth}`
                     },
-                    body: new URLSearchParams({
-                        'username': username,
-                        'password': password,
-                        'grant_type': "password",
-                        'response_type': "code"
-                    })
+                    body: new URLSearchParams(bodyParams)
                 });
 
                 if (!tokenResponse.ok) {
@@ -103,6 +112,7 @@
                 const authorizationCode = tokenResult.code; // Extract authorization code
 
                 console.log(tokenResult)
+                console.log("Success : login with the sample (oauth2/token (Access Token, Response Type = code) in the Postman")
 
                 // Build the dynamic authorization URL
                 const authorizeUrl = `/oauth2/authorize?response_type=code&client_id=${client_id}&code=${authorizationCode}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect_uri)}`;

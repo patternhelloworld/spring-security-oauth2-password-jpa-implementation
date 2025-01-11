@@ -335,7 +335,14 @@
 								},
 								{
 									"key": "code",
-									"value": "692b2017-d14a-4279-b673-371c24fb18951",
+									"value": "df330c3c-0f45-4b80-89c4-4c4a10e78e91",
+									"description": "Only one time valid",
+									"type": "text"
+								},
+								{
+									"key": "code_verifier",
+									"value": "EAp91aanXdoMcoOc2Il55H3UDDIV909k9olEEcl6L24J6_9X",
+									"description": "Only one time valid",
 									"type": "text"
 								}
 							]

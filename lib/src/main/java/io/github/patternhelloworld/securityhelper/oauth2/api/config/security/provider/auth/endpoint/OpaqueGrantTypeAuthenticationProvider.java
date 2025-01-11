@@ -57,7 +57,7 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
                 // For reference, if an incorrect Basic header, such as base64(client_id:<--no secret here-->), is detected, the ClientSecretBasicAuthenticationConverter handles it directly and passes it to the AuthenticationFailureHandler.
                 String clientId = token.getAdditionalParameters().getOrDefault("client_id", "").toString();
                 if (clientId.isEmpty()) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Invalid Request. OpaqueGrantTypeAccessTokenRequestConverter was not invoked. This may indicate incorrect payloads.").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Invalid Request. OpaqueGrantTypeAccessTokenRequestConverter was not invoked. This may indicate incorrect payloads or expired code or code_verifier.").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
                 }
 
                 Map<String, Object> modifiableAdditionalParameters = new HashMap<>(token.getAdditionalParameters());

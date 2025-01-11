@@ -246,21 +246,15 @@ public class CommonDataSourceConfiguration {
     2. Check the login page at the "resources/templates/login.hml"
     3. Ensure the callback URL (http://localhost:8081/callback1) is properly set in the ``oauth2_registered_client`` table in the database.
 - How to use
-    1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1``, using the values from the ``oauth2_registered_client``  2. Now you Login with ``cicd@test.com / 1234 ``
+    1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1&code_challenge=HVoKJYs8JruAxs7hKcG4oLpJXCP-z1jJQtXpQte6GyA&code_challenge_method=S256``, using the values from the ``oauth2_registered_client``
+        - PKCE (``code_challege, code_challege_METHOD``) is optional.
+        - PKCE adds a Code Verifier and a Code Challenge to the flow, enhancing the Authorization Code Grant Flow by preventing the issuance of an Access Token if the Authorization Code is compromised.
     2. Login with ``cicd@test.com / 1234 ``
     3. You will be redirected to
        ``https://localhost:8081/callback1?code=215e9539-1dcb-4843-b1ea-b2d7be0a3c44&state=xxx``
-    4. You can login with this API payload
-    ```http request
-    POST /oauth2/token HTTP/1.1
-    Host: localhost:8370
-    Accept: application/json
-    Content-Type: application/x-www-form-urlencoded
-    App-Token: aaa # You can achieve the separated and shared session using App-Token
-    Authorization: ••••••
-    Content-Length: 57
-    grant_type=code&code=ef5aaaaf-ebae-4677-aac5-abf8e8412f1e
-    ```
+       4. You can login with the API in the Postman
+        - ![img4.png](reference/docs/img.png)
+        - ``code_verifier`` sample : EAp91aanXdoMcoOc2Il55H3UDDIV909k9olEEcl6L24J6_9X
 
 ## Running this App with Docker
 * Use the following module for Blue-Green deployment:
