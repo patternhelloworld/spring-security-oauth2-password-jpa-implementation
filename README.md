@@ -24,7 +24,7 @@
 <dependency>
     <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
     <artifactId>spring-oauth2-easyplus</artifactId>
-    <version>4.0.1</version>
+    <version>4.1.1</version>
 </dependency>
 ```
 
