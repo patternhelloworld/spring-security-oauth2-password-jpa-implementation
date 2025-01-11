@@ -43,24 +43,36 @@ public class DefaultApiAuthenticationSuccessHandlerImpl implements Authenticatio
         Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
 
         if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.PASSWORD.getValue())
-                || ((String) additionalParameters.get("grant_type")).equals(OAuth2ParameterNames.CODE)) {
-            OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
-                    .tokenType(accessToken.getTokenType())
-                    .scopes(accessToken.getScopes());
-            if (accessToken.getExpiresAt() != null) {
-                builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), accessToken.getExpiresAt()));
+                || ((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
+
+            if (AuthorizationGrantType.PASSWORD.getValue().equals(additionalParameters.get("grant_type")) &&
+                    OAuth2ParameterNames.CODE.equals(additionalParameters.get("response_type"))) {
+
+                String code = (String) additionalParameters.get("code");
+
+                String jsonResponse = String.format("{\"code\":\"%s\"}", code);
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(jsonResponse);
+
+            } else {
+
+                OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue()).tokenType(accessToken.getTokenType()).scopes(accessToken.getScopes());
+                if (accessToken.getExpiresAt() != null) {
+                    builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), accessToken.getExpiresAt()));
+                }
+                if (refreshToken != null) {
+                    builder.refreshToken(refreshToken.getTokenValue());
+                }
+                OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+                ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+                this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
+
             }
-            if (refreshToken != null) {
-                builder.refreshToken(refreshToken.getTokenValue());
-            }
-            OAuth2AccessTokenResponse accessTokenResponse = builder.build();
-            ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
-            this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
 
         } else if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
-            OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
-                    .tokenType(accessToken.getTokenType())
-                    .scopes(accessToken.getScopes());
+            OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue()).tokenType(accessToken.getTokenType()).scopes(accessToken.getScopes());
             if (refreshToken.getExpiresAt() != null) {
                 builder.expiresIn(ChronoUnit.SECONDS.between(Instant.now(), refreshToken.getExpiresAt()));
             }
@@ -71,23 +83,8 @@ public class DefaultApiAuthenticationSuccessHandlerImpl implements Authenticatio
             ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
             this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
 
-        } else if (((String) additionalParameters.get("grant_type")).equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
-            // Authorization Code만 JSON으로 응답
-            String code = (String) additionalParameters.get("authorization_code");
-
-            // JSON 응답 생성 (authorization_code만 포함)
-            String jsonResponse = String.format("{\"code\":\"%s\"}", code);
-
-            // JSON 응답 전송
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonResponse);
-
         } else {
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder()
-                    .message("Wrong grant type from Req : " + (String) additionalParameters.get("grant_type"))
-                    .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE))
-                    .build());
+            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Wrong grant type from Req : " + (String) additionalParameters.get("grant_type")).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_GRANT_TYPE)).build());
         }
     }
 }

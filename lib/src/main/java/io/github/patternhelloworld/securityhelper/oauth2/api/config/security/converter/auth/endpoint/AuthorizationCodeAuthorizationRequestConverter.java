@@ -59,7 +59,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
             throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_REQUEST_WRONG_METHOD));
         }
 
-        MultiValueMap<String, String> parameters = EasyPlusOAuth2EndpointUtils.getWebParameters(request);
+        MultiValueMap<String, String> parameters = EasyPlusOAuth2EndpointUtils.getWebParametersContainingEasyPlusHeaders(request);
 
         String clientId = parameters.getFirst(OAuth2ParameterNames.CLIENT_ID);
         if (!StringUtils.hasText(clientId)) {

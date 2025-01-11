@@ -90,7 +90,7 @@ public class TraditionalOauthService {
 
 
             @NotNull OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails,
-                    new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), EasyPlusOAuth2EndpointUtils.getApiParameters(request), null);
+                    new AuthorizationGrantType(accessTokenRequest.getGrant_type()), basicCredentials.getClientId(), EasyPlusOAuth2EndpointUtils.getApiParametersContainingEasyPlusHeaders(request));
 
             Instant now = Instant.now();
             Instant expiresAt = oAuth2Authorization.getAccessToken().getToken().getExpiresAt();
@@ -126,12 +126,12 @@ public class TraditionalOauthService {
                 userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), registeredClient.getClientId());
             }
 
-            Map<String, Object> modifiableAdditionalParameters = new HashMap<>();
+            Map<String, Object> modifiableAdditionalParameters = new HashMap<>(oAuth2Authorization.getAttributes());
             modifiableAdditionalParameters.put("refresh_token", refreshTokenRequest.getRefresh_token());
 
             oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails,
                     new AuthorizationGrantType(refreshTokenRequest.getGrant_type()),
-                    basicCredentials.getClientId(), oAuth2Authorization.getAttributes(), modifiableAdditionalParameters);
+                    basicCredentials.getClientId(), modifiableAdditionalParameters);
 
 
             Instant now = Instant.now();

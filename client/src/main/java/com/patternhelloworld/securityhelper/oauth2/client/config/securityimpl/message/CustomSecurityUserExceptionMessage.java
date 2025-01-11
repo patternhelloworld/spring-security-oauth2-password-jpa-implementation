@@ -27,6 +27,7 @@ public enum CustomSecurityUserExceptionMessage implements ExceptionMessageInterf
 
     // GRANT TYPE
     AUTHENTICATION_WRONG_GRANT_TYPE("1Wrong Grant Type detected."),
+    AUTHENTICATION_WRONG_COMBINATION_OF_GRANT_TYPE_RESPONSE_TYPE("1Grant Type doesn't match response type."),
 
     // OAuth2 : Authorization Code
     AUTHENTICATION_AUTHORIZATION_CODE_REQUEST_WRONG_METHOD("1Wrong Authorization Code request."),

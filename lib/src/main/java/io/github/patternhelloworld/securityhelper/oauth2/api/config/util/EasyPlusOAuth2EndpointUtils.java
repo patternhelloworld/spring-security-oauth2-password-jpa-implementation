@@ -35,7 +35,7 @@ public class EasyPlusOAuth2EndpointUtils {
             "client_id" -> ""
     *
    * */
-    public static Map<String, Object> getApiParameters(HttpServletRequest request){
+    public static Map<String, Object> getApiParametersContainingEasyPlusHeaders(HttpServletRequest request){
 
         Map<String, Object> allParameters = new HashMap<>();
 
@@ -60,7 +60,7 @@ public class EasyPlusOAuth2EndpointUtils {
     }
 
 
-    public static MultiValueMap<String, String> getWebParameters(HttpServletRequest request) {
+    public static MultiValueMap<String, String> getWebParametersContainingEasyPlusHeaders(HttpServletRequest request) {
 
         MultiValueMap<String, String> allParameters = "GET".equals(request.getMethod())
                 ? EasyPlusOAuth2EndpointUtils.getQueryParameters(request)
