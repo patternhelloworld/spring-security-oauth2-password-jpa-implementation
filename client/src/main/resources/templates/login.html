@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Spring Authorization Server Sample</title>
     <style>
@@ -11,11 +11,13 @@
             border: 1px solid transparent;
             border-radius: 4px;
         }
+
         .alert-danger {
             color: #a94442;
             background-color: #f2dede;
             border-color: #ebccd1;
         }
+
         .alert-success {
             color: #3c763d;
             background-color: #dff0d8;
@@ -69,7 +71,7 @@
             const password = passwordInput.value;
 
             // Extract query parameters from the current URL
-            const { client_id, state, scope, redirect_uri } = getQueryParameters();
+            const {client_id, state, scope, redirect_uri} = getQueryParameters();
 
             // Basic Auth header creation
             const clientSecret = '12345'; // Enter client secret
@@ -86,7 +88,8 @@
                     body: new URLSearchParams({
                         'username': username,
                         'password': password,
-                        'grant_type': "authorization_code"
+                        'grant_type': "password",
+                        'response_type': "code"
                     })
                 });
 
@@ -98,6 +101,8 @@
 
                 const tokenResult = await tokenResponse.json();
                 const authorizationCode = tokenResult.code; // Extract authorization code
+
+                console.log(tokenResult)
 
                 // Build the dynamic authorization URL
                 const authorizeUrl = `/oauth2/authorize?response_type=code&client_id=${client_id}&code=${authorizationCode}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect_uri)}`;

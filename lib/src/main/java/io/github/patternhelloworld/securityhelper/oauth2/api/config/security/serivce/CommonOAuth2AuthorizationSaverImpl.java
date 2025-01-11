@@ -63,30 +63,38 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
       * @param authorizationGrantType the type of authorization grant.
       * @param clientId the client ID.
       * @param additionalParameters additional parameters for the OAuth2 flow.
-      * @param modifiableAdditionalParameters additional parameters that may be modified during the flow.
       * @return the persisted {@link OAuth2Authorization} object.
       * @throws EasyPlusOauth2AuthenticationException if an authentication error occurs.
       */
      @Override
      public @NotNull OAuth2Authorization save(UserDetails userDetails, AuthorizationGrantType authorizationGrantType, String clientId,
-                                              Map<String, Object> additionalParameters, Map<String, Object> modifiableAdditionalParameters) {
+                                              Map<String, Object> additionalParameters) {
 
-          if (authorizationGrantType.getValue().equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
-               return SecurityExceptionUtils.retryOnDuplicateException(() -> {
-                    // In-memory build
-                    OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationBuildingService.build(
-                            userDetails, authorizationGrantType, clientId, additionalParameters, null);
-                    // Persist
-                    oAuth2AuthorizationService.save(oAuth2Authorization);
-                    return oAuth2Authorization;
-               }, 5, logger, "[Authorization Code] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
+          String responseType = null;
+          if (additionalParameters != null && additionalParameters.containsKey("response_type")) {
+               responseType = (String) additionalParameters.get("response_type");
+          }
+
+          if (responseType != null && responseType.equals(OAuth2ParameterNames.CODE)) {
+               if(authorizationGrantType.getValue().equals(AuthorizationGrantType.PASSWORD.getValue())) {
+                    return SecurityExceptionUtils.retryOnDuplicateException(() -> {
+                         // In-memory build
+                         OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationBuildingService.build(
+                                 userDetails, authorizationGrantType, clientId, additionalParameters, null);
+                         // Persist
+                         oAuth2AuthorizationService.save(oAuth2Authorization);
+                         return oAuth2Authorization;
+                    }, 5, logger, "[Authorization Code] An error occurred with the Key during the execution of persistOAuth2Authorization for " + userDetails.getUsername());
+               }else{
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Wrong grant type from Req : " + authorizationGrantType.getValue()).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_COMBINATION_OF_GRANT_TYPE_RESPONSE_TYPE)).build());
+               }
 
           }else {
 
                OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByUserNameAndClientIdAndAppToken(
                        userDetails.getUsername(), clientId, (String) additionalParameters.get(EasyPlusHttpHeaders.APP_TOKEN));
 
-               if (authorizationGrantType.getValue().equals(OAuth2ParameterNames.CODE)) {
+               if (authorizationGrantType.getValue().equals(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
 
                     OAuth2Authorization oAuth2AuthorizationForCodeVerification = oAuth2AuthorizationService.findByAuthorizationCode(additionalParameters.get(OAuth2ParameterNames.CODE).toString());
                     if(oAuth2AuthorizationForCodeVerification == null) {
@@ -132,8 +140,7 @@ public class CommonOAuth2AuthorizationSaverImpl implements CommonOAuth2Authoriza
 
                } else if (authorizationGrantType.getValue().equals(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
                     return SecurityExceptionUtils.retryOnDuplicateException(() -> {
-                         String refreshTokenValue = (String) (additionalParameters.containsKey("refresh_token") ? additionalParameters.get("refresh_token")
-                                 : modifiableAdditionalParameters.get("refresh_token"));
+                         String refreshTokenValue = (String) additionalParameters.get("refresh_token");
 
                          OAuth2Authorization oAuth2AuthorizationFromRefreshToken = oAuth2AuthorizationService.findByToken(refreshTokenValue, OAuth2TokenType.REFRESH_TOKEN);
 

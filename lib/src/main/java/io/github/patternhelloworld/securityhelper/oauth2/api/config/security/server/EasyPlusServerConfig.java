@@ -4,14 +4,14 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.se
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.OpaqueGrantTypeAccessTokenRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.IntrospectionRequestConverter;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.PasswordAccessTokenRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationConsentRepository;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.introspector.DefaultResourceServerTokenIntrospector;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.AuthorizationCodeAuthenticationProvider;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.PasswordAuthenticationProvider;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.OpaqueGrantTypeAuthenticationProvider;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.IntrospectOpaqueTokenAuthenticationProvider;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationFailureHandlerImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationSuccessHandlerImpl;
@@ -137,23 +137,19 @@ public class EasyPlusServerConfig {
 
                 )
                 /*
-                 *
                  *    1) ROPC (grant_type=password, grant_type=refresh_token)
                  *    2) Authorization Code flow
-                 *      - Get an authorization_code with username and password (grant_type=authorization_code)
-                 *      - Login with code received from the authorization code flow instead of username & password (grant_type=code)
-                 *
-                 *    : /oauth2/authorize
-                 *
+                 *      - Get an "authorization_code" with "username" and "password" (grant_type=password, response_type=code)
+                 *      - Login with the "code" received from Authorization Code flow instead of "username" & "password" (grant_type=authorization_code)
                  * * */
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
                                 // Converter
-                                .accessTokenRequestConverter(new PasswordAccessTokenRequestConverter())
+                                .accessTokenRequestConverter(new OpaqueGrantTypeAccessTokenRequestConverter())
                                 // Provider
-                                .authenticationProvider(new PasswordAuthenticationProvider(
+                                .authenticationProvider(new OpaqueGrantTypeAuthenticationProvider(
                                         commonOAuth2AuthorizationSaver, conditionalDetailsService, oauth2AuthenticationHashCheckService,
-                                        authorizationService, iSecurityUserExceptionMessageService
+                                        authorizationService, iSecurityUserExceptionMessageService, registeredClientRepository
                                 ))
                                 // Response (Success)
                                 .accessTokenResponseHandler(iApiAuthenticationSuccessHandler)

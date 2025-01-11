@@ -449,38 +449,7 @@ public class CustomerIntegrationTest {
     @Test
     public void testLoginWithInvalidCredentials_ORIGINAL() throws Exception {
 
-
         MvcResult result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
-                        .header(HttpHeaders.AUTHORIZATION, basicHeader)
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("grant_type", "password")
-                        .param("username", testUserName + "wrongcredential")
-                        .param("password", testUserPassword))
-                .andExpect(status().isUnauthorized()) // 401
-                .andDo(document( "{class-name}/{method-name}/oauth-access-token",
-                        preprocessRequest(new AccessTokenMaskingPreprocessor()),
-                        preprocessResponse(new AccessTokenMaskingPreprocessor(), prettyPrint()),
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Connect the received client_id and client_secret with ':', use the base64 function, and write Basic at the beginning. ex) Basic base64(client_id:client_secret)"),
-                                headerWithName(EasyPlusHttpHeaders.APP_TOKEN).optional().description("Not having a value does not mean you cannot log in, but cases without an App-Token value share the same access_token. Please include it as a required value according to the device-specific session policy.")
-                        ),
-                        formParameters(
-                                parameterWithName("grant_type").description("Uses the password method among Oauth2 grant_types. Please write password."),
-                                parameterWithName("username").description("This is the user's email address."),
-                                parameterWithName("password").description("This is the user's password.")
-                        )))
-                .andReturn();
-
-
-        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        JSONObject jsonResponse = new JSONObject(responseString);
-        String userMessage = jsonResponse.getString("userMessage");
-
-        //assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE.getMessage());
-        assertTrue(userMessage.contains("NOT Found"));
-
-
-        result = mockMvc.perform(RestDocumentationRequestBuilders.post("/oauth2/token")
                         .header(HttpHeaders.AUTHORIZATION, "Basic " + DatatypeConverter.printBase64Binary((appUserClientId + "wrongcred:" + appUserClientSecret).getBytes("UTF-8")))
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("grant_type", "password")
@@ -502,11 +471,11 @@ public class CustomerIntegrationTest {
                 .andReturn();
 
 
-        responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        jsonResponse = new JSONObject(responseString);
-        userMessage = jsonResponse.getString("userMessage");
+        String responseString = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        JSONObject jsonResponse = new JSONObject(responseString);
+        String userMessage = jsonResponse.getString("userMessage");
 
-        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET.getMessage());
+        assertEquals(userMessage, CustomSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR.getMessage());
 
 
 

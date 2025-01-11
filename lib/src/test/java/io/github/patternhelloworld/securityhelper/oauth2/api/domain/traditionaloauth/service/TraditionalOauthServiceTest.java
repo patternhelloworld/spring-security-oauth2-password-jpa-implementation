@@ -19,14 +19,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -38,7 +36,6 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -181,7 +178,7 @@ public class TraditionalOauthServiceTest {
 
             // Mock the save method of commonOAuth2AuthorizationSaver
             doReturn(oAuth2Authorization).when(commonOAuth2AuthorizationSaver).save(userDetails, new AuthorizationGrantType(tokenRequest.getGrant_type()),
-                    registeredClient.getClientId(), map, null);
+                    registeredClient.getClientId(), map);
 
             // When calling the createAccessToken method
             SpringSecurityTraditionalOauthDTO.TokenResponse response = traditionalOauthService.createAccessToken(tokenRequest, authorizationHeader);

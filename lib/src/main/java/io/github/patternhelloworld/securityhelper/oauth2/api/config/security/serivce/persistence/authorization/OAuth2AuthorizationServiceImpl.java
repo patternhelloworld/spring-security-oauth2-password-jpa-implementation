@@ -6,7 +6,6 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.entity.EasyPlusAuthorization;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusHttpHeaders;
-
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
@@ -15,21 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -68,24 +63,23 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
         EasyPlusAuthorization easyPlusAuthorization = new EasyPlusAuthorization();
 
-
         easyPlusAuthorization.setId(shouldBeNewAuthorization.getId());
-
         easyPlusAuthorization.setPrincipalName(shouldBeNewAuthorization.getPrincipalName());
 
-        if(shouldBeNewAuthorization.getAttribute("grant_type") == null || Objects.equals(shouldBeNewAuthorization.getAttribute("grant_type"), new OAuth2TokenType("authorization_code").getValue())){
+        if (shouldBeNewAuthorization.getAttribute("response_type") != null &&
+                OAuth2ParameterNames.CODE.equals(shouldBeNewAuthorization.getAttribute("response_type"))) {
             // Authorization Code
             easyPlusAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
             OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCodeToken = shouldBeNewAuthorization.getToken(OAuth2AuthorizationCode.class);
             if (authorizationCodeToken != null) {
-                easyPlusAuthorization.hashSetAuthorizationCodeValue(authorizationCodeToken.getToken().getTokenValue());
+                easyPlusAuthorization.setAuthorizationCodeValue(CustomAuthenticationKeyGenerator.hashTokenValue(authorizationCodeToken.getToken().getTokenValue()));
                 easyPlusAuthorization.setAuthorizationCodeIssuedAt(LocalDateTime.ofInstant(authorizationCodeToken.getToken().getIssuedAt(), ZoneId.systemDefault()));
                 if (authorizationCodeToken.getToken().getExpiresAt() != null) {
                     easyPlusAuthorization.setAuthorizationCodeExpiresAt(LocalDateTime.ofInstant(authorizationCodeToken.getToken().getExpiresAt(), ZoneId.systemDefault()));
                 }
             }
         }else{
-            // ROPC
+
             easyPlusAuthorization.setRegisteredClientId(shouldBeNewAuthorization.getAttribute("client_id"));
 
             if(shouldBeNewAuthorization.getAccessToken() != null) {
@@ -151,7 +145,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
             return easyPlusAuthorizationRepository.findByAccessTokenValue(hashedTokenValue).map(EasyPlusAuthorization::getAttributes).orElse(null);
         } else if (tokenType != null && tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)) {
             return easyPlusAuthorizationRepository.findByRefreshTokenValue(hashedTokenValue).map(EasyPlusAuthorization::getAttributes).orElse(null);
-        }else if (tokenType != null && tokenType.equals(new OAuth2TokenType(AuthorizationGrantType.AUTHORIZATION_CODE.getValue()))) {
+        }else if (tokenType != null && tokenType.equals(new OAuth2TokenType(OAuth2ParameterNames.CODE))) {
             return easyPlusAuthorizationRepository.findByAuthorizationCodeValue(hashedTokenValue).map(EasyPlusAuthorization::getAttributes).orElse(null);
         }  else {
             return easyPlusAuthorizationRepository.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValueOrOidcIdTokenValueOrUserCodeValueOrDeviceCodeValue(hashedTokenValue).map(EasyPlusAuthorization::getAttributes).orElse(null);
@@ -167,7 +161,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
 
     public @Nullable OAuth2Authorization findByAuthorizationCode(String authorizationCode) {
-        return easyPlusAuthorizationRepository.findByAuthorizationCodeValue(CustomAuthenticationKeyGenerator.hashTokenValue((authorizationCode)))
+        return easyPlusAuthorizationRepository.findByAuthorizationCodeValue(CustomAuthenticationKeyGenerator.hashTokenValue(authorizationCode))
                 .map(EasyPlusAuthorization::getAttributes)
                 .orElse(null);
     }

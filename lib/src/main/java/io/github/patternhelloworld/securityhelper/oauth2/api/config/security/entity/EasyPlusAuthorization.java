@@ -141,9 +141,9 @@ public class EasyPlusAuthorization {
     private String deviceCodeMetadata;
 
 
-    public void hashSetAuthorizationCodeValue(String authorizationCodeValue) {
+/*    public void hashSetAuthorizationCodeValue(String authorizationCodeValue) {
         this.authorizationCodeValue = CustomAuthenticationKeyGenerator.hashTokenValue(authorizationCodeValue);
-    }
+    }*/
     public void hashSetAccessTokenValue(String accessTokenValue) {
         this.accessTokenValue = CustomAuthenticationKeyGenerator.hashTokenValue(accessTokenValue);
     }
