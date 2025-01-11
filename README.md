@@ -34,10 +34,10 @@
 * Complete separation of the library and the client
     * Library : API
     * Client : DOC, Integration tester
+* Use JPA for various databases to gain full control over all tokens and permissions, unlike simple in-memory examples.
 * Extensible: Supports multiple authorization servers and resource servers with this library.
 * Hybrid Resource Servers Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
-
 * Authentication management based on a combination of username, client ID, and App-Token
     * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
 
