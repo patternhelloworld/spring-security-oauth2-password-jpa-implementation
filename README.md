@@ -84,7 +84,8 @@
             ```
 
             * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
-
+* Authorization Code Flow with PKCE and Single Page Application (XMLHttpRequest)
+* ROPC for scenarios where accessing a browser screen on the server is either unavailable or impractical
 * Application of Spring Rest Docs, Postman payloads provided
 
 ## Dependencies
