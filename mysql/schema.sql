@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `authorization_consent` (
   PRIMARY KEY (`registered_client_id`,`principal_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 테이블 데이터 sc_oauth2_pji.authorization_consent:~0 rows (대략적) 내보내기
+-- 테이블 데이터 sc_oauth2_pji.authorization_consent:~1 rows (대략적) 내보내기
 
 -- 테이블 sc_oauth2_pji.customer 구조 내보내기
 CREATE TABLE IF NOT EXISTS `customer` (
