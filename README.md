@@ -250,9 +250,10 @@ public class CommonDataSourceConfiguration {
         - PKCE (``code_challege, code_challege_METHOD``) is optional.
         - PKCE adds a Code Verifier and a Code Challenge to the flow, enhancing the Authorization Code Grant Flow by preventing the issuance of an Access Token if the Authorization Code is compromised.
     2. Login with ``cicd@test.com / 1234 ``
-    3. You will be redirected to
+    3. You will be redirected to 
        ``https://localhost:8081/callback1?code=215e9539-1dcb-4843-b1ea-b2d7be0a3c44&state=xxx``
-       4. You can login with the API in the Postman
+       - However, if ``patternhelloworld.securityhelper.authorization-code.consent=Y``is set in the``application.properties``, it will be redirected to the consent page. 
+    4. You can login with the API in the Postman
         - ![img4.png](reference/docs/img.png)
         - ``code_verifier`` sample : EAp91aanXdoMcoOc2Il55H3UDDIV909k9olEEcl6L24J6_9X
 
