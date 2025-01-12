@@ -24,7 +24,7 @@
 <dependency>
     <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
     <artifactId>spring-oauth2-easyplus</artifactId>
-    <version>4.1.1</version>
+    <version>4.2.0</version>
 </dependency>
 ```
 
@@ -84,7 +84,7 @@
             ```
 
             * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
-* Authorization Code Flow with PKCE and Single Page Application (XMLHttpRequest)
+* Authorization Code Flow with Optional PKCE, Authorization Consent and Single Page Application (XMLHttpRequest)
 * ROPC for scenarios where accessing a browser screen on the server is either unavailable or impractical
 * Application of Spring Rest Docs, Postman payloads provided
 
