@@ -1,8 +1,8 @@
 package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.authentication;
 
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.EasyPlusGrantAuthenticationToken;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomAccessTokenCustomizer;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.EasyPlusGrantAuthenticationToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 *
@@ -44,6 +44,12 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
 
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
 
+        Set<String> scopeSet  = new HashSet<>();
+        if(easyPlusGrantAuthenticationToken.getAdditionalParameters().get("scope") != null) {
+            scopeSet = Arrays.stream(easyPlusGrantAuthenticationToken.getAdditionalParameters().get("scope").toString().split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+        }
         if(AuthorizationServerContextHolder.getContext() == null){
 
             // If you use "api/v1/traditional-oauth/token", "AuthorizationServerContextHolder.getContext()" is null,
@@ -82,9 +88,8 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
                 .tokenType(OAuth2TokenType.ACCESS_TOKEN)
                 .authorizationGrantType(easyPlusGrantAuthenticationToken.getGrantType())
                 .authorizationGrant(easyPlusGrantAuthenticationToken)
-                .authorizedScopes(registeredClient.getScopes())
+                .authorizedScopes(scopeSet)
                 .build());
-
 
         OAuth2Token refreshToken = shouldBePreservedRefreshToken != null ? shouldBePreservedRefreshToken : customTokenGenerator.generate(DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
@@ -93,14 +98,16 @@ public class OAuth2AuthorizationBuildingServiceImpl implements OAuth2Authorizati
                 .tokenType(OAuth2TokenType.REFRESH_TOKEN)
                 .authorizationGrantType(easyPlusGrantAuthenticationToken.getGrantType())
                 .authorizationGrant(easyPlusGrantAuthenticationToken)
-                .authorizedScopes(registeredClient.getScopes())
+                .authorizedScopes(scopeSet)
                 .build());
+
 
 
         return OAuth2Authorization
                 .withRegisteredClient(registeredClient)
                 .principalName(userDetails.getUsername())
                 .authorizationGrantType(easyPlusGrantAuthenticationToken.getGrantType())
+                .authorizedScopes(scopeSet)
                 .attribute("authorities", easyPlusGrantAuthenticationToken.getAuthorities())
                 .attributes(attrs -> attrs.putAll(easyPlusGrantAuthenticationToken.getAdditionalParameters()))
                 .token(authorizationCode)

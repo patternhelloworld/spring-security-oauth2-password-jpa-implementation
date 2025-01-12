@@ -44,6 +44,10 @@ public class DefaultWebAuthenticationFailureHandlerImpl implements Authenticatio
                 request.getRequestDispatcher("/login").forward(request, response);
                 return;
             }
+            if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_CONSENT)){
+                request.getRequestDispatcher("/consent").forward(request, response);
+                return;
+            }
         }
         request.setAttribute("errorMessage", errorMessage);
         request.setAttribute("errorDetails", errorDetails);

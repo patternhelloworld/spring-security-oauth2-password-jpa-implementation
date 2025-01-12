@@ -228,7 +228,6 @@ public class CommonDataSourceConfiguration {
 * Refer to ``client/src/docs/asciidoc/api-app.adoc``
 
 ## OAuth2 - Authorization Code
-- Beta
 - How to set it up
     1. Create your own login page with the /login route as indicated in the client project (In the future, this address will be customisable):
   ```java

@@ -14,4 +14,5 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.util;
 * */
 public class ErrorCodeConstants {
     public static final String REDIRECT_TO_LOGIN = "REDIRECTTOLOGIN";
+    public static final String REDIRECT_TO_CONSENT = "REDIRECTTOCONSENT";
 }

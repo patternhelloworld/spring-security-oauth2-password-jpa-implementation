@@ -175,6 +175,11 @@
 									"key": "grant_type",
 									"value": "password",
 									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "read",
+									"type": "text"
 								}
 							]
 						},

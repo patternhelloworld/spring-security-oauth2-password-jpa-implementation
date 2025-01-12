@@ -17,7 +17,9 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Primary
 @Qualifier("webAuthenticationFailureHandler")
@@ -45,6 +47,28 @@ public class CustomWebAuthenticationFailureHandlerImpl implements Authentication
 
             if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_LOGIN)){
                 request.getRequestDispatcher("/login").forward(request, response);
+                return;
+            }
+            if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_CONSENT)){
+                // Construct full URL
+                String fullURL = request.getRequestURL().toString();
+                if (request.getQueryString() != null) {
+                    fullURL += "?" + request.getQueryString();
+                }
+                Map<String, String> consentAttributes = new HashMap<>();
+                consentAttributes.put("clientId", request.getParameter("client_id"));
+                consentAttributes.put("redirectUri", request.getParameter("redirect_uri"));
+                consentAttributes.put("code", request.getParameter("code"));
+                consentAttributes.put("state", request.getParameter("state"));
+                consentAttributes.put("scope", request.getParameter("scope"));
+                if(request.getParameter("code_challenge") == null || request.getParameter("code_challenge_method") == null) {
+                    consentAttributes.put("codeChallenge", request.getParameter("code_challenge"));
+                    consentAttributes.put("codeChallengeMethod", request.getParameter("code_challenge_method"));
+                }
+                consentAttributes.put("consentRequestURI", fullURL);
+
+                request.setAttribute("consentAttributes", consentAttributes);
+                request.getRequestDispatcher("/consent").forward(request, response);
                 return;
             }
         }

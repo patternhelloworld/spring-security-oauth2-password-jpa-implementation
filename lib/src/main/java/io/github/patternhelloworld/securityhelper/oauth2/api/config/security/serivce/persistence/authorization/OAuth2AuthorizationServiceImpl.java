@@ -4,6 +4,7 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.se
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationRepository;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.entity.EasyPlusAuthorization;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusHttpHeaders;
 import jakarta.annotation.Nullable;
@@ -46,6 +47,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     private final EasyPlusAuthorizationRepository easyPlusAuthorizationRepository;
     private final SecurityPointCut securityPointCut;
+    private final RegisteredClientRepositoryImpl registeredClientRepositoryImpl;
 
 
     /*
@@ -107,18 +109,20 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
             easyPlusAuthorization.setAccessTokenType(shouldBeNewAuthorization.getAuthorizationGrantType().getValue());
             easyPlusAuthorization.setAccessTokenScopes(String.join(",", shouldBeNewAuthorization.getAuthorizedScopes()));
 
-            // Token Expiration
             easyPlusAuthorization.setAccessTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
             if (shouldBeNewAuthorization.getAccessToken() != null && shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt() != null) {
                 easyPlusAuthorization.setAccessTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getAccessToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
             }
 
-            // Token Expiration
             easyPlusAuthorization.setRefreshTokenIssuedAt(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
             if (shouldBeNewAuthorization.getRefreshToken() != null && shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt() != null) {
                 easyPlusAuthorization.setRefreshTokenExpiresAt(LocalDateTime.ofInstant(shouldBeNewAuthorization.getRefreshToken().getToken().getExpiresAt(), ZoneId.systemDefault()));
             }
-            easyPlusAuthorization.setAuthorizationGrantType(shouldBeNewAuthorization.getAttribute("grant_type"));
+        }
+
+        easyPlusAuthorization.setAuthorizationGrantType(shouldBeNewAuthorization.getAttribute("grant_type"));
+        if(shouldBeNewAuthorization.getAttribute("scope") != null) {
+            easyPlusAuthorization.setAuthorizedScopes(shouldBeNewAuthorization.getAttribute("scope"));
         }
 
         easyPlusAuthorization.setAttributes(shouldBeNewAuthorization);

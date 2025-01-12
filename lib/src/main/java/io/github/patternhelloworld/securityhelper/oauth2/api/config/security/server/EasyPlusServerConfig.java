@@ -96,7 +96,8 @@ public class EasyPlusServerConfig {
             @Qualifier("apiAuthenticationFailureHandler") AuthenticationFailureHandler iApiAuthenticationFailureHandler,
             @Qualifier("apiAuthenticationSuccessHandler") AuthenticationSuccessHandler iApiAuthenticationSuccessHandler,
             @Qualifier("webAuthenticationFailureHandler") AuthenticationFailureHandler iWebAuthenticationFailureHandler,
-            @Qualifier("webAuthenticationSuccessHandler") AuthenticationSuccessHandler iWebAuthenticationSuccessHandler) throws Exception {
+            @Qualifier("webAuthenticationSuccessHandler") AuthenticationSuccessHandler iWebAuthenticationSuccessHandler,
+            @Value("${patternhelloworld.securityhelper.authorization-code.consent:N}") String consentYN) throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
 
@@ -125,7 +126,7 @@ public class EasyPlusServerConfig {
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
                                 // Converter
-                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService,  iSecurityUserExceptionMessageService))
+                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService,  iSecurityUserExceptionMessageService, consentYN))
                                 // Provider
                                 .authenticationProvider(new AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator, conditionalDetailsService, commonOAuth2AuthorizationSaver

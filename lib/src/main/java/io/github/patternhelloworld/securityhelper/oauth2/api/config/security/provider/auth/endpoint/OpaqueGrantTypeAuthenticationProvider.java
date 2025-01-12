@@ -27,8 +27,11 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
  *    1) ROPC (grant_type=password, grant_type=refresh_token)
@@ -101,6 +104,19 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
                 RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
                 if (registeredClient == null) {
                     throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("client_id NOT found in DB").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
+                }
+                Set<String> registeredScopes = registeredClient.getScopes();
+                Set<String> requestedScopes = Arrays.stream(
+                                modifiableAdditionalParameters.getOrDefault(OAuth2ParameterNames.SCOPE, "")
+                                        .toString()
+                                        .split(",")
+                        )
+                        .map(String::trim)
+                        .filter(scope -> !scope.isEmpty())
+                        .collect(Collectors.toSet());
+                if (!registeredScopes.containsAll(requestedScopes)) {
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_REDIRECT_URI))
+                            .message("Invalid scopes: " + requestedScopes + ". Allowed scopes: " + registeredScopes).build());
                 }
 
                 if (responseType.equals(OAuth2ParameterNames.CODE)) {

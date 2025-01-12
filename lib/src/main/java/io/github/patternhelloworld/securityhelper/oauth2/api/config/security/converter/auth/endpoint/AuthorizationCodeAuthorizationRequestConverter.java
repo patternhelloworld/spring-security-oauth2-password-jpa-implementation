@@ -1,6 +1,7 @@
 package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint;
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationConsentRepository;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.entity.EasyPlusAuthorizationConsent;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.dto.EasyPlusErrorMessages;
@@ -10,6 +11,7 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlu
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.ErrorCodeConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -17,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -38,6 +42,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
+    private final String consentYN;
 
     private static final Authentication ANONYMOUS_AUTHENTICATION = new AnonymousAuthenticationToken("anonymous",
             "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
@@ -54,10 +59,6 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
      */
     @Override
     public Authentication convert(HttpServletRequest request) {
-
-        if (!"GET".equals(request.getMethod()) && !OIDC_REQUEST_MATCHER.matches(request)) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_REQUEST_WRONG_METHOD));
-        }
 
         MultiValueMap<String, String> parameters = EasyPlusOAuth2EndpointUtils.getWebParametersContainingEasyPlusHeaders(request);
 
@@ -103,7 +104,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
         Set<String> registeredScopes = registeredClient.getScopes(); // Scopes from the RegisteredClient
 
         if (!registeredScopes.containsAll(requestedScopes)) {
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_REDIRECT_URI))
+            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
                     .message("Invalid scopes: " + requestedScopes + ". Allowed scopes: " + registeredScopes).build());
         }
 
@@ -111,6 +112,26 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
         if (!StringUtils.hasText(code)) {
             throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_MISSING))
                     .errorCode(ErrorCodeConstants.REDIRECT_TO_LOGIN).build());
+        }
+
+        // Check Consent
+        if(consentYN.equals("Y")) {
+            OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken(code, new OAuth2TokenType(OAuth2ParameterNames.CODE));
+            EasyPlusAuthorizationConsent easyPlusAuthorizationConsent = easyPlusAuthorizationConsentRepository.findByRegisteredClientIdAndPrincipalName(oAuth2Authorization.getRegisteredClientId(), oAuth2Authorization.getPrincipalName()).orElse(null);
+            if (easyPlusAuthorizationConsent == null) {
+                if (request.getMethod().equals(HttpMethod.POST.toString())) {
+                    // This means the user checks authorization consent OK
+                    easyPlusAuthorizationConsent = new EasyPlusAuthorizationConsent();
+                    easyPlusAuthorizationConsent.setPrincipalName(oAuth2Authorization.getPrincipalName());
+                    easyPlusAuthorizationConsent.setRegisteredClientId(oAuth2Authorization.getRegisteredClientId());
+                    easyPlusAuthorizationConsent.setAuthorities(oAuth2Authorization.getAuthorizedScopes().stream().reduce((scope1, scope2) -> scope1 + "," + scope2).orElse(""));
+                    easyPlusAuthorizationConsentRepository.save(easyPlusAuthorizationConsent);
+                } else {
+                    // This means the user should check authorization consent OK
+                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_MISSING))
+                            .errorCode(ErrorCodeConstants.REDIRECT_TO_CONSENT).build());
+                }
+            }
         }
 
         return new OAuth2AuthorizationCodeAuthenticationToken(
