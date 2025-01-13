@@ -8,7 +8,7 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.res
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.CacheableRegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusOAuth2EndpointUtils;
@@ -41,7 +41,7 @@ public class TraditionalOauthService {
 
     private static final Logger logger = LoggerFactory.getLogger(EasyPlusSecurityLogConfig.class);
 
-    private final RegisteredClientRepositoryImpl registeredClientRepository;
+    private final CacheableRegisteredClientRepositoryImpl cacheableRegisteredClientRepository;
 
     private final OAuth2AuthorizationServiceImpl authorizationService;
 
@@ -53,14 +53,14 @@ public class TraditionalOauthService {
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
-    public TraditionalOauthService(RegisteredClientRepositoryImpl registeredClientRepository,
+    public TraditionalOauthService(CacheableRegisteredClientRepositoryImpl cacheableRegisteredClientRepository,
                                    OAuth2AuthorizationServiceImpl authorizationService,
                                    ConditionalDetailsService conditionalDetailsService,
                                    CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationSaver,
                                    DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
                                    ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService) {
 
-        this.registeredClientRepository = registeredClientRepository;
+        this.cacheableRegisteredClientRepository = cacheableRegisteredClientRepository;
         this.authorizationService = authorizationService;
         this.conditionalDetailsService = conditionalDetailsService;
 
@@ -80,7 +80,7 @@ public class TraditionalOauthService {
             HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-            @NotNull RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+            @NotNull RegisteredClient registeredClient = cacheableRegisteredClientRepository.findByClientId(basicCredentials.getClientId());
 
             oauth2AuthenticationHashCheckService.validateClientCredentials(basicCredentials.getClientSecret(), registeredClient);
 
@@ -115,7 +115,7 @@ public class TraditionalOauthService {
         try {
             BasicTokenResolver.BasicCredentials basicCredentials = BasicTokenResolver.parse(authorizationHeader).orElseThrow(() -> new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Header parsing error (header : " + authorizationHeader).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_WRONG_CLIENT_ID_SECRET)).build()));
 
-            RegisteredClient registeredClient = registeredClientRepository.findByClientId(basicCredentials.getClientId());
+            RegisteredClient registeredClient = cacheableRegisteredClientRepository.findByClientId(basicCredentials.getClientId());
 
             OAuth2Authorization oAuth2Authorization = authorizationService.findByToken(refreshTokenRequest.getRefresh_token(), OAuth2TokenType.REFRESH_TOKEN);
 

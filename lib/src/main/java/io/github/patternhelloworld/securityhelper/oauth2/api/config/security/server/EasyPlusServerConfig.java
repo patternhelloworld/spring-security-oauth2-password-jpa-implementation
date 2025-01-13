@@ -3,15 +3,17 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.se
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.DefaultSecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.TokenRequestAfterClientBasicSecretAuthenticatedConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.AuthorizationCodeAuthorizationRequestConverter;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.converter.auth.endpoint.IntrospectionRequestConverter;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationConsentRepository;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.introspector.DefaultResourceServerTokenIntrospector;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.DefaultSecurityMessageServiceImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.AuthorizationCodeAuthenticationProvider;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.OpaqueGrantTypeAuthenticationProvider;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.authorization.AuthorizationCodeAuthenticationProvider;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.token.OpaqueGrantTypeAuthenticationProvider;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.validator.endpoint.token.OpaqueGrantTypeTokenRequestValidator;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.validator.endpoint.token.OpaqueGrantTypeTokenValidationResult;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.introspectionendpoint.IntrospectOpaqueTokenAuthenticationProvider;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationFailureHandlerImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.auth.authentication.DefaultApiAuthenticationSuccessHandlerImpl;
@@ -22,7 +24,7 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.ser
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationConsentServiceImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.CacheableRegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomDelegatingOAuth2TokenGenerator;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusOrderConstants;
@@ -61,6 +63,9 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.util.Map;
+import java.util.function.Function;
+
 @Order(EasyPlusOrderConstants.SECURITY_EASY_PLUS_SERVER_CONFIG_ORDER)
 @Configuration
 @RequiredArgsConstructor
@@ -89,7 +94,7 @@ public class EasyPlusServerConfig {
             ConditionalDetailsService conditionalDetailsService,
             DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService,
             OAuth2TokenGenerator<?> tokenGenerator,
-            RegisteredClientRepositoryImpl registeredClientRepository,
+            CacheableRegisteredClientRepositoryImpl cacheableRegisteredClientRepository,
             EasyPlusAuthorizationConsentRepository easyPlusAuthorizationConsentRepository,
             ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService,
             OAuth2AuthorizationConsentServiceImpl oAuth2AuthorizationConsentService,
@@ -105,11 +110,7 @@ public class EasyPlusServerConfig {
         http.with(authorizationServerConfigurer, Customizer.withDefaults());
 
         authorizationServerConfigurer
-                .clientAuthentication(clientAuthentication ->
-                        clientAuthentication
-                                .errorResponseHandler(iApiAuthenticationFailureHandler)
-                )
-                .registeredClientRepository(registeredClientRepository)
+                .registeredClientRepository(cacheableRegisteredClientRepository)
                 .authorizationService(authorizationService)
                 .tokenGenerator(tokenGenerator)
                 .oidc(Customizer.withDefaults())
@@ -126,7 +127,7 @@ public class EasyPlusServerConfig {
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
                                 // Converter
-                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(registeredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService,  iSecurityUserExceptionMessageService, consentYN))
+                                .authorizationRequestConverter(new AuthorizationCodeAuthorizationRequestConverter(cacheableRegisteredClientRepository, easyPlusAuthorizationConsentRepository, authorizationService,  iSecurityUserExceptionMessageService, consentYN))
                                 // Provider
                                 .authenticationProvider(new AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator, conditionalDetailsService, commonOAuth2AuthorizationSaver
@@ -142,16 +143,37 @@ public class EasyPlusServerConfig {
                  *    2) Authorization Code flow
                  *      - Get an "authorization_code" with "username" and "password" (grant_type=password, response_type=code)
                  *      - Login with the "code" received from Authorization Code flow instead of "username" & "password" (grant_type=authorization_code)
+                 *    3) Call Order
+                 *      - ClientSecretBasicAuthenticationConverter -> ClientSecretBasicAuthenticationProvider
+                 *          -> OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter
+                 *              -> OpaqueGrantTypeAuthenticationProvider
                  * * */
-                .tokenEndpoint(tokenEndpoint ->
+                .clientAuthentication(clientAuthentication ->
+                        clientAuthentication
+                                // For Consistent Error Payloads
+                                .errorResponseHandler(iApiAuthenticationFailureHandler)
+                ).tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
                                 // Converter
-                                .accessTokenRequestConverter(new OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter())
+                                .accessTokenRequestConverter(new TokenRequestAfterClientBasicSecretAuthenticatedConverter())
+                                // Validation
+                                .authenticationProviders((authenticationProviders) ->
+                                        authenticationProviders.forEach((authenticationProvider) -> {
+                                            if (authenticationProvider instanceof OpaqueGrantTypeAuthenticationProvider) {
+                                                Function<Map<String, Object>, OpaqueGrantTypeTokenValidationResult> authenticationValidator =
+
+                                                        new OpaqueGrantTypeTokenRequestValidator(cacheableRegisteredClientRepository, iSecurityUserExceptionMessageService);
+
+                                                ((OpaqueGrantTypeAuthenticationProvider) authenticationProvider)
+                                                        .setAuthenticationValidator(authenticationValidator);
+                                            }
+                                        }))
                                 // Provider
                                 .authenticationProvider(new OpaqueGrantTypeAuthenticationProvider(
                                         commonOAuth2AuthorizationSaver, conditionalDetailsService, oauth2AuthenticationHashCheckService,
-                                        authorizationService, iSecurityUserExceptionMessageService, registeredClientRepository
+                                        authorizationService, iSecurityUserExceptionMessageService
                                 ))
+
                                 // Response (Success)
                                 .accessTokenResponseHandler(iApiAuthenticationSuccessHandler)
                                 // Response (Failure)

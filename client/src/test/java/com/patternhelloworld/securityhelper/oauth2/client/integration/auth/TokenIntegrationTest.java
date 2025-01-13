@@ -1,8 +1,8 @@
 package com.patternhelloworld.securityhelper.oauth2.client.integration.auth;
 
 
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusHttpHeaders;
 import com.patternhelloworld.securityhelper.oauth2.client.config.securityimpl.message.CustomSecurityUserExceptionMessage;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusHttpHeaders;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -61,10 +61,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@AutoConfigureRestDocs(outputDir = "target/generated-snippets",uriScheme = "https", uriHost = "vholic.com", uriPort = 8300)
-public class CustomerIntegrationTest {
+@AutoConfigureRestDocs(outputDir = "target/generated-snippets",uriScheme = "http", uriHost = "localhost", uriPort = 8370)
+public class TokenIntegrationTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CustomerIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenIntegrationTest.class);
 
 
     @Autowired
@@ -806,8 +806,6 @@ public class CustomerIntegrationTest {
         }
 
     }
-
-
 
 
 }

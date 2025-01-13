@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class RegisteredClientRepositoryImpl implements RegisteredClientRepository {
+public class CacheableRegisteredClientRepositoryImpl implements RegisteredClientRepository {
 
     private Map<String, @NotNull RegisteredClient> cachedRegisteredClientsByClientId = new HashMap<>();
 

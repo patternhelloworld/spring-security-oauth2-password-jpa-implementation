@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint;
+package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.authorization;
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
@@ -33,8 +33,6 @@ import org.springframework.util.Assert;
 
 
 public final class AuthorizationCodeAuthenticationProvider implements AuthenticationProvider {
-
-    private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
     private final OAuth2AuthorizationService authorizationService;
 

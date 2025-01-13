@@ -12,14 +12,15 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public final class OpaqueGrantTypeClientIdMandatoryAccessTokenRequestConverter implements AuthenticationConverter {
+public final class TokenRequestAfterClientBasicSecretAuthenticatedConverter implements AuthenticationConverter {
 
     @Override
     public Authentication convert(HttpServletRequest request) {
 
         Map<String, Object> allParameters = EasyPlusOAuth2EndpointUtils.getApiParametersContainingEasyPlusHeaders(request);
 
-        // ClientId is a must
+        // The client_id has already been parsed by ClientSecretBasicAuthenticationConverter.
+        // Therefore, there is no need to validate the client_id again at this point.
         String clientId = allParameters.get("client_id").toString();
 
         // All token requests are "CLIENT_SECRET_BASIC"

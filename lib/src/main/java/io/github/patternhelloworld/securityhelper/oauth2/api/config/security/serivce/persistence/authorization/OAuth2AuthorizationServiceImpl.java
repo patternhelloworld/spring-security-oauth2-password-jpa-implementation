@@ -4,7 +4,7 @@ package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.se
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.aop.SecurityPointCut;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.dao.EasyPlusAuthorizationRepository;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.entity.EasyPlusAuthorization;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.CacheableRegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.token.generator.CustomAuthenticationKeyGenerator;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusHttpHeaders;
 import jakarta.annotation.Nullable;
@@ -47,7 +47,7 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     private final EasyPlusAuthorizationRepository easyPlusAuthorizationRepository;
     private final SecurityPointCut securityPointCut;
-    private final RegisteredClientRepositoryImpl registeredClientRepositoryImpl;
+    private final CacheableRegisteredClientRepositoryImpl cacheableRegisteredClientRepositoryImpl;
 
 
     /*

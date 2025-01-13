@@ -5,7 +5,7 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.mes
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaverImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.CacheableRegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.domain.traditionaloauth.bo.BasicTokenResolver;
 import io.github.patternhelloworld.securityhelper.oauth2.api.domain.traditionaloauth.dto.SpringSecurityTraditionalOauthDTO;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 public class TraditionalOauthServiceTest {
 
     @Mock
-    private RegisteredClientRepositoryImpl registeredClientRepository;
+    private CacheableRegisteredClientRepositoryImpl registeredClientRepository;
 
     @Mock
     private OAuth2AuthorizationServiceImpl authorizationService;

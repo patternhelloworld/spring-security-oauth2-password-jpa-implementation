@@ -1,4 +1,4 @@
-package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint;
+package io.github.patternhelloworld.securityhelper.oauth2.api.config.security.provider.auth.endpoint.token;
 
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.DefaultSecurityUserExceptionMessage;
@@ -8,9 +8,11 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.res
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.CommonOAuth2AuthorizationSaver;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.DefaultOauth2AuthenticationHashCheckService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.client.RegisteredClientRepositoryImpl;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.userdetail.ConditionalDetailsService;
-import lombok.AllArgsConstructor;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.validator.endpoint.token.OpaqueGrantTypeTokenValidationResult;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,13 +27,11 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.util.Assert;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /*
  *    1) ROPC (grant_type=password, grant_type=refresh_token)
@@ -39,15 +39,18 @@ import java.util.stream.Collectors;
  *      - Get an authorization_code with username and password (grant_type=authorization_code)
  *      - Login with code received from the authorization code flow instead of username & password (grant_type=code)
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 public final class OpaqueGrantTypeAuthenticationProvider implements AuthenticationProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpaqueGrantTypeAuthenticationProvider.class);
+
+    private Function<Map<String, Object>, OpaqueGrantTypeTokenValidationResult> authenticationValidator;
 
     private final CommonOAuth2AuthorizationSaver commonOAuth2AuthorizationSaver;
     private final ConditionalDetailsService conditionalDetailsService;
     private final DefaultOauth2AuthenticationHashCheckService oauth2AuthenticationHashCheckService;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
-    private final RegisteredClientRepositoryImpl registeredClientRepository;
 
     @Override
     public Authentication authenticate(Authentication authentication)
@@ -56,41 +59,26 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
         try {
             if (authentication instanceof OAuth2ClientAuthenticationToken token) {
 
-                // [NOTICE] If an incorrect client ID or Secret is detected, the OpaqueGrantTypeAccessTokenRequestConverter is not be invoked, which means there is NO mandatory client_id header parameter.
-                // For reference, if an incorrect Basic header, such as base64(client_id:<--no secret here-->), is detected, the ClientSecretBasicAuthenticationConverter handles it directly and passes it to the AuthenticationFailureHandler.
-                String clientId = token.getAdditionalParameters().getOrDefault("client_id", "").toString();
-                if (clientId.isEmpty()) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("Invalid Request. OpaqueGrantTypeAccessTokenRequestConverter was not invoked. This may indicate incorrect payloads or expired code or code_verifier.").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-                }
-
                 Map<String, Object> modifiableAdditionalParameters = new HashMap<>(token.getAdditionalParameters());
-
+                OpaqueGrantTypeTokenValidationResult opaqueGrantTypeTokenValidationResult = this.authenticationValidator.apply(modifiableAdditionalParameters);
 
                 UserDetails userDetails;
-
-                String grantType = modifiableAdditionalParameters.getOrDefault("grant_type", "").toString();
-                if (grantType.isEmpty()) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("No grant_type key found").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-                }
-
-                String responseType = modifiableAdditionalParameters.getOrDefault("response_type", "").toString();
-
-                switch (grantType) {
+                switch (opaqueGrantTypeTokenValidationResult.getGrantType()) {
                     case "authorization_code" -> {
-                        OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByAuthorizationCode((String) modifiableAdditionalParameters.get("code"));
+                        OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByAuthorizationCode(opaqueGrantTypeTokenValidationResult.getCode());
                         if (oAuth2Authorization == null) {
-                            throw new EasyPlusOauth2AuthenticationException("authorization code not found");
+                            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("No user info found for the authorization code").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_FAILURE)).build());
                         }
-                        userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
+                        userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), opaqueGrantTypeTokenValidationResult.getClientId());
                     }
                     case "password" -> {
-                        userDetails = conditionalDetailsService.loadUserByUsername((String) modifiableAdditionalParameters.get("username"), clientId);
+                        userDetails = conditionalDetailsService.loadUserByUsername((String) modifiableAdditionalParameters.get("username"), opaqueGrantTypeTokenValidationResult.getClientId());
                         oauth2AuthenticationHashCheckService.validateUsernamePassword((String) modifiableAdditionalParameters.get("password"), userDetails);
                     }
                     case "refresh_token" -> {
                         OAuth2Authorization oAuth2Authorization = oAuth2AuthorizationService.findByToken((String) modifiableAdditionalParameters.get("refresh_token"), OAuth2TokenType.REFRESH_TOKEN);
                         if (oAuth2Authorization != null) {
-                            userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), clientId);
+                            userDetails = conditionalDetailsService.loadUserByUsername(oAuth2Authorization.getPrincipalName(), opaqueGrantTypeTokenValidationResult.getClientId());
                         } else {
                             throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR));
                         }
@@ -99,34 +87,16 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
                 }
 
                 // Create tokens at this point
-                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails, new AuthorizationGrantType(modifiableAdditionalParameters.get("grant_type").toString()), clientId, modifiableAdditionalParameters);
+                OAuth2Authorization oAuth2Authorization = commonOAuth2AuthorizationSaver.save(userDetails, new AuthorizationGrantType(modifiableAdditionalParameters.get("grant_type").toString()), opaqueGrantTypeTokenValidationResult.getClientId(), modifiableAdditionalParameters);
 
-                RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
-                if (registeredClient == null) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().message("client_id NOT found in DB").userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-                }
-                Set<String> registeredScopes = registeredClient.getScopes();
-                Set<String> requestedScopes = Arrays.stream(
-                                modifiableAdditionalParameters.getOrDefault(OAuth2ParameterNames.SCOPE, "")
-                                        .toString()
-                                        .split(",")
-                        )
-                        .map(String::trim)
-                        .filter(scope -> !scope.isEmpty())
-                        .collect(Collectors.toSet());
-                if (!registeredScopes.containsAll(requestedScopes)) {
-                    throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_REDIRECT_URI))
-                            .message("Invalid scopes: " + requestedScopes + ". Allowed scopes: " + registeredScopes).build());
-                }
-
-                if (responseType.equals(OAuth2ParameterNames.CODE)) {
+                if (opaqueGrantTypeTokenValidationResult.getResponseType() != null && opaqueGrantTypeTokenValidationResult.getResponseType().equals(OAuth2ParameterNames.CODE)) {
                     // [IMPORTANT] To return the "code" not "access_token". Check "AuthenticationSuccessHandler".
                     modifiableAdditionalParameters.put("code", oAuth2Authorization.getToken(OAuth2AuthorizationCode.class).getToken().getTokenValue());
                 }
 
                 authentication.setAuthenticated(true);
                 return new OAuth2AccessTokenAuthenticationToken(
-                        registeredClient,
+                        opaqueGrantTypeTokenValidationResult.getRegisteredClient(),
                         getAuthenticatedClientElseThrowInvalidClient(authentication),
                         oAuth2Authorization.getAccessToken().getToken(),
                         oAuth2Authorization.getRefreshToken() != null ? oAuth2Authorization.getRefreshToken().getToken() : null,
@@ -159,5 +129,10 @@ public final class OpaqueGrantTypeAuthenticationProvider implements Authenticati
             return clientPrincipal;
         }
         throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT));
+    }
+
+    public void setAuthenticationValidator(Function<Map<String, Object>, OpaqueGrantTypeTokenValidationResult> authenticationValidator) {
+        Assert.notNull(authenticationValidator, "authenticationValidator cannot be null");
+        this.authenticationValidator = authenticationValidator;
     }
 }
