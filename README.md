@@ -24,7 +24,7 @@
 <dependency>
     <groupId>io.github.patternhelloworld.securityhelper.oauth2.api</groupId>
     <artifactId>spring-oauth2-easyplus</artifactId>
-    <version>4.4.0</version>
+    <version>4.4.1</version>
 </dependency>
 ```
 
@@ -246,7 +246,7 @@ public class CommonDataSourceConfiguration {
     2. Check the login page at the "resources/templates/login.hml"
     3. Ensure the callback URL (http://localhost:8081/callback1) is properly set in the ``oauth2_registered_client`` table in the database.
 - How to use
-    1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?response_type=code&client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1&code_challenge=HVoKJYs8JruAxs7hKcG4oLpJXCP-z1jJQtXpQte6GyA&code_challenge_method=S256``, using the values from the ``oauth2_registered_client``
+    1. Open the web browser by connecting to ``http://localhost:8370/oauth2/authorize?client_id=client_customer&state=xxx&scope=read&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fcallback1&code_challenge=HVoKJYs8JruAxs7hKcG4oLpJXCP-z1jJQtXpQte6GyA&code_challenge_method=S256``, using the values from the ``oauth2_registered_client``
         - PKCE (``code_challege, code_challege_METHOD``) is optional.
         - PKCE adds a Code Verifier and a Code Challenge to the flow, enhancing the Authorization Code Grant Flow by preventing the issuance of an Access Token if the Authorization Code is compromised.
     2. Login with ``cicd@test.com / 1234 ``

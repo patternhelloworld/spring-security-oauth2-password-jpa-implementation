@@ -57,6 +57,7 @@ public class CustomWebAuthenticationFailureHandlerImpl implements Authentication
                 }
                 Map<String, String> consentAttributes = new HashMap<>();
                 consentAttributes.put("clientId", request.getParameter("client_id"));
+                //consentAttributes.put("responseType", request.getParameter("response_type"));
                 consentAttributes.put("redirectUri", request.getParameter("redirect_uri"));
                 consentAttributes.put("code", request.getParameter("code"));
                 consentAttributes.put("state", request.getParameter("state"));

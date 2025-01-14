@@ -47,6 +47,7 @@
         <div class="col text-center">
             <form name="consent_form" method="post" action="/oauth2/authorize">
                 <input type="hidden" name="client_id" th:value="${consentAttributes.clientId}">
+                <!--<input type="hidden" name="response_type" th:value="${consentAttributes.responseType}">-->
                 <input type="hidden" name="redirect_uri" th:value="${consentAttributes.redirectUri}">
                 <input type="hidden" name="code" th:value="${consentAttributes.code}">
                 <input type="hidden" name="state" th:value="${consentAttributes.state}">

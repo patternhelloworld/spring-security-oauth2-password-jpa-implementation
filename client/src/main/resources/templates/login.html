@@ -73,7 +73,7 @@
             const password = passwordInput.value;
 
             // Extract query parameters from the current URL
-            const {client_id, response_type, state, scope, redirect_uri, code_challenge, code_challenge_method} = getQueryParameters();
+            const {client_id, state, scope, redirect_uri, code_challenge, code_challenge_method} = getQueryParameters();
 
             // Basic Auth header creation
             const clientSecret = '12345'; // Enter client secret
@@ -83,7 +83,7 @@
                 'username': username,
                 'password': password,
                 'grant_type': "password",
-                'response_type': response_type,
+                'response_type': "code",
                 'scope': scope
             };
 

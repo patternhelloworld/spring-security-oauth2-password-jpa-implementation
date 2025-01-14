@@ -34,14 +34,6 @@ public class CodeRequestValidator extends AbstractEasyPlusBaseValidator implemen
 
         String clientId = validateClientIdForCodeRequest(queryParameters);
 
-        String responseType = queryParameters.getFirst(OAuth2ParameterNames.RESPONSE_TYPE);
-        if (!StringUtils.hasText(responseType)) {
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().errorCode(EasyPlusErrorCodeConstants.MISSING_RESPONSE_TYPE).message(EasyPlusErrorCodeConstants.MISSING_RESPONSE_TYPE).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-        }else{
-            if(!responseType.equals("code")){
-                throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().errorCode(EasyPlusErrorCodeConstants.WRONG_RESPONSE_TYPE).message(EasyPlusErrorCodeConstants.WRONG_RESPONSE_TYPE).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
-            }
-        }
         String redirectUri = queryParameters.getFirst(OAuth2ParameterNames.REDIRECT_URI);
         if (!StringUtils.hasText(redirectUri)) {
             throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().errorCode(EasyPlusErrorCodeConstants.MISSING_REDIRECT_URI).message(EasyPlusErrorCodeConstants.MISSING_REDIRECT_URI).userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR)).build());
@@ -65,7 +57,6 @@ public class CodeRequestValidator extends AbstractEasyPlusBaseValidator implemen
 
         return CodeValidationResult.builder()
                 .clientId(clientId)
-                .responseType(responseType)
                 .redirectUri(redirectUri)
                 .state(state)
                 .scope(registeredScopes)
