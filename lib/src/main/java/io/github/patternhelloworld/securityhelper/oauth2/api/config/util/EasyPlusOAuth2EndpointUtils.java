@@ -139,4 +139,14 @@ public class EasyPlusOAuth2EndpointUtils {
                 && request.getParameter(PkceParameterNames.CODE_VERIFIER) != null;
     }
 
+    public static Map<String, Object> convertMultiValueMapToMap(MultiValueMap<String, String> multiValueMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+        multiValueMap.forEach((key, value) -> {
+            resultMap.put(key, value.size() == 1 ? value.get(0) : String.join(",", value));
+        });
+
+        return resultMap;
+    }
+
 }

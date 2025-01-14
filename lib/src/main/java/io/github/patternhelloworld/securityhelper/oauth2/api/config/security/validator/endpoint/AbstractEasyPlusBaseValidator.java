@@ -4,7 +4,10 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.mes
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.dto.EasyPlusErrorMessages;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.exception.EasyPlusOauth2AuthenticationException;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusErrorCodeConstants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
@@ -33,17 +36,30 @@ public abstract class AbstractEasyPlusBaseValidator {
      * the {@code ClientSecretBasicAuthenticationConverter} handles it directly and delegates to the {@code AuthenticationFailureHandler}.
      * </p>
      */
-    protected String validateClientId(Map<String, Object> additionalParameters) {
+    protected String validateClientIdForTokenRequest(Map<String, Object> additionalParameters) {
         Object clientIdObj = additionalParameters.get("client_id");
         if (clientIdObj == null) {
             throw new EasyPlusOauth2AuthenticationException(
-                    EasyPlusErrorMessages.builder()
-                            .message("Invalid Request. Missing client_id.")
+                    EasyPlusErrorMessages.builder().errorCode(EasyPlusErrorCodeConstants.MISSING_CLIENT_ID)
+                            .message("Invalid Request. As the token request has been processed by 'ClientSecretBasicAuthenticationConverter', this can be issues with 1) Missing client ID, 2) Wrong Client Secret, 3) Authorization Code Expired, 4) PKCE Parameter Error.")
                             .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
                             .build()
             );
         }
         return clientIdObj.toString();
+    }
+
+    protected String validateClientIdForCodeRequest(MultiValueMap<String, String> additionalParameters) {
+        String clientId = additionalParameters.getFirst("client_id");
+        if (!StringUtils.hasText(clientId)) {
+            throw new EasyPlusOauth2AuthenticationException(
+                    EasyPlusErrorMessages.builder().errorCode(EasyPlusErrorCodeConstants.MISSING_CLIENT_ID)
+                            .message("Invalid Request. Missing client_id.")
+                            .userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
+                            .build()
+            );
+        }
+        return clientId;
     }
 
     protected String getNullableParameter(Map<String, Object> parameters, String key) {

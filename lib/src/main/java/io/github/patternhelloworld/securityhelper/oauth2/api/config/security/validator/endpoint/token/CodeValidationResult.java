@@ -7,7 +7,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 
 @Data
 @Builder
-public class OpaqueGrantTypeTokenValidationResult {
+public class CodeValidationResult {
     private String clientId;
     private String grantType;
     @Nullable

@@ -2,7 +2,7 @@ package com.patternhelloworld.securityhelper.oauth2.client.config.securityimpl.r
 
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.message.ISecurityUserExceptionMessageService;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.exception.EasyPlusOauth2AuthenticationException;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.ErrorCodeConstants;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusErrorCodeConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,13 +43,13 @@ public class CustomWebAuthenticationFailureHandlerImpl implements Authentication
         // Extract error messages if the exception is of type EasyPlusOauth2AuthenticationException
         if (exception instanceof EasyPlusOauth2AuthenticationException) {
             oauth2Exception = (EasyPlusOauth2AuthenticationException) exception;
-            errorMessage = oauth2Exception.getErrorMessages().getUserMessage();
+            errorMessage = oauth2Exception.getErrorMessages().getUserMessage() + "(" + oauth2Exception.getErrorMessages().getErrorCode() + ")";
 
-            if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_LOGIN)){
+            if(oauth2Exception.getError().getErrorCode().equals(EasyPlusErrorCodeConstants.REDIRECT_TO_LOGIN)){
                 request.getRequestDispatcher("/login").forward(request, response);
                 return;
             }
-            if(oauth2Exception.getError().getErrorCode().equals(ErrorCodeConstants.REDIRECT_TO_CONSENT)){
+            if(oauth2Exception.getError().getErrorCode().equals(EasyPlusErrorCodeConstants.REDIRECT_TO_CONSENT)){
                 // Construct full URL
                 String fullURL = request.getRequestURL().toString();
                 if (request.getQueryString() != null) {

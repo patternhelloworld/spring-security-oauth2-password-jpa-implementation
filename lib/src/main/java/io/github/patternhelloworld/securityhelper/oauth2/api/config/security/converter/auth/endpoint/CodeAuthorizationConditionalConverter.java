@@ -7,14 +7,13 @@ import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.mes
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.dto.EasyPlusErrorMessages;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.response.error.exception.EasyPlusOauth2AuthenticationException;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.serivce.persistence.authorization.OAuth2AuthorizationServiceImpl;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.security.validator.endpoint.authorization.CodeValidationResult;
+import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusErrorCodeConstants;
 import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.EasyPlusOAuth2EndpointUtils;
-import io.github.patternhelloworld.securityhelper.oauth2.api.config.util.ErrorCodeConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -22,32 +21,30 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Map;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
-public final class AuthorizationCodeAuthorizationRequestConverter implements AuthenticationConverter {
+public final class CodeAuthorizationConditionalConverter implements AuthenticationConverter {
 
-    private final RegisteredClientRepository registeredClientRepository;
+    private Function<MultiValueMap<String, String>, CodeValidationResult> authenticationValidator;
+
     private final EasyPlusAuthorizationConsentRepository easyPlusAuthorizationConsentRepository;
     private final OAuth2AuthorizationServiceImpl oAuth2AuthorizationService;
 
     private final ISecurityUserExceptionMessageService iSecurityUserExceptionMessageService;
 
     private final String consentYN;
-
-    private static final Authentication ANONYMOUS_AUTHENTICATION = new AnonymousAuthenticationToken("anonymous",
-            "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
-
-    private static final RequestMatcher OIDC_REQUEST_MATCHER = createOidcRequestMatcher();
 
     /*
      * Why is the validation check done here?
@@ -62,56 +59,19 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
 
         MultiValueMap<String, String> parameters = EasyPlusOAuth2EndpointUtils.getWebParametersContainingEasyPlusHeaders(request);
 
-        String clientId = parameters.getFirst(OAuth2ParameterNames.CLIENT_ID);
-        if (!StringUtils.hasText(clientId)) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_CLIENT_ID_MISSING));
-        }
-        String redirectUri = parameters.getFirst(OAuth2ParameterNames.REDIRECT_URI);
-        if (!StringUtils.hasText(redirectUri)) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_REDIRECT_URI_MISSING));
-        }
+        CodeValidationResult codeValidationResult = this.authenticationValidator.apply(parameters);
 
-        Map<String, Object> additionalParameters = new HashMap<>();
-
-        parameters.forEach((key, value) -> {
-            additionalParameters.put(key, (value.size() == 1) ? value.get(0) : value.toArray(new String[0]));
-        });
-
-
-        String state = parameters.getFirst(OAuth2ParameterNames.STATE);
-        if (!StringUtils.hasText(state)) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_STATE_MISSING));
-        }
-
-        Set<String> requestedScopes = new HashSet<>(parameters.getOrDefault(OAuth2ParameterNames.SCOPE, Collections.emptyList()));
+        Map<String, Object> additionalParameters = EasyPlusOAuth2EndpointUtils.convertMultiValueMapToMap(parameters);
 
         Authentication principal = SecurityContextHolder.getContext().getAuthentication();
         if (principal == null) {
-            setClientAuthenticationContext(clientId);
+            setClientAuthenticationContext(codeValidationResult.getRegisteredClient());
             principal = SecurityContextHolder.getContext().getAuthentication();
-        }
-
-        RegisteredClient registeredClient = ((OAuth2ClientAuthenticationToken) principal).getRegisteredClient();
-
-        if (registeredClient == null) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_REGISTERED_CLIENT_NOT_FOUND));
-        }
-
-        if (!registeredClient.getRedirectUris().contains(redirectUri)) {
-            throw new EasyPlusOauth2AuthenticationException(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_INVALID_REDIRECT_URI));
-        }
-
-        Set<String> registeredScopes = registeredClient.getScopes(); // Scopes from the RegisteredClient
-
-        if (!registeredScopes.containsAll(requestedScopes)) {
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_LOGIN_ERROR))
-                    .message("Invalid scopes: " + requestedScopes + ". Allowed scopes: " + registeredScopes).build());
         }
 
         String code = parameters.getFirst(OAuth2ParameterNames.CODE);
         if (!StringUtils.hasText(code)) {
-            throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_MISSING))
-                    .errorCode(ErrorCodeConstants.REDIRECT_TO_LOGIN).build());
+            return new OAuth2AuthorizationCodeRequestAuthenticationToken(request.getRequestURL().toString(), codeValidationResult.getClientId(), principal, codeValidationResult.getRedirectUri(), codeValidationResult.getState(), codeValidationResult.getScope(), additionalParameters);
         }
 
         // Check Consent
@@ -129,7 +89,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
                 } else {
                     // This means the user should check authorization consent OK
                     throw new EasyPlusOauth2AuthenticationException(EasyPlusErrorMessages.builder().userMessage(iSecurityUserExceptionMessageService.getUserMessage(DefaultSecurityUserExceptionMessage.AUTHENTICATION_AUTHORIZATION_CODE_MISSING))
-                            .errorCode(ErrorCodeConstants.REDIRECT_TO_CONSENT).build());
+                            .errorCode(EasyPlusErrorCodeConstants.REDIRECT_TO_CONSENT).build());
                 }
             }
         }
@@ -137,7 +97,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
         return new OAuth2AuthorizationCodeAuthenticationToken(
                 code,
                 principal,
-                redirectUri,
+                codeValidationResult.getRedirectUri(),
                 additionalParameters
         );
     }
@@ -153,12 +113,7 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
         return new AndRequestMatcher(postMethodMatcher, responseTypeParameterMatcher, openidScopeMatcher);
     }
 
-    public void setClientAuthenticationContext(String clientId) {
-        RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
-        if (registeredClient == null) {
-            throw new IllegalArgumentException("Invalid client ID");
-        }
-
+    public void setClientAuthenticationContext(RegisteredClient registeredClient) {
         OAuth2ClientAuthenticationToken clientAuthenticationToken = new OAuth2ClientAuthenticationToken(
                 registeredClient,
                 ClientAuthenticationMethod.CLIENT_SECRET_BASIC,
@@ -168,5 +123,9 @@ public final class AuthorizationCodeAuthorizationRequestConverter implements Aut
         SecurityContextHolder.getContext().setAuthentication(clientAuthenticationToken);
     }
 
+    public void setAuthenticationValidator(Function<MultiValueMap<String, String>, CodeValidationResult> authenticationValidator) {
+        Assert.notNull(authenticationValidator, "authenticationValidator cannot be null");
+        this.authenticationValidator = authenticationValidator;
+    }
 }
 
