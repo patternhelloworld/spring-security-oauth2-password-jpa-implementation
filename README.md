@@ -59,9 +59,12 @@
 
 
 * Separated UserDetails implementation for Admin and Customer roles as an example. (This can be extended such as Admin, Customer, Seller and Buyer... by implementing ``UserDetailsServiceFactory``)
+* Authorization Code Flow with Optional PKCE, Authorization Consent and Single Page Application (XMLHttpRequest)
+* ROPC for scenarios where accessing a browser screen on the server is either unavailable or impractical
+* Application of Spring Rest Docs, Postman payloads provided
 * Set up the same access & refresh token APIs on both ``/oauth2/token`` and on our controller layer such as ``/api/v1/traditional-oauth/token``, both of which function same and have `the same request & response payloads for success and errors`. (However, ``/oauth2/token`` is the standard that "spring-authorization-server" provides.)
-    * As you are aware, the API ``/oauth2/token`` is what "spring-authorization-server" provides.
-        * ``/api/v1/traditional-oauth/token`` is what this library implemented directly.
+    * As you are aware, the API ``/oauth2/token``(Recommended) is what "spring-authorization-server" provides.
+        * ``/api/v1/traditional-oauth/token``(Easily Customizable) is what this library implemented directly.
             * Success Payload
              ```json
               {
@@ -85,9 +88,8 @@
             ```
 
             * In the following error payload, the 'message' shouldn't be exposed to clients; instead, the 'userMessage' should be.
-* Authorization Code Flow with Optional PKCE, Authorization Consent and Single Page Application (XMLHttpRequest)
-* ROPC for scenarios where accessing a browser screen on the server is either unavailable or impractical
-* Application of Spring Rest Docs, Postman payloads provided
+            * Definitely, you can customize the payload sent to the client by implementing AuthenticationFailureHandler.
+* See the sample folder ``com.patternhelloworld.securityhelper.oauth2.client.config.securityimpl`` to understand how to implement the library.
 
 ## Dependencies
 
