@@ -38,8 +38,9 @@
 * Extensible: Supports multiple authorization servers and resource servers with this library.
 * Hybrid Resource Servers Token Verification Methods: Support for multiple verification approaches, including API calls to the authorization server, direct database validation, and local JWT decoding.
 * Immediate Permission (Authority) Check: Not limited to verifying the token itself, but also ensuring real-time validation of any updates to permissions in the database.
-* Authentication management based on a combination of username, client ID, and App-Token
-    * What is an App-Token? An App-Token is a new access token generated each time the same account logs in. If the token values are the same, the same access token is shared.
+* Authentication management based on a combination of Username, client ID, and App-Token
+    * What is an App-Token?
+      * An App-Token is an additional token that serves as a unique identifier for each device. Unlike access tokens, it is not regenerated with each login. Instead, it uses a device-specific unique value, such as a GUID in Android, to control device-level authentication, even when the app is reinstalled. If the token values are the same, the same access token is shared.
 
 | App-Token Status       | Access Token Behavior      |
 |------------------------|----------------------------|
