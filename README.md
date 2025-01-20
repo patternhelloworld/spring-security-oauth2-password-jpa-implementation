@@ -96,10 +96,12 @@
 | Category          | Dependencies                                                           |
 |-------------------|------------------------------------------------------------------------|
 | Backend-Language  | Java 17                                                                |
-| Backend-Framework | Spring Boot 3.3.2 (the latest version)                                 |
+| Backend-Framework | Spring Boot 3.3.2                                |
 | Main Libraries    | Spring Security 6.3.1, Spring Security Authorization Server 1.3.1, JPA |
 | Package-Manager   | Maven 3.6.3 (mvnw, Dockerfile)                                         |
 | RDBMS             | Mysql 8.0.17                                                           |
+
+- Requires selected dependencies for Spring Boot. Check the ``pom.xml`` or this link "https://libraries.io/maven/io.github.patternhelloworld.securityhelper.oauth2.api:spring-oauth2-easyplus/4.4.1/tree".
 
 ## Run the App
 
